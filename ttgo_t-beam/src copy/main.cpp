@@ -1,9 +1,8 @@
 // /https://github.com/Xinyuan-LilyGO/LilyGo-LoRa-Series/tree/master/examples/RadioLibExamples/SX1262/SX1262_Receive_Interrupt
-#include "main.h"
+#include <RadioLib.h>
 #include "boards.h"
 
 SX1262 radio = new Module(RADIO_CS_PIN, RADIO_DIO1_PIN, RADIO_RST_PIN, RADIO_BUSY_PIN);
-MessageHandler messageHandler = MessageHandler();
 
 int transmissionState = RADIOLIB_ERR_NONE;
 
@@ -21,11 +20,6 @@ void setFlag(void)
 
   // we sent or received  packet, set the flag
   operationDone = true;
-}
-
-void memoryAnalyse(){
-  Serial.print("\nFree Heap: ");
-  Serial.println(ESP.getFreeHeap());
 }
 
 void setup()
@@ -51,7 +45,8 @@ void setup()
   // when new packet is received or transmission is finished
   radio.setDio1Action(setFlag);
 
-  Serial.println("[SX1262] Starting to listen ... ");
+  // start listening for LoRa packets
+  Serial.print(F("[SX1262] Starting to listen ... "));
   state = radio.startReceive();
   if (state == RADIOLIB_ERR_NONE)
   {
@@ -69,6 +64,7 @@ void setup()
 
 void loop()
 {
+  // check if the flag is set
   if (operationDone)
   {
     // disable the interrupt service routine while
@@ -77,39 +73,38 @@ void loop()
     operationDone = false;
 
     if(transmitFlag){
+      if (transmissionState == RADIOLIB_ERR_NONE)
+        Serial.println(F("transmission finished!"));
+
+      // listen for response
+      radio.startReceive();
       transmitFlag = false;
-    }
-    else{
-      uint32_t packetLength = radio.getPacketLength();
-      if (packetLength){
+    }else{
+      String str;
+      int state = radio.readData(str);
+
+      if (state == RADIOLIB_ERR_NONE)
+      {
         digitalWrite(BOARD_LED, LED_ON);
-        byte data[packetLength];
-        int state = radio.readData(data, packetLength);
-        if (state == RADIOLIB_ERR_NONE)
-        {
-          Message* receivedMessage = messageHandler.processNewMessage(data, packetLength, radio.getRSSI(), radio.getSNR());
-          if (DEBUG){
-            Serial.println("Received message:");
-            Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");
-            Serial.println("##########################################################################################################");
-            Serial.println(receivedMessage->toString());
-          }
-          if (receivedMessage->getSenderAddress() == 0xa02c){
-            //TODO just for testing
-            uint32_t byteArraySize;
-            byte *bytes = messageHandler.createTextMessage(byteArraySize, "Hello from TTGO t-beam");
+        Serial.println(F("[SX1262] Received packet!"));
 
-            transmissionState = radio.startTransmit(bytes, byteArraySize);
-            transmitFlag = true;
-          }
+        Serial.print(F("[SX1262] Data:\t\t"));
+        Serial.println(str);
 
-          delete receivedMessage;
-        }
+        Serial.print(F("[SX1262] RSSI:\t\t"));
+        Serial.print(radio.getRSSI());
+        Serial.println(F(" dBm"));
+
+        Serial.print(F("[SX1262] SNR:\t\t"));
+        Serial.print(radio.getSNR());
+        Serial.println(F(" dB"));
+
+        delay(1000);
+        Serial.print(F("[SX1262] Sending another packet ... "));
+        transmissionState = radio.startTransmit(str + "R");
+        transmitFlag = true;
         digitalWrite(BOARD_LED, LED_OFF);
       }
-    }
-    if (!transmitFlag){
-      radio.startReceive();
     }
     enableInterrupt = true;
   }

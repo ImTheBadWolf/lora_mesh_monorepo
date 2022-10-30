@@ -36,6 +36,7 @@ void setup()
   resetDisplay();
   initializeDisplay();
   initLoRa(display);
+  randomSeed(analogRead(0));
   pinMode(0, INPUT_PULLUP);
 }
 
@@ -44,7 +45,7 @@ void loop()
   checkForMessage();
   if (!digitalRead(0) && !buttonFlag){
     buttonFlag = true;
-    sendMessage("OogaBooga");
+    sendTextMessage("Hello from TTGO LoRa32");
   }
   else if(digitalRead(0) && buttonFlag)
     buttonFlag = false;

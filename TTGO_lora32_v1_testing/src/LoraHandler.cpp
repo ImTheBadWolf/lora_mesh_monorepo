@@ -16,6 +16,18 @@ Adafruit_SSD1306 *display_glob;
 bool newMessage = false;
 int newPacketSize = 0;
 
+union twoByte
+{
+  uint16_t value;
+  unsigned char Bytes[2];
+} twoByteVal;
+
+union fourByte
+{
+  uint32_t value;
+  unsigned char Bytes[4];
+} fourByteVal;
+
 void initLoRa(Adafruit_SSD1306 &display)
 {
   Serial.println("Initializing LoRa....");
@@ -62,7 +74,7 @@ void setSettings(uint8_t config){
 
 void sendConfirmation(byte msgId3, byte msgId2, byte msgId1, byte msgId0)
 {
-  byte confirmationMsg[17] = {
+  /* byte confirmationMsg[17] = {
       0x13,
       0x12,
       0x11,
@@ -83,52 +95,72 @@ void sendConfirmation(byte msgId3, byte msgId2, byte msgId1, byte msgId0)
   };
   LoRa.beginPacket();
   LoRa.write(confirmationMsg, 17);
-  LoRa.endPacket(true);
+  LoRa.endPacket(true); */
 }
 
-void sendMessage(String message)
+byte* createHeader(uint16_t destinationAddress, uint16_t senderAddress, uint8_t messageType, uint8_t priority){
+  uint32_t messageId = (uint32_t)((random(200) / 100.0) * (uint32_t)random(LONG_MAX)); //TODO random returns signed long, but messageId is unsigned
+
+  static byte header[10];
+  twoByteVal.value = destinationAddress;
+  header[0] = twoByteVal.Bytes[1];
+  header[1] = twoByteVal.Bytes[0];
+
+  twoByteVal.value = senderAddress;
+  header[2] = twoByteVal.Bytes[1];
+  header[3] = twoByteVal.Bytes[0];
+
+  fourByteVal.value = messageId;
+  header[4] = fourByteVal.Bytes[3];
+  header[5] = fourByteVal.Bytes[2];
+  header[6] = fourByteVal.Bytes[1];
+  header[7] = fourByteVal.Bytes[0];
+
+  header[8] = messageType;
+  header[9] = priority;
+  return header;
+}
+
+void sendTextMessage(String message, bool receiveAck, uint8_t maxHop, uint8_t priority)
 {
+  byte *header = createHeader(0xE67E, MY_ADDRESS, receiveAck ? 1 : 0, priority);
+
+  byte messagePrefix[TEXTMESSAGE_PREFIX_LENGTH];
+  fourByteVal.value = 1667116784; //TODO timestamp should go here
+  messagePrefix[0] = fourByteVal.Bytes[3];
+  messagePrefix[1] = fourByteVal.Bytes[2];
+  messagePrefix[2] = fourByteVal.Bytes[1];
+  messagePrefix[3] = fourByteVal.Bytes[0];
+  messagePrefix[4] = maxHop;
+
   byte messageByteArr[message.length() + 1];
   message.getBytes(messageByteArr, message.length() + 1);
 
-  byte header[16] = {
-      0x13,
-      0x12,
-      0x11,
-      0x22, // Destination
-      0x13,
-      0x12,
-      0x11,
-      0x44, // Sender
-      0x13,
-      0x12,
-      (byte)random(255),
-      (byte)random(255),
-      0,
-      0,
-      0,
-      3};
-  byte input[message.length() + 7];
-  byte output[message.length() + 7];
-
-  for (int i = 0; i < message.length(); i++)
-  {
-    input[i] = messageByteArr[i];
-  }
-  for (int i = message.length(); i < message.length() + 7; i++)
-  {
-    input[i] = 0x7C;
-  }
-
+  /* byte encryptedMessage[message.length()]; //TODO encryption disabled for now, makes for easier debugging
   ctraes128.setKey(key, 16);
   ctraes128.setIV(key, 16);
-  ctraes128.encrypt(output, input, message.length() + 7);
-  byte outputMessage[16 + message.length() + 7];
-  memcpy(outputMessage, header, sizeof(header));
-  memcpy(&outputMessage[sizeof(header)], output, sizeof(output));
+  ctraes128.encrypt(encryptedMessage, messageByteArr, message.length());*/
+
+  byte wholePayload[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH + message.length()];
+  memcpy(wholePayload, header, HEADER_LENGTH);
+  memcpy(&wholePayload[HEADER_LENGTH], messagePrefix, TEXTMESSAGE_PREFIX_LENGTH);
+
+  //memcpy(&wholePayload[sizeof(header)], encryptedMessage, sizeof(encryptedMessage));
+  memcpy(&wholePayload[HEADER_LENGTH+TEXTMESSAGE_PREFIX_LENGTH], messageByteArr, message.length());
+
+  Serial.println("Payload: ");
+  for (int i = 0; i < HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH  + message.length(); i++)
+  {
+    Serial.print(wholePayload[i], HEX);
+    if (i == HEADER_LENGTH - 1 || i == HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH - 1)
+      Serial.print(" | ");
+    else
+      Serial.print(" ");
+  }
+  Serial.println();
 
   LoRa.beginPacket();
-  LoRa.write(outputMessage, 16 + message.length() + 7);
+  LoRa.write(wholePayload, HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH + message.length());
   LoRa.endPacket(true);
 }
 
@@ -146,46 +178,85 @@ void processNewMessage(){
   if (newPacketSize)
   {
     newMessage = false;
-    Serial.print("Received packet: ");
-    String msg = "";
-    int data[newPacketSize];
+    byte data[newPacketSize];
 
     int rssi = LoRa.packetRssi();
     int snr = LoRa.packetSnr();
 
+    Serial.print("\nReceived packet: ");
     for (int i = 0; i < newPacketSize; i++)
     {
-      int c = LoRa.read();
+      byte c = LoRa.read();
       Serial.print(c, HEX);
       Serial.print(" ");
       data[i] = c;
     }
-
     Serial.println();
-    if (data[16] == 33 || data[3] != 0x22)
-    { // Symbol "!" for delivery confirmation
+
+    //Check if destination address is my address or broadcast
+    twoByte destination;
+    destination.Bytes[1] = data[0];
+    destination.Bytes[0] = data[1];
+
+    if (destination.value != MY_ADDRESS && destination.value != BROADCAST_ADDRESS){
       return;
     }
+    // TODO may break if random message with FF FF is received
 
-    byte strippedData[newPacketSize - 16];
-    byte output[newPacketSize - 16];
-    for (int i = 0; i < newPacketSize - 16; i++)
-    {
-      strippedData[i] = data[16 + i];
+    uint8_t messagePrefixLength;
+    switch (data[8]){
+      case 0:
+      case 1:
+        messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
+        break;
+      case 2:
+        messagePrefixLength = SENSORMESSAGE_PREFIX_LENGTH;
+        break;
+      default:
+        messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
+        break;
     }
+
+    uint32_t messageLength = newPacketSize - HEADER_LENGTH - messagePrefixLength;
+    byte header[HEADER_LENGTH];
+    byte messagePrefix[messagePrefixLength];
+    byte message[messageLength];
+
+    memcpy(header, data, HEADER_LENGTH);
+    memcpy(messagePrefix, &data[HEADER_LENGTH], messagePrefixLength);
+    memcpy(message, &data[HEADER_LENGTH + messagePrefixLength], messageLength);
+
+    twoByte sender;
+    sender.Bytes[1] = header[2];
+    sender.Bytes[0] = header[3];
+
+    fourByte messageId;
+    messageId.Bytes[3] = header[4];
+    messageId.Bytes[2] = header[5];
+    messageId.Bytes[1] = header[6];
+    messageId.Bytes[0] = header[7];
+
+    /*
+    byte messageDecrypted[messageLength];
     ctraes128.setKey(key, 16);
     ctraes128.setIV(key, 16);
-    ctraes128.decrypt(output, strippedData, newPacketSize - 16);
+    ctraes128.decrypt(messageDecrypted, message, messageLength);
+    */
+    String msg = "";
     Serial.print("Decrypted: ");
-    for (int i = 0; i < newPacketSize - 16; i++)
+    for (int i = 0; i < messageLength; i++)
     {
-      if (output[i] != 0x7C)
-        msg += (char)output[i];
-      Serial.print(output[i], HEX);
+      msg += (char)message[i];
+      Serial.print(message[i], HEX);
       Serial.print(" ");
     }
     Serial.println();
-    Serial.println(msg);
+
+    Serial.println("Received message:");
+    Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");
+    Serial.println("##########################################################################################################");
+    String outputStr = "| " + String(destination.value, HEX) + "\t\t | " + String(sender.value, HEX) + "\t\t | " + String(messageId.value, HEX) + "\t | " + String(message[4]) + "\t\t | " + String(rssi) + "\t\t | " + String(snr) + "\t | " + msg;
+    Serial.println(outputStr);
 
     display_glob->clearDisplay();
     display_glob->setCursor(0, 2);
@@ -200,13 +271,13 @@ void processNewMessage(){
     display_glob->print(snr);
     display_glob->display();
 
-    delay(700);
+    /*delay(700);
     sendConfirmation(data[8], data[9], data[10], data[11]);
     delay(200);
     if (msg == "Ping")
     {
-      sendMessage("Pong");
-    }
+      sendTextMessage("Pong");
+    } */
     newPacketSize = 0;
   }
 }

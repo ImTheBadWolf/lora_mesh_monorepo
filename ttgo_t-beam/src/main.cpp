@@ -97,7 +97,7 @@ void loop()
           if (receivedMessage->getSenderAddress() == 0xa02c){
             //TODO just for testing
             uint32_t byteArraySize;
-            byte *bytes = messageHandler.createTextMessage(byteArraySize, "Hello from TTGO t-beam");
+            byte *bytes = messageHandler.createTextMessage(0xA02C, byteArraySize, "Hello from TTGO t-beam");
 
             transmissionState = radio.startTransmit(bytes, byteArraySize);
             transmitFlag = true;

@@ -5,7 +5,7 @@
 #include "Message.h"
 
 
-#define MY_ADDRESS 0xE67E
+#define MY_ADDRESS 0xA02C
 #define AES_KEY {0x53, 0x69, 0x78, 0x74, 0x65, 0x65, 0x6E, 0x20, 0x62, 0x79, 0x74, 0x65, 0x20, 0x6B, 0x65, 0x79} //"Sixteen byte key"
 #define DEBUG 1
 
@@ -17,6 +17,7 @@
 class MessageHandler {
   private:
     byte key[16];
+    CTR<AES128> aes128;
 
   public:
     MessageHandler();

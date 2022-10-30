@@ -5,12 +5,10 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <Crypto.h>
-#include <AES.h>
 #include <string.h>
-#include <CTR.h>
 
-#include "LoraHandler.h"
+
+#include "MessageHandler.h"
 
 //TODO move to pins.h
 // Define OLED PIN
@@ -27,9 +25,4 @@
 
 #define LORA_BAND 868E6
 
-#define MY_ADDRESS 0xA02C
-
-#define BROADCAST_ADDRESS 0xFFFF
-#define HEADER_LENGTH 10
-#define TEXTMESSAGE_PREFIX_LENGTH 5
-#define SENSORMESSAGE_PREFIX_LENGTH 6
+#define DEFAULT_CONFIG 1 //TODO move the whole params setting elsewhere

@@ -1,5 +1,4 @@
-#include "main.h"
-
+#include "MessageHandler.h"
 
 union twoByte
 {
@@ -14,9 +13,21 @@ union fourByte
 } fourByteVal;
 
 MessageHandler::MessageHandler(){
-  byte key[16] = AES_KEY;
-  CTR<AES128> aes128;
+  CTR<AES128> ctraes128 = CTR<AES128>();
+  this->generateAesKey();
 };
+
+void MessageHandler::generateAesKey(){
+  String keyStr = AES_KEY;
+  if (keyStr.length() != 16){
+    while(true){
+      Serial.println("AES_KEY must be 16 characters long");//TODO console displays some weird charactersinstead of this?
+      delay(2000);
+    }
+  }
+
+  keyStr.getBytes(this->key, 16 + 1);
+}
 
 byte* MessageHandler::createHeader(uint16_t destinationAddress, uint16_t senderAddress, uint8_t messageType, uint8_t priority){
   uint32_t messageId = (uint32_t)((random(200) / 100.0) * (uint32_t)random(LONG_MAX)); //TODO random returns signed long, but messageId is unsigned
@@ -57,16 +68,16 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
 
   byte encryptedMessage[message.length()];
 
-  this->aes128.setKey(this->key, 16);
-  this->aes128.setIV(this->key, 16);
-  this->aes128.encrypt(encryptedMessage, messageByteArr, message.length());
+  this->ctraes128.setKey(this->key, 16);
+  this->ctraes128.setIV(this->key, 16);
+  this->ctraes128.encrypt(encryptedMessage, messageByteArr, message.length());
 
   byte* wholePayload = new byte[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH + message.length()];
   memcpy(wholePayload, header, HEADER_LENGTH);
   memcpy(&wholePayload[HEADER_LENGTH], messagePrefix, TEXTMESSAGE_PREFIX_LENGTH);
 
   // TODO if crypto disabled
-  // memcpy(&wholePayload[HEADER_LENGTH+TEXTMESSAGE_PREFIX_LENGTH], messageByteArr, message.length());
+  //memcpy(&wholePayload[HEADER_LENGTH+TEXTMESSAGE_PREFIX_LENGTH], messageByteArr, message.length());
   memcpy(&wholePayload[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH], encryptedMessage, message.length());
 
   if (DEBUG){
@@ -87,7 +98,7 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
 
 Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize, float rssi, float snr){
   if (newPacketSize){
-    byte data[newPacketSize + 1];
+    byte data[newPacketSize + 1]; //TODO why is +1 here 🤔?
     if (DEBUG){
       Serial.print("\nReceived packet: ");
       for (int i = 0; i < newPacketSize; i++)
@@ -98,7 +109,6 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
       }
       Serial.println();
     }
-
     //Check if destination address is my address or broadcast
     twoByte destination;
     destination.Bytes[1] = data[0];
@@ -142,9 +152,9 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
       messageId.Bytes[0] = header[7];
 
       byte messageDecrypted[messageLength];
-      this->aes128.setKey(this->key, 16);
-      this->aes128.setIV(this->key, 16);
-      this->aes128.decrypt(messageDecrypted, message, messageLength);
+      this->ctraes128.setKey(this->key, 16);
+      this->ctraes128.setIV(this->key, 16);
+      this->ctraes128.decrypt(messageDecrypted, message, messageLength);
 
       Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[8], header[9], messagePrefix[4], messageDecrypted, messageLength, rssi, snr);
 
@@ -173,4 +183,6 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
       return receivedMessage;
     }
   }
+  //TODO return empty message otherwise it crashes
+  //TODO add flag to Message if it is empty flag=invalid
 }

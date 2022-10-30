@@ -1,5 +1,4 @@
-#include "main.h"
-
+#include "MessageHandler.h"
 
 union twoByte
 {
@@ -14,9 +13,21 @@ union fourByte
 } fourByteVal;
 
 MessageHandler::MessageHandler(){
-  byte key[16] = AES_KEY;
-  // CTR<AES128> ctraes128;
+  CTR<AES128> ctraes128 = CTR<AES128>();
+  this->generateAesKey();
 };
+
+void MessageHandler::generateAesKey(){
+  String keyStr = AES_KEY;
+  if (keyStr.length() != 16){
+    while(true){
+      Serial.println("AES_KEY must be 16 characters long");//TODO console displays some weird charactersinstead of this?
+      delay(2000);
+    }
+  }
+
+  keyStr.getBytes(this->key, 16 + 1);
+}
 
 byte* MessageHandler::createHeader(uint16_t destinationAddress, uint16_t senderAddress, uint8_t messageType, uint8_t priority){
   uint32_t messageId = (uint32_t)((random(200) / 100.0) * (uint32_t)random(LONG_MAX)); //TODO random returns signed long, but messageId is unsigned
@@ -55,17 +66,19 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
   byte messageByteArr[message.length() + 1];
   message.getBytes(messageByteArr, message.length() + 1);
 
-  /* byte encryptedMessage[message.length()]; //TODO encryption disabled for now, makes for easier debugging
-  ctraes128.setKey(key, 16);
-  ctraes128.setIV(key, 16);
-  ctraes128.encrypt(encryptedMessage, messageByteArr, message.length());*/
+  byte encryptedMessage[message.length()];
+
+  this->ctraes128.setKey(this->key, 16);
+  this->ctraes128.setIV(this->key, 16);
+  this->ctraes128.encrypt(encryptedMessage, messageByteArr, message.length());
 
   byte* wholePayload = new byte[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH + message.length()];
   memcpy(wholePayload, header, HEADER_LENGTH);
   memcpy(&wholePayload[HEADER_LENGTH], messagePrefix, TEXTMESSAGE_PREFIX_LENGTH);
 
-  //memcpy(&wholePayload[sizeof(header)], encryptedMessage, sizeof(encryptedMessage));
-  memcpy(&wholePayload[HEADER_LENGTH+TEXTMESSAGE_PREFIX_LENGTH], messageByteArr, message.length());
+  // TODO if crypto disabled
+  //memcpy(&wholePayload[HEADER_LENGTH+TEXTMESSAGE_PREFIX_LENGTH], messageByteArr, message.length());
+  memcpy(&wholePayload[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH], encryptedMessage, message.length());
 
   if (DEBUG){
     Serial.println("Payload: ");
@@ -84,9 +97,8 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
 }
 
 Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize, float rssi, float snr){
-  if (newPacketSize)
-  {
-    byte data[newPacketSize + 1];
+  if (newPacketSize){
+    byte data[newPacketSize + 1]; //TODO why is +1 here 🤔?
     if (DEBUG){
       Serial.print("\nReceived packet: ");
       for (int i = 0; i < newPacketSize; i++)
@@ -97,7 +109,6 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
       }
       Serial.println();
     }
-
     //Check if destination address is my address or broadcast
     twoByte destination;
     destination.Bytes[1] = data[0];
@@ -140,26 +151,23 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
       messageId.Bytes[1] = header[6];
       messageId.Bytes[0] = header[7];
 
-      Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[8], header[9], messagePrefix[4], message, messageLength, rssi, snr);
-
-      /*
       byte messageDecrypted[messageLength];
-      ctraes128.setKey(key, 16);
-      ctraes128.setIV(key, 16);
-      ctraes128.decrypt(messageDecrypted, message, messageLength);
-      */
+      this->ctraes128.setKey(this->key, 16);
+      this->ctraes128.setIV(this->key, 16);
+      this->ctraes128.decrypt(messageDecrypted, message, messageLength);
+
+      Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[8], header[9], messagePrefix[4], messageDecrypted, messageLength, rssi, snr);
+
       if (DEBUG)
       {
-        String msg = "";
         Serial.print("Decrypted: ");
         for (int i = 0; i < messageLength; i++)
         {
-          msg += (char)message[i];
-          Serial.print(message[i], HEX);
+          Serial.print(messageDecrypted[i], HEX);
           Serial.print(" ");
         }
         Serial.println();
-/* 
+        /*
         Serial.println("Received message:");
         Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");
         Serial.println("##########################################################################################################");
@@ -175,4 +183,6 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
       return receivedMessage;
     }
   }
+  //TODO return empty message otherwise it crashes
+  //TODO add flag to Message if it is empty flag=invalid
 }

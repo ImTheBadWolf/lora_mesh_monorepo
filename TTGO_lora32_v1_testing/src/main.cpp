@@ -152,7 +152,8 @@ void loop()
 
     uint32_t byteArraySize;
     byte *bytes = messageHandler.createTextMessage(0xe67e, byteArraySize, "Hello from TTGO LoRa32 v1.0");
-    //TODO lookup table for "contacts". Instead of displaying hex addresses in received messages, display names
+    // TODO lookup table for "contacts". Instead of displaying hex addresses in received messages, display names
+    //table can contain aes keys also, if we want to encrypt messages uniquely for each contact
 
     LoRa.beginPacket();
     LoRa.write(bytes, byteArraySize);

@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 class Message {
   private:
     uint16_t destinationAddress;

@@ -1,4 +1,4 @@
-#include "main.h"
+#include "message.h"
 
 Message::Message(uint16_t destinationAddress, uint16_t senderAddress, uint32_t messageID, uint8_t messageType, uint8_t priority, uint8_t maxHop, byte *payload, uint32_t payloadSize, float rssi, float snr){
   this->destinationAddress = destinationAddress;

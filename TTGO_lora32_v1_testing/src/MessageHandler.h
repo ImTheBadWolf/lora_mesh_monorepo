@@ -1,13 +1,16 @@
 #include <Crypto.h>
 #include <AES.h>
 #include <CTR.h>
+#include <Array.h>
 
 #include "Message.h"
+#include "QueueMessage.h"
 
 
 #define MY_ADDRESS 0xA02C
 #define AES_KEY "SuperTajne heslo" //Must be 16 characters long
 #define DEBUG 1
+#define MESSAGE_QUEUE_SIZE 20
 
 #define BROADCAST_ADDRESS 0xFFFF
 #define HEADER_LENGTH 10
@@ -18,6 +21,7 @@ class MessageHandler {
   private:
     byte key[17];
     CTR<AES128> ctraes128;
+    Array<QueueMessage*, MESSAGE_QUEUE_SIZE> messageQueue;
     void generateAesKey();
 
   public:

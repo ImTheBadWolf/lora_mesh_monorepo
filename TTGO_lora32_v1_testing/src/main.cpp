@@ -107,6 +107,10 @@ void checkForMessage(){
     float rssi = LoRa.packetRssi();
     float snr = LoRa.packetSnr();
     Message *receivedMessage = messageHandler.processNewMessage(data, newPacketSize, rssi, snr);
+    if (!receivedMessage->isValid()){
+      delete receivedMessage;
+      return;
+    }
     if (DEBUG)
     {
       Serial.println("Received message:");
@@ -154,6 +158,7 @@ void loop()
     byte *bytes = messageHandler.createTextMessage(0xe67e, byteArraySize, "Hello from TTGO LoRa32 v1.0");
     // TODO lookup table for "contacts". Instead of displaying hex addresses in received messages, display names
     //table can contain aes keys also, if we want to encrypt messages uniquely for each contact
+    //TODO add message to rebroadcast queue and rebroadcast it X times or until ACK or rebroadcast from another node is received (which comes first)
 
     LoRa.beginPacket();
     LoRa.write(bytes, byteArraySize);

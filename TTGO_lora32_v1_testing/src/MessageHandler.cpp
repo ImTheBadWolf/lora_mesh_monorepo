@@ -15,13 +15,14 @@ union fourByte
 MessageHandler::MessageHandler(){
   CTR<AES128> ctraes128 = CTR<AES128>();
   this->generateAesKey();
+  Array<QueueMessage *, MESSAGE_QUEUE_SIZE> messageQueue;
 };
 
 void MessageHandler::generateAesKey(){
   String keyStr = AES_KEY;
   if (keyStr.length() != 16){
     while(true){
-      Serial.println("AES_KEY must be 16 characters long");//TODO console displays some weird charactersinstead of this?
+      Serial.println("AES_KEY must be 16 characters long");//TODO console displays some weird characters instead of this... Serial is not initialised yet
       delay(2000);
     }
   }
@@ -53,7 +54,7 @@ byte* MessageHandler::createHeader(uint16_t destinationAddress, uint16_t senderA
 }
 
 byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &byteArraySize, String message, bool receiveAck, uint8_t maxHop, uint8_t priority){
-  byte *header = createHeader(destinationAddress, MY_ADDRESS, receiveAck ? 1 : 0, priority); // TODO destination address hardcoded for now
+  byte *header = createHeader(destinationAddress, MY_ADDRESS, receiveAck ? 1 : 0, priority);
 
   byte messagePrefix[TEXTMESSAGE_PREFIX_LENGTH];
   fourByteVal.value = 1667116784; //TODO timestamp should go here, ttgo doesnt have rtc
@@ -76,7 +77,7 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
   memcpy(wholePayload, header, HEADER_LENGTH);
   memcpy(&wholePayload[HEADER_LENGTH], messagePrefix, TEXTMESSAGE_PREFIX_LENGTH);
 
-  // TODO if crypto disabled
+  // TODO if crypto disabled, this option will not be available
   //memcpy(&wholePayload[HEADER_LENGTH+TEXTMESSAGE_PREFIX_LENGTH], messageByteArr, message.length());
   memcpy(&wholePayload[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH], encryptedMessage, message.length());
 
@@ -98,7 +99,7 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
 
 Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize, float rssi, float snr){
   if (newPacketSize){
-    byte data[newPacketSize + 1]; //TODO why is +1 here 🤔?
+    byte data[newPacketSize];
     if (DEBUG){
       Serial.print("\nReceived packet: ");
       for (int i = 0; i < newPacketSize; i++)
@@ -173,16 +174,15 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
         Serial.println("##########################################################################################################");
         Serial.println(receivedMessage->toString()); */
       }
-      /*delay(700);
-      sendConfirmation(data[8], data[9], data[10], data[11]);
-      delay(200);
-      if (msg == "Ping")
-      {
-        sendTextMessage("Pong");
-      } */
+      /*TODO if msg type = 1, send ACK of received message
+      sendConfirmation(data[8], data[9], data[10], data[11]);*/
+
       return receivedMessage;
     }
+    else{
+      //TODO if message is not for me, add it to rebroadcast queue
+      //Validation is needed before, to not queue messages that are not part of this protocol
+    }
   }
-  //TODO return empty message otherwise it crashes
-  //TODO add flag to Message if it is empty flag=invalid
+  return new Message();
 }

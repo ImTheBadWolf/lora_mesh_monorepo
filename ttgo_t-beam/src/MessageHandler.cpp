@@ -98,7 +98,7 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
 
 Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize, float rssi, float snr){
   if (newPacketSize){
-    byte data[newPacketSize + 1]; //TODO why is +1 here 🤔?
+    byte data[newPacketSize];
     if (DEBUG){
       Serial.print("\nReceived packet: ");
       for (int i = 0; i < newPacketSize; i++)

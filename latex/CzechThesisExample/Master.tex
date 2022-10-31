@@ -1,0 +1,128 @@
+% Nejprve uvedeme tridu dokumentu s volbami
+\documentclass[czech,master]{diploma}
+% Dalsi doplnujici baliky maker
+\usepackage[autostyle=true,czech=quotes]{csquotes} % korektni sazba uvozovek, podpora pro balik biblatex
+\usepackage[backend=biber, style=iso-numeric, alldates=iso]{biblatex} % bibliografie
+\usepackage{dcolumn} % sloupce tabulky s ciselnymi hodnotami
+\usepackage{subfig} % makra pro "podobrazky" a "podtabulky"
+
+% Zadame pozadovane vstupy pro generovani titulnich stran.
+\ThesisAuthor{Matúš Ozaniak}
+
+\ThesisSupervisor{Mgr. Ing. Michal Krumnikl, Ph.D.}
+
+\CzechThesisTitle{Protokol pre komunikáciu medzi uzlami siete LoRa}
+
+\EnglishThesisTitle{LoRa-Based Protocol for Peer-to-Peer Long-Range Communication}
+
+\SubmissionYear{2022}
+
+\ThesisAssignmentFileName{ThesisSpecification_OZA0016.pdf}
+
+% Pokud nechceme nikomu dekovat makro zapoznamkujeme.
+\Acknowledgement{TODO podakovanie}
+
+\CzechAbstract{TODO Tohle je český abstrakt, zbytek odstavce je tvořen výplňovým textem. Naší si rozmachu potřebami s posílat v poskytnout ty má plot. Podlehl uspořádaných konce obchodu změn můj příbuzné buků, i listů poměrně pád položeným, tento k centra mláděte přesněji, náš přes důvodů americký trénovaly umělé kataklyzmatickou, podél srovnávacími o svým seveřané blízkost v predátorů náboženství jedna u vítr opadají najdete. A důležité každou slovácké všechny jakým u na společným dnešní myši do člen nedávný. Zjistí hází vymíráním výborná.}
+
+\CzechKeywords{LoRa; Mesh; diplomová práce}
+
+\EnglishAbstract{TODO This is English abstract. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Fusce tellus odio, dapibus id fermentum quis, suscipit id erat. Aenean placerat. Vivamus ac leo pretium faucibus. Duis risus. Fusce consectetuer risus a nunc. Duis ante orci, molestie vitae vehicula venenatis, tincidunt ac pede. Aliquam erat volutpat. Donec vitae arcu. Nullam lectus justo, vulputate eget mollis sed, tempor sed magna. Curabitur ligula sapien, pulvinar a vestibulum quis, facilisis vel sapien. Vestibulum fermentum tortor id mi. Etiam bibendum elit eget erat. Pellentesque pretium lectus id turpis. Nulla quis diam.}
+
+\EnglishKeywords{typography; \LaTeX; master thesis}
+
+\AddAcronym{DVD}{Digital Versatile Disc}
+\AddAcronym{TNT}{Trinitrotoluen}
+\AddAcronym{UML}{Unified Modeling Language}
+\AddAcronym{HTML}{Hyper Text Markup Language}
+\AddAcronym{TUG}{\TeX{} Users Group}
+
+\addbibresource{biblatex.bib}
+
+% Novy druh tabulkoveho sloupce, ve kterem jsou cisla zarovnana podle desetinne carky
+\newcolumntype{d}[1]{D{,}{,}{#1}}
+
+
+% Zacatek dokumentu
+\begin{document}
+
+% Nechame vysazet titulni strany.
+\MakeTitlePages
+
+% Jsou v praci obrazky? Pokud ano vysazime jejich seznam a odstrankujeme.
+% Pokud ne smazeme nasledujici dve makra.
+%\listoffigures
+%\clearpage
+
+% Jsou v praci tabulky? Pokud ano vysazime jejich seznam a odstrankujeme.
+% Pokud ne smazeme nasledujici dve makra.
+%\listoftables
+%\clearpage
+
+% A nasleduje text zaverecne prace.
+\chapter{TODO Dostupne lora moduly a sposob prenosu dat}
+TODO popis co je to lora, ako funguje, dosah atd., parametre (spreading factor, coding rate atd..) + popisat aky maju vplyv na prenos dat
+
+Porovnanie LoraWAN(topologia hviezda) vs mesh
+
+Popisat zariadenia, ktore budem pouzivat v diplomke, ake maju ficury atd
+
+\chapter{TODO Porovnanie existujucich rieseni}
+TODO tu daky text
+
+TODO v zadani sa chce porovnat priamo protokoly
+
+TODO porovnat ich voci sebe
+
+\section{Lora mesher}
+Pouziva distance vector routing protocol.
+Vytvara si routovaciu tabulku, kde zaznamenava IDcka nodov, cez ktore susedne nody sa knim dostane a kolko hopov ho to bude stat.
+
+Kazda noda drzi routing table, periodicky je updatovana cez specialny typ packetu, ktory sa posiela vsetkymi nodami v sieti. (routing packet)
+
+Pouziva freeRtos na zabezpecenie schedulingu taskov. Rozlicne tasky sa staraju o prijatie a odoslanie packetov, iny task sa stara o samotne spracovanie packetov.
+
+\section{Meshtastic}
+Mesh siet tvorena lora modulmi. Princip fungovania je zalozeny na jednoduchom multi-hop floodingu.
+Kazda node znovu odvysiela prijaty packet (pokial nedosiel maxhop na 0) az kym sa packet nedostane do destinacie napriec mesh sietou.
+
+Pouzivane Lora moduly maju zabudovany bluetooth chip, vdaka ktoremu je mozne k modulu pripojit smarthphone, ktory sluzi ako rozhranie pre
+ uzivatela. Cez aplikaciu v mobile potom vytvara a prijma spravy, ktore su cez bluetooth posielane do modulu a cez lora sa posielaju do siete.
+
+Dosah siete sa da rozsirit cez pripojenie k oficialnemu meshtastic mqtt brokerovi. Umoznuje to tak prepojit mensie lokalne mesh siete do globalnej siete. TODO pozriet viac k tomuto
+
+Myslienka meshtasticu spociva v tom, ze vytvara komunikacnu siet na miestach kde bezne nieje napr. mobilny signal.(V horach)
+
+\section{LoRaBlink}
+Multi-hop protokol, ktory pouziva casovu synchronizaciu medzi nodami. Casova synchronizacia definuje sloty na pristup ku prenosovemnu kanalu.
+Spravy sa sietou siria pomocou floodingu.
+
+Siet sa sklada z jedneho datasinku (gateway) a viacerych nodov, ktore posielaju data do datasinku alebo data zneho prijmaju.
+V urcitych intervaloch datasink vysle tzv. beacon. Tento sluzi na casovu synchronizaciu a znaci novu epochu. Kazda epocha obsahuje N 
+slotov, v ktorych mozu nody vysielat data. Beacon sprava obsahuje hop count, ktora udava vzdialenost ku data-sinku.
+
+Ked node prijme beacon signal, vysle svoj vlastny beacon signal v dalsom volnom slote, ktory vybera na zaklade vzdialenosti od data-sinku.
+
+Ked node potrebuje poslat data, tak vybere dalsi volny slot a v nom vysiela data. Ak tieto data prijme node, ktora nieje sink a jej hop count ku sinku je mensi ako hop count
+vysielajucej nody tak data v dalsom slote retransmitne. Toto sa opakuje az kym data nedosiahnu datasink. TODO dostudovat, spravit lepsi popis
+
+- je to siet vyzadujuca jeden hlavny node (data-sink/gateway), tento node je potrebny na riadenie siete, pretoze vsetky ostatne nody sa synchronizuju na neho
+
+
+
+\chapter{TODO Vlastna implementacia}
+\chapter{TODO Testovanie vykonnosti + test voci existujucim protokolom?}
+
+
+% Seznam literatury
+\printbibliography[title={Literatura}, heading=bibintoc]
+
+% Prilohy
+%\appendix
+%\input{Chapters/Appendix1.tex}
+%\input{Chapters/Appendix2.tex}
+
+% Priloha vlozena primo do hlavniho LaTeX souboru. Ne vsechny prilohy je nutne mit ve zvlastnich souborech.
+%\chapter{Dlouhý zdrojový kód}
+%\lstinputlisting[label=src:CppExternal,caption={Dlouhý zdrojový kód v jazyce C++ načtený s externího souboru}]{SourceCodes/ArraySortingAlgorithms.cpp}
+
+\end{document}

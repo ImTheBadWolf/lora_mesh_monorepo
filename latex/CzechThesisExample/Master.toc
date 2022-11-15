@@ -8,16 +8,48 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{Seznam použitých symbolů a zkratek}{7}{chapter*.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {1}TODO Dostupne lora moduly a sposob prenosu dat}{8}{chapter.1}%
+\contentsline {chapter}{Seznam tabulek}{8}{chapter*.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {2}TODO Porovnanie existujucich rieseni}{9}{chapter.2}%
+\contentsline {chapter}{\numberline {1}TOOD Dostupné LoRa moduly a spôsob prenosu dát}{9}{chapter.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.1}Lora mesher}{9}{section.2.1}%
+\contentsline {subsection}{\numberline {1.0.1}LoRaWAN}{10}{subsection.1.0.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.2}Meshtastic}{9}{section.2.2}%
+\contentsline {section}{\numberline {1.1}SX127x/SX126x}{10}{section.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.3}LoRaBlink}{10}{section.2.3}%
+\contentsline {subsection}{\numberline {1.1.1}SX127x}{10}{subsection.1.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}TODO Vlastna implementacia}{11}{chapter.3}%
+\contentsline {subsection}{\numberline {1.1.2}SX126x}{10}{subsection.1.1.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}TODO Testovanie vykonnosti + test voci existujucim protokolom?}{12}{chapter.4}%
+\contentsline {section}{\numberline {1.2}RFM9xW}{11}{section.1.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {2}TODO Porovnanie existujucich rieseni}{12}{chapter.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.1}Lora mesher}{12}{section.2.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.2}Meshtastic}{12}{section.2.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.3}LoRaBlink}{13}{section.2.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {3}TODO Vlastna implementacia}{14}{chapter.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}TODO Testovanie vykonnosti + test voci existujucim protokolom?}{15}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Literatura}{16}{chapter*.5}%
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}
+\babel@toc {czech}{}

@@ -55,21 +55,103 @@
 
 % Jsou v praci tabulky? Pokud ano vysazime jejich seznam a odstrankujeme.
 % Pokud ne smazeme nasledujici dve makra.
-%\listoftables
-%\clearpage
+\listoftables
+\clearpage
 
-% A nasleduje text zaverecne prace.
-\chapter{TODO Dostupne lora moduly a sposob prenosu dat}
-TODO popis co je to lora, ako funguje, dosah atd., parametre (spreading factor, coding rate atd..) + popisat aky maju vplyv na prenos dat
 
-Porovnanie LoraWAN(topologia hviezda) vs mesh
+\chapter{TOOD Dostupné LoRa moduly a spôsob prenosu dát}
+LoRa je proprietárna rádiová komnikačná technika.
+Používa bezlicenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou a poskytuje rádiovy prenos na veľkú vzdialenosť s nízkou spotrebou energie.
+V otvorenom priestranstve môže mať rádiovy prenos dosah až 10-15 km.
+Vďaka tomu je vhodná pre použitie v IoT alebo senzorových sieťach, kde sa často vyskytujú senzory poháňané batériami a je potrebné aby vydržali dlhú dobu.
 
-Popisat zariadenia, ktore budem pouzivat v diplomke, ake maju ficury atd
+Na prenos je použitá proprietárna spread-spectrum modulácia odvodená od chirp spread-spectrum modulácie, pri ktorej sú 
+vysielané symboly a každý vysielaný symbol je reprezentovaný takzvaným chirpom. Tento chirp sa postupne posúva po intervale 
+vo frekvenčnom pásme, ktoré je dané vybraným bandwidth-om. 
+Ako rýchlo sa chirp posúva po frekvenčnom pásme je určené parametrom spreading factor (SF). Spreading factor taktiež vyjadruje, kolko bitov je v každom 
+symbole prenesených. Pri nižšiom spreading factore sa chirp posúva po frekvenčnom pásme rýchlejšie a tým sa zvyšuje datovy prenos, avšak zhoršuje sa citlivosť a dosah.
+
+TODO obrazok porovnania spreading factorov
+
+Pri používaní LoRa je nutné správne zvoliť parametre prenosu. Sú nimi frekvencia, bandwidth, spreading factor a coding rate.
+Použitá frekvencia je závisla od regiónu, v ktorom sa používa. V Európe sa používa 868 MHz, v USA 915 MHz a v Ázii 923 MHz. Okrem toho existuje ešte globálne používaná 
+frekvencia 2.4 GHz.
+
+Ostatné parametre sú vyberané na základe toho ako ďaleko a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu a dosahom.
+Pomocou LoRa dokážeme dáta prenášať rýchlosťou až 253 kbit/s, avšak pri takýchto rýchlostiach sa dramaticky zníži dosah.
+%TODO overit ci 253 kbit je realnych
+Parameter bandwidth určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššom bandwidthe sa zvyšuje rýchlosť prenosu, avšak zníži sa dosah.
+
+Spreading factor určuje koľko bitov je v každom symbole. Zároveň určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom zvyšuje alebo znižuje rýchlosť 
+prenosu na úkor zniženia alebo zvýšenia dosahu prenosu.
+%TODO lepsi preklad error-correcting data
+LoRa obsahuje korekciu errorov spôsobených rušením. Parameter coding rate vyjadruje pomer dát ku error-correcting dátam. Vyšší coding rate zabezpečí spolahlivejší prenos ak 
+sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát pretože ku každému prenášanému packetu pridáva viacej dát.
+
+\subsection{LoRaWAN}
+LoRa je definovaná len na fyzickej vrstve. Na používanie LoRa v IoT sieťach sú však potrebné aj vyššie vrstvy sieťového modelu.
+K tomu vznikol protokol LoRaWAN, ktorý je spravovaný organizáciou LoRa Alliance \cite{lora}.
+
+LoRaWAN definuje komunikačný protokol a architektúru sieti, ktoré LoRaWAN používajú. Siete používaju hviezdicovu alebo hviezda hviezd topológiu, kde 
+centrálnym uzlom je LoRaWAN gateway, ktorá je pripojená k internetu. Ostatne uzly siete posielajú dáta na gateway, ktorá ich preposiela na internet.
+
+
+\section{SX127x/SX126x}
+\subsection{SX127x}
+Výrobca Semtech \cite{semtech}, prináša LoRa modemy serie SX127x a SX126x. 
+
+SX127x LoRa moduly používajú frequency hopping spread-spectrum moduláciu. Čo znamená, že viaceré vysielané signály zaberajú rovnaký kanál, ktorý ma 
+vysokú ochranu proti rušeniu a zároveň majú nízku spotrebu energie.
+
+Moduly používajú LoRa modulačnú techniku, patentovanú firmou Semtech. Maximálny vysielací výkon modulov je 100mW. %TODO pridat ref na patent i guess
+Vďaka tejto modulačnej technike je možné dosiahnúť vysokej citlivosti modulov.
+Výrobca uvádza citlivosť cez 137 dBm pri moduloch SX1272/73 a 148 dBm pri moduloch SX1276/78/79.
+
+Moduly SX1272 a SX1273 ponukajú menší link budget - 157 dB oproti 168 dB pri moduloch SX1276/77/78/79 a majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz.
+Okrem toho majú aj vyššiu spotrebu energie.
+
+Pri moduloch SX1276/77/78/79 je možné vybrať frekvenčné pásma z rozsahu 137 až 1020 MHz.
+
+\subsection{SX126x}
+TODO tabulka preteka
+
+Moduly zo série SX126x - SX1261/62/68 sú následovníkmi modulov SX127x. Majú väčší vysielací výkon vďaka integrovanému zosilovaču a menšiu spotrebu energie. Obsahujú precízny TCXO oscilátor, 
+ktorý zabezpečuje presnejšie a stabilnejšie riadenie počas prevádzky modulu. Okrem LoRa modulácie obsahujú aj G(FSK) moduláciu, ktorá je vhodná pre staršie 
+prípady užitia.
+
+Moduly taktiež obsahujú +22/+15 dBm zosilovač, vďaka ktorému majú vyšší link budget oproti modulom zo série SX127x - 170 dBm,
+takže sú optimálne pre aplikácie vyžadujúce dosah alebo robustnosť.
+
+\section{RFM9xW}
+Moduly RFM95W/96W/97W/98W od výrobcu HopeRF \cite{hoperf}, používajúce SX LoRa modemy od výrobcu Semtech, poskytujú bezdrôtový prenos na 
+vysokú vzdialenosť s veľkou odolnosťou voči rušeniu.
+%TODO tabulka vyteka von
+\begin{table}
+	\centering
+  \small
+  \setlength\tabcolsep{2pt}
+	\caption[Parametre LoRa modulov]{LoRa moduly a ich parametre}
+  \begin{tabular}{c|c|c|c|c|c|c|c}
+    \toprule %TODO pridat air data rate
+    Modul & Frekvencia & Spreading factor & Bandwidth & Citlivosť & Spotreba počas vysielania & Zbernica & Cena(TODO do footeru *k tomuto kvartalu)\\
+    \midrule
+    SX1272 & 860-1020 MHz & 6-12 & 125-500 kHz & -117 - -137 dBm & 10mA & SPI & X€ \\ 
+    SX1273 & 860-1020 MHz & 6-9 & 125-500 kHz & -117 - -130 dBm & 10mA & SPI & X€ \\
+    SX1276 & 137-1020 MHz & 6-12 & 7.8-500 kHz & -111 - -148 dBm & 9.9mA & SPI & X€ \\
+    SX1277 & 137-1020 MHz & 6-9 & 7.8-500 kHz & -111 - -139 dBm & 9.9mA & SPI & X€ \\
+    SX1278 & 137-525 MHz & 6-12 & 7.8-500 kHz & -111 - -148 dBm & 9.9mA & SPI & X€ \\
+    SX1279 & 137-960 MHz & 6-12 & 7.8-500 kHz & -111 - -148 dBm & 9.9mA & SPI & X€ \\
+    SX1261 & TODO & TODO & TODO & TODO & 4.6mA & TODO & X€ \\
+    RFM95W & 868/915 MHz & 6-12 & 7.8-500 kHz & -111 - 148 dBm & 10.3 mA & SPI & ~8€ \\
+    RFM97W & 868/915 MHz & 6-9 & 7.8-500 kHz & -111 - 139 dBm & 10.3 mA & SPI & ~8€ \\
+    RFM96W/RFM98W & 433/470 MHz & 6-12 & 7.8 - 500 kHz & -111 - 148 dBm & 10.3 mA & SPI & ~8€ \\
+    \midrule
+  \end{tabular}
+\end{table}
+
 
 \chapter{TODO Porovnanie existujucich rieseni}
 TODO tu daky text
-
-TODO v zadani sa chce porovnat priamo protokoly
 
 TODO porovnat ich voci sebe
 
@@ -91,6 +173,8 @@ Pouzivane Lora moduly maju zabudovany bluetooth chip, vdaka ktoremu je mozne k m
 Dosah siete sa da rozsirit cez pripojenie k oficialnemu meshtastic mqtt brokerovi. Umoznuje to tak prepojit mensie lokalne mesh siete do globalnej siete. TODO pozriet viac k tomuto
 
 Myslienka meshtasticu spociva v tom, ze vytvara komunikacnu siet na miestach kde bezne nieje napr. mobilny signal.(V horach)
+
+timestamp sa posiela iba v GPS datach. TODO pridat text ktomu ze sa posiela pozicia z gpsky.
 
 \section{LoRaBlink}
 Multi-hop protokol, ktory pouziva casovu synchronizaciu medzi nodami. Casova synchronizacia definuje sloty na pristup ku prenosovemnu kanalu.

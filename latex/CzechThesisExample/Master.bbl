@@ -16,5 +16,58 @@
   {}
 \endgroup
 
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{lora}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{LoRa alliance}
+      \field{urlday}{10}
+      \field{urlmonth}{7}
+      \field{urlyear}{2022}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://lora-alliance.org/
+      \endverb
+      \verb{url}
+      \verb https://lora-alliance.org/
+      \endverb
+    \endentry
+    \entry{semtech}{online}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{title}{Semtech}
+      \field{urlday}{10}
+      \field{urlmonth}{7}
+      \field{urlyear}{2022}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.semtech.com/
+      \endverb
+      \verb{url}
+      \verb https://www.semtech.com/
+      \endverb
+    \endentry
+    \entry{hoperf}{online}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{title}{HopeRF}
+      \field{urlday}{10}
+      \field{urlmonth}{7}
+      \field{urlyear}{2022}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.hoperf.com/
+      \endverb
+      \verb{url}
+      \verb https://www.hoperf.com/
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
 \endinput
 

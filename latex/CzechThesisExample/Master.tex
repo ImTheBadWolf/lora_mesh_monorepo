@@ -1,12 +1,10 @@
-% Nejprve uvedeme tridu dokumentu s volbami
-\documentclass[czech,master]{diploma}
-% Dalsi doplnujici baliky maker
+\documentclass[slovak,master]{diploma}
+
 \usepackage[autostyle=true,czech=quotes]{csquotes} % korektni sazba uvozovek, podpora pro balik biblatex
 \usepackage[backend=biber, style=iso-numeric, alldates=iso]{biblatex} % bibliografie
-\usepackage{dcolumn} % sloupce tabulky s ciselnymi hodnotami
-\usepackage{subfig} % makra pro "podobrazky" a "podtabulky"
 
-% Zadame pozadovane vstupy pro generovani titulnich stran.
+
+
 \ThesisAuthor{Matúš Ozaniak}
 
 \ThesisSupervisor{Mgr. Ing. Michal Krumnikl, Ph.D.}
@@ -19,95 +17,127 @@
 
 \ThesisAssignmentFileName{ThesisSpecification_OZA0016.pdf}
 
-% Pokud nechceme nikomu dekovat makro zapoznamkujeme.
 \Acknowledgement{TODO podakovanie}
 
 \CzechAbstract{TODO Tohle je český abstrakt, zbytek odstavce je tvořen výplňovým textem. Naší si rozmachu potřebami s posílat v poskytnout ty má plot. Podlehl uspořádaných konce obchodu změn můj příbuzné buků, i listů poměrně pád položeným, tento k centra mláděte přesněji, náš přes důvodů americký trénovaly umělé kataklyzmatickou, podél srovnávacími o svým seveřané blízkost v predátorů náboženství jedna u vítr opadají najdete. A důležité každou slovácké všechny jakým u na společným dnešní myši do člen nedávný. Zjistí hází vymíráním výborná.}
 
-\CzechKeywords{LoRa; Mesh; diplomová práce}
+\CzechKeywords{LoRa; Mesh; Raspberry Pi; komunikačny protokol; diplomová práce}
 
 \EnglishAbstract{TODO This is English abstract. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Fusce tellus odio, dapibus id fermentum quis, suscipit id erat. Aenean placerat. Vivamus ac leo pretium faucibus. Duis risus. Fusce consectetuer risus a nunc. Duis ante orci, molestie vitae vehicula venenatis, tincidunt ac pede. Aliquam erat volutpat. Donec vitae arcu. Nullam lectus justo, vulputate eget mollis sed, tempor sed magna. Curabitur ligula sapien, pulvinar a vestibulum quis, facilisis vel sapien. Vestibulum fermentum tortor id mi. Etiam bibendum elit eget erat. Pellentesque pretium lectus id turpis. Nulla quis diam.}
 
-\EnglishKeywords{typography; \LaTeX; master thesis}
+\EnglishKeywords{LoRa; Mesh; Raspberry Pi; communication protocol; master thesis}
 
-\AddAcronym{DVD}{Digital Versatile Disc}
-\AddAcronym{TNT}{Trinitrotoluen}
-\AddAcronym{UML}{Unified Modeling Language}
-\AddAcronym{HTML}{Hyper Text Markup Language}
-\AddAcronym{TUG}{\TeX{} Users Group}
+\AddAcronym{IoT}{Internet of Things - Internet vecí}
+
 
 \addbibresource{biblatex.bib}
 
-% Novy druh tabulkoveho sloupce, ve kterem jsou cisla zarovnana podle desetinne carky
-\newcolumntype{d}[1]{D{,}{,}{#1}}
-
-
-% Zacatek dokumentu
 \begin{document}
 
-% Nechame vysazet titulni strany.
 \MakeTitlePages
 
-% Jsou v praci obrazky? Pokud ano vysazime jejich seznam a odstrankujeme.
-% Pokud ne smazeme nasledujici dve makra.
-%\listoffigures
-%\clearpage
+\listoffigures
+\clearpage
 
-% Jsou v praci tabulky? Pokud ano vysazime jejich seznam a odstrankujeme.
-% Pokud ne smazeme nasledujici dve makra.
 \listoftables
 \clearpage
 
+\chapter{Úvod}
+V dnešnej dobe sa čoraz viac stretávame s pojmom IoT alebo internet vecí. Jedna sa o lokálne siete, zložené z fyzických zariadení, ktoré tvoria uzly siete.
+Zariadenia môžu byť jednoduché senzory na monitorovanie nejakej fyzikalnej veličiny, domáce spotrebiče, vozidla, prípadne 
+zariadenia na ovládanie niečoho a kopa ďalších vecí. Tvori sa tak akási sieť, v ktorej si môžu zariadenia medzi sebou posielať 
+dáta a informácie, prípadne môžu byť na dialku ovládane.
 
-\chapter{TOOD Dostupné LoRa moduly a spôsob prenosu dát}
-LoRa je proprietárna rádiová komnikačná technika.
+K realizacií tejto siete je potrebné mať niečo, čo by zariadenia spájalo a umožňovalo im komunikáciu. Velmi používanou technológiou
+v tejto oblasti je práve technológia LoRa, ktorá umožnuje komunikáciu na veľmi veľké vzdialenosti. Spôsobov ako môžu zariadenia 
+v sieti tvorenej pomocou technológie LoRa komunikovať je viacero a neustálne vznikajú nové. %TODO sem pridat ref na zopar protokolov... meshtastic, daky lorawan multihop atd.
+
+Často sa využíva riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov, ktoré sú pripojené k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom. 
+Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svojé dáta. Centrálny uzol potom dáta spracováva a posiela ich cez internet na nejakú službu kde 
+k ním môžu uživatelia pristupovať z internetu.
+
+Pri LoRaWAN je potrebné mať nejaký centrálny uzol a ak chceme nejaké zariadenie pripojiť do siete, musí mať dosah na daný centrálny uzol. 
+Takto sme limitovaní existenciou a dosahom centrálnych uzlov, čož nieje v niektorých prípadoch užitia vhodné. Neustále sa vyvíjajú nové 
+protokoly, ktoré by tieto problémy riešili. %TODO ref na lorawan multihop daky.
+
+V tejto práci sa budeme venovať návhru a vytvoreniu protokolu, ktorý by umožnil komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
+bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol bude tvoriť sieťovú topológiu typu mesh, ktorá ma oproti hviezdicovej topológií, 
+využívanej pri LoRaWAN, niekoľko výhod. Su nimi napríklad istá dynamickosť siete, kedy sa môžu zo siete odoberať alebo do nej pridávať nové zariadenia, 
+bez nutnosti akejkoľvek konfigurácie na ostatných zariadeniach v sieti. Z toho vyplýva aj mobilita zariadení. Zariadenia sa môžu fyzicky pohybovať a 
+pokiaľ sa nachádzajú v dosahu hocijakého iného zariadenia, majú prístup do siete. Medzi ďalšie výhody patrí redundancia spojenia. Ak sa nejaký 
+uzol nečakane odpojí, tak sa dáta pošlu prostredníctvom iného uzlu.
+
+\chapter{LoRa, spôsob prenosu dát a dostupné LoRa moduly }
+LoRa je proprietárna technológia na bezdrôtový prenos dát za pomoci rádiovych vĺn.
 Používa bezlicenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou a poskytuje rádiovy prenos na veľkú vzdialenosť s nízkou spotrebou energie.
-V otvorenom priestranstve môže mať rádiovy prenos dosah až 10-15 km.
-Vďaka tomu je vhodná pre použitie v IoT alebo senzorových sieťach, kde sa často vyskytujú senzory poháňané batériami a je potrebné aby vydržali dlhú dobu.
+V otvorenom priestranstve môže mať rádiovy prenos dosah až 10-15 km. LoRa má avšak veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
+Rýchlosti prenosu sa pohybujú medzi 0.3 až 37.5 kbps.
 
-Na prenos je použitá proprietárna spread-spectrum modulácia odvodená od chirp spread-spectrum modulácie, pri ktorej sú 
-vysielané symboly a každý vysielaný symbol je reprezentovaný takzvaným chirpom. Tento chirp sa postupne posúva po intervale 
+Vďaka týmto aspektom je vhodná pre použitie v IoT senzorových sieťach, kde sa často vyskytujú senzory poháňané batériami a je potrebné aby vydržali dlhú dobu 
+bez výmeny baterii.  Okrem toho senzory často odosielajú veľmi malý obsah dát, takže nízka prenosová rýchlosť v tomto prípade nieje problémom.
+
+Na prenos je použitá proprietárna chirp spread-spectrum modulácia, pri ktorej sú 
+vysielané symboly a každý vysielaný symbol je reprezentovaný takzvaným chirp signálom. Tento chirp signál sa postupne posúva po intervale 
 vo frekvenčnom pásme, ktoré je dané vybraným bandwidth-om. 
 Ako rýchlo sa chirp posúva po frekvenčnom pásme je určené parametrom spreading factor (SF). Spreading factor taktiež vyjadruje, kolko bitov je v každom 
-symbole prenesených. Pri nižšiom spreading factore sa chirp posúva po frekvenčnom pásme rýchlejšie a tým sa zvyšuje datovy prenos, avšak zhoršuje sa citlivosť a dosah.
+symbole prenesených. Pri nižšiom spreading factore sa chirp posúva po frekvenčnom pásme rýchlejšie (viď \ref{fig:spreadingfactors}) a tým sa zvyšuje datovy prenos, 
+avšak zhoršuje sa citlivosť a s tým aj použitelný dosah.
+\newpage
 
-TODO obrazok porovnania spreading factorov
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\textwidth]{Figures/spreading factors.png}
+	\caption{Porovnanie spreading factorov. Prevzate z \cite{spreadfactorimage}}
+	\label{fig:spreadingfactors}
+\end{figure}
 
+TODO ako sa data moduluju do signalu + obrazek daky
+Consequat proident ipsum incididunt laboris officia eiusmod sint non magna aute qui labore anim. Lorem exercitation amet esse voluptate fugiat 
+nisi elit veniam cupidatat cupidatat sint veniam ut. Dolore nostrud minim labore exercitation consectetur enim deserunt esse id mollit laborum enim. 
+Proident sint ipsum id aliqua qui in.
+
+Consequat proident ipsum incididunt laboris officia eiusmod sint non magna aute qui labore anim. Lorem exercitation amet esse voluptate fugiat 
+nisi elit veniam cupidatat cupidatat sint veniam ut. Dolore nostrud minim labore exercitation consectetur enim deserunt esse id mollit laborum enim. 
+Proident sint ipsum id aliqua qui in.
+
+
+\subsection{LoRa parametre}
 Pri používaní LoRa je nutné správne zvoliť parametre prenosu. Sú nimi frekvencia, bandwidth, spreading factor a coding rate.
 Použitá frekvencia je závisla od regiónu, v ktorom sa používa. V Európe sa používa 868 MHz, v USA 915 MHz a v Ázii 923 MHz. Okrem toho existuje ešte globálne používaná 
 frekvencia 2.4 GHz.
 
 Ostatné parametre sú vyberané na základe toho ako ďaleko a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu a dosahom.
-Pomocou LoRa dokážeme dáta prenášať rýchlosťou až 253 kbit/s, avšak pri takýchto rýchlostiach sa dramaticky zníži dosah.
-%TODO overit ci 253 kbit je realnych
+
 Parameter bandwidth určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššom bandwidthe sa zvyšuje rýchlosť prenosu, avšak zníži sa dosah.
 
-Spreading factor určuje koľko bitov je v každom symbole. Zároveň určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom zvyšuje alebo znižuje rýchlosť 
+Spreading factor určuje koľko bitov dát je prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom zvyšuje alebo znižuje rýchlosť 
 prenosu na úkor zniženia alebo zvýšenia dosahu prenosu.
 %TODO lepsi preklad error-correcting data
-LoRa obsahuje korekciu errorov spôsobených rušením. Parameter coding rate vyjadruje pomer dát ku error-correcting dátam. Vyšší coding rate zabezpečí spolahlivejší prenos ak 
-sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát pretože ku každému prenášanému packetu pridáva viacej dát.
+LoRa obsahuje korekciu errorov spôsobených rušením. Parameter coding rate vyjadruje aky pomer dát, ku error-correcting dátam - parity bitom sa má použiť. Vyšší coding rate zabezpečí spolahlivejší prenos ak 
+sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát pretože ku každému prenášanému packetu pridáva dáta navyše.
 
 \subsection{LoRaWAN}
 LoRa je definovaná len na fyzickej vrstve. Na používanie LoRa v IoT sieťach sú však potrebné aj vyššie vrstvy sieťového modelu.
 K tomu vznikol protokol LoRaWAN, ktorý je spravovaný organizáciou LoRa Alliance \cite{lora}.
 
-LoRaWAN definuje komunikačný protokol a architektúru sieti, ktoré LoRaWAN používajú. Siete používaju hviezdicovu alebo hviezda hviezd topológiu, kde 
+LoRaWAN definuje komunikačný protokol a architektúru sieti. Siete používaju hviezdicovu alebo hviezda hviezd topológiu, kde 
 centrálnym uzlom je LoRaWAN gateway, ktorá je pripojená k internetu. Ostatne uzly siete posielajú dáta na gateway, ktorá ich preposiela na internet.
 
 
 \section{SX127x/SX126x}
+Výrobca Semtech \cite{semtech}, prináša LoRa modemy série SX127x a SX126x. V dnešnej dobe sú to najrozšírenejšie používané LoRa modemy.
+Ponukajú vysoký výkon za pomerne nízku cenu.
+
 \subsection{SX127x}
-Výrobca Semtech \cite{semtech}, prináša LoRa modemy serie SX127x a SX126x. 
 
 SX127x LoRa moduly používajú frequency hopping spread-spectrum moduláciu. Čo znamená, že viaceré vysielané signály zaberajú rovnaký kanál, ktorý ma 
 vysokú ochranu proti rušeniu a zároveň majú nízku spotrebu energie.
 
-Moduly používajú LoRa modulačnú techniku, patentovanú firmou Semtech. Maximálny vysielací výkon modulov je 100mW. %TODO pridat ref na patent i guess
+Moduly používajú LoRa modulačnú techniku, patentovanú firmou Semtech. Maximálny vysielací výkon modulov je 100mW.
 Vďaka tejto modulačnej technike je možné dosiahnúť vysokej citlivosti modulov.
-Výrobca uvádza citlivosť cez 137 dBm pri moduloch SX1272/73 a 148 dBm pri moduloch SX1276/78/79.
+Výrobca uvádza citlivosť cez -137 dBm pri moduloch SX1272/73 a -148 dBm pri moduloch SX1276/78/79.
 
-Moduly SX1272 a SX1273 ponukajú menší link budget - 157 dB oproti 168 dB pri moduloch SX1276/77/78/79 a majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz.
+Moduly SX1272 a SX1273 ponukajú menší link budget 157 dB oproti 168 dB pri moduloch SX1276/77/78/79 a majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz.
 Okrem toho majú aj vyššiu spotrebu energie.
 
 Pri moduloch SX1276/77/78/79 je možné vybrať frekvenčné pásma z rozsahu 137 až 1020 MHz.
@@ -120,11 +150,35 @@ ktorý zabezpečuje presnejšie a stabilnejšie riadenie počas prevádzky modul
 prípady užitia.
 
 Moduly taktiež obsahujú +22/+15 dBm zosilovač, vďaka ktorému majú vyšší link budget oproti modulom zo série SX127x - 170 dBm,
-takže sú optimálne pre aplikácie vyžadujúce dosah alebo robustnosť.
+takže sú optimálne pre aplikácie vyžadujúce väčší dosah alebo robustnosť.
 
 \section{RFM9xW}
-Moduly RFM95W/96W/97W/98W od výrobcu HopeRF \cite{hoperf}, používajúce SX LoRa modemy od výrobcu Semtech, poskytujú bezdrôtový prenos na 
-vysokú vzdialenosť s veľkou odolnosťou voči rušeniu.
+Moduly RFM95W/96W/97W/98W od výrobcu HopeRF \cite{hoperf}, používajúce SX LoRa modemy od výrobcu Semtech, %TOTO asi nieje pravda idk
+ poskytujú bezdrôtový prenos na vysokú vzdialenosť s veľkou odolnosťou voči rušeniu. 
+ Jedná sa vlastne len o rozšírujucí modul, ktorý obsahuje LoRa modem a elektroniku potrebnú na riadenie modemu.
+ %toto pozret https://www.disk91.com/2019/technology/lora/hoperf-rfm95-and-arduino-a-low-cost-lorawan-solution/
+
+Existuje niekoľko verzií modulov RFM9xW, kde každá verzia používa iný semtech LoRa modem.
+
+\section{STM32WL}
+Mikrokontroller s loramodemom
+%https://www.st.com/en/microcontrollers-microprocessors/stm32wl-series.html
+
+\section{SAM R34/R35}
+Mikrokontroller s loramodemom
+%https://www.microchip.com/en-us/products/wireless-connectivity/lora-technology/sam-r34-r35
+
+\section{HPD13A}
+Modem
+%Tento je v T-beame tak ho spomenut + zistit co je v tom druhom ttgo...
+%Je shielded
+
+\section {EBYTE E32}
+%https://www.ebyte.com/en/product-view-news.html?id=108
+
+% + Popisat aj zariadenia ktore pouzijem - TTGO obe, RPI, armachat....
+
+
 %TODO tabulka vyteka von
 \begin{table}
 	\centering
@@ -135,16 +189,16 @@ vysokú vzdialenosť s veľkou odolnosťou voči rušeniu.
     \toprule %TODO pridat air data rate
     Modul & Frekvencia & Spreading factor & Bandwidth & Citlivosť & Spotreba počas vysielania & Zbernica & Cena(TODO do footeru *k tomuto kvartalu)\\
     \midrule
-    SX1272 & 860-1020 MHz & 6-12 & 125-500 kHz & -117 - -137 dBm & 10mA & SPI & X€ \\ 
-    SX1273 & 860-1020 MHz & 6-9 & 125-500 kHz & -117 - -130 dBm & 10mA & SPI & X€ \\
-    SX1276 & 137-1020 MHz & 6-12 & 7.8-500 kHz & -111 - -148 dBm & 9.9mA & SPI & X€ \\
-    SX1277 & 137-1020 MHz & 6-9 & 7.8-500 kHz & -111 - -139 dBm & 9.9mA & SPI & X€ \\
-    SX1278 & 137-525 MHz & 6-12 & 7.8-500 kHz & -111 - -148 dBm & 9.9mA & SPI & X€ \\
-    SX1279 & 137-960 MHz & 6-12 & 7.8-500 kHz & -111 - -148 dBm & 9.9mA & SPI & X€ \\
+    SX1272 & 860-1020 MHz & 6-12 & 125-500 kHz & -137 dBm & 10mA & SPI & X€ \\ 
+    SX1273 & 860-1020 MHz & 6-9 & 125-500 kHz & -130 dBm & 10mA & SPI & X€ \\
+    SX1276 & 137-1020 MHz & 6-12 & 7.8-500 kHz & -148 dBm & 9.9mA & SPI & X€ \\
+    SX1277 & 137-1020 MHz & 6-9 & 7.8-500 kHz & -139 dBm & 9.9mA & SPI & X€ \\
+    SX1278 & 137-525 MHz & 6-12 & 7.8-500 kHz & -148 dBm & 9.9mA & SPI & X€ \\
+    SX1279 & 137-960 MHz & 6-12 & 7.8-500 kHz & -148 dBm & 9.9mA & SPI & X€ \\
     SX1261 & TODO & TODO & TODO & TODO & 4.6mA & TODO & X€ \\
-    RFM95W & 868/915 MHz & 6-12 & 7.8-500 kHz & -111 - 148 dBm & 10.3 mA & SPI & ~8€ \\
-    RFM97W & 868/915 MHz & 6-9 & 7.8-500 kHz & -111 - 139 dBm & 10.3 mA & SPI & ~8€ \\
-    RFM96W/RFM98W & 433/470 MHz & 6-12 & 7.8 - 500 kHz & -111 - 148 dBm & 10.3 mA & SPI & ~8€ \\
+    RFM95W & 868/915 MHz & 6-12 & 7.8-500 kHz & -148 dBm & 10.3 mA & SPI & ~8€ \\
+    RFM97W & 868/915 MHz & 6-9 & 7.8-500 kHz & -139 dBm & 10.3 mA & SPI & ~8€ \\
+    RFM96W/RFM98W & 433/470 MHz & 6-12 & 7.8 - 500 kHz & -148 dBm & 10.3 mA & SPI & ~8€ \\
     \midrule
   \end{tabular}
 \end{table}

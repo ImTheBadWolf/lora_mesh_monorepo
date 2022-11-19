@@ -108,12 +108,17 @@ Obr. \ref{fig:loraModulation}, kde posun definuje hodnotu daného symbolu.
 	\label{fig:loraModulation}
 \end{figure}
 
-\subsection{Legislativa TODO}
-TODO legislativne limitacie zakona v CR
-Consequat proident ipsum incididunt laboris officia eiusmod sint non magna aute qui labore anim. Lorem exercitation amet esse voluptate fugiat 
-nisi elit veniam cupidatat cupidatat sint veniam ut. Dolore nostrud minim labore exercitation consectetur enim deserunt esse id mollit laborum enim. 
-Proident sint ipsum id aliqua qui in.
-\newpage
+\subsection{Legislativa}
+V Európe sa k frekvenčnému pásmu používaného pre LoRa viažu určité obmedzenia. 
+Obmedzenia sa týkaju používania fyzického média. Regulácia určuje maximálnu povolenú dobu, v ktorú môže vysielač na daných frekvenciach vysielať 
+v rámci jednej hodiny a maximálny vysielací výkon.
+Určuje sa klučovací pomer, ktorý hovorí koľko percent času z nejakého celkového času môže vysielač vysielat.
+
+Ak by zariadenie vysielalo signál po dobu jednej jednotky času z celkových 10 jednotiek času, tak kľučovací pomer by bol 10\%.
+
+Český Telekomunikačný úrad \cite{ctu} stanovuje vyhláškou \textit{všeobecné oprávnění č. VO-R/10/07.2021-8 \cite{vor}}, že 
+frekvenčné pásmo, do ktorého spadá LoRa, patrí do skupiny g. Pre túto skupinu je maximálny povolený kľučovací pomer 1\% a maximálny 
+vysielací výkon 25 mW. Znamená to teda, že zariadenia môžu každú hodinu vysielať maximálne po dobu 36 sekund.
 
 \subsection{LoRa parametre}
 Pri používaní LoRa je nutné správne zvoliť parametre prenosu. Sú nimi frekvencia, bandwidth, spreading factor a coding rate.

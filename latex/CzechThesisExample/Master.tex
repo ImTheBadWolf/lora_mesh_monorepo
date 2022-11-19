@@ -28,6 +28,10 @@
 \EnglishKeywords{LoRa; Mesh; Raspberry Pi; communication protocol; master thesis}
 
 \AddAcronym{IoT}{Internet of Things - Internet vecí}
+\AddAcronym{SF}{Spreading factor}
+\AddAcronym{BW}{Bandwidth}
+\AddAcronym{DR}{Data rate - rýchlosť prenosu}
+\AddAcronym{CR}{Coding rate}
 
 
 \addbibresource{biblatex.bib}
@@ -42,79 +46,104 @@
 \listoftables
 \clearpage
 
-\chapter{Úvod}
+\chapter{Úvod} %TODO skratit uvod
 V dnešnej dobe sa čoraz viac stretávame s pojmom IoT alebo internet vecí. Jedna sa o lokálne siete, zložené z fyzických zariadení, ktoré tvoria uzly siete.
 Zariadenia môžu byť jednoduché senzory na monitorovanie nejakej fyzikalnej veličiny, domáce spotrebiče, vozidla, prípadne 
-zariadenia na ovládanie niečoho a kopa ďalších vecí. Tvori sa tak akási sieť, v ktorej si môžu zariadenia medzi sebou posielať 
-dáta a informácie, prípadne môžu byť na dialku ovládane.
+zariadenia, ktoré je možné ovládať na diaľku. Zariadenia tvoria sieť, v ktorej si môžu medzi sebou posielať 
+dáta a informácie.
 
 K realizacií tejto siete je potrebné mať niečo, čo by zariadenia spájalo a umožňovalo im komunikáciu. Velmi používanou technológiou
 v tejto oblasti je práve technológia LoRa, ktorá umožnuje komunikáciu na veľmi veľké vzdialenosti. Spôsobov ako môžu zariadenia 
-v sieti tvorenej pomocou technológie LoRa komunikovať je viacero a neustálne vznikajú nové. %TODO sem pridat ref na zopar protokolov... meshtastic, daky lorawan multihop atd.
+v sieti tvorenej pomocou technológie LoRa komunikovať je viacero a je to populárna téma, kde neustálne vznikajú nové návrhy rôznych riešení[1][2 TODO]. %TODO sem pridat ref na zopar protokolov... meshtastic atd.
 
 Často sa využíva riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov, ktoré sú pripojené k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom. 
-Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svojé dáta. Centrálny uzol potom dáta spracováva a posiela ich cez internet na nejakú službu kde 
+Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svojé dáta. Centrálny uzol potom dáta posiela cez internet na nejakú službu kde 
 k ním môžu uživatelia pristupovať z internetu.
 
 Pri LoRaWAN je potrebné mať nejaký centrálny uzol a ak chceme nejaké zariadenie pripojiť do siete, musí mať dosah na daný centrálny uzol. 
-Takto sme limitovaní existenciou a dosahom centrálnych uzlov, čož nieje v niektorých prípadoch užitia vhodné. Neustále sa vyvíjajú nové 
-protokoly, ktoré by tieto problémy riešili. %TODO ref na lorawan multihop daky.
+Takto sme limitovaní existenciou a dosahom centrálnych uzlov, čož nieje v niektorých prípadoch užitia vhodné. Neustále sa vznikajú nové 
+protokoly, ktoré by tieto problémy riešili [1][2][3 TODO]. %TODO ref na lorawan multihop daky.
 
-V tejto práci sa budeme venovať návhru a vytvoreniu protokolu, ktorý by umožnil komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
+V tejto práci sa budeme venovať návrhu a vytvoreniu protokolu, ktorý by umožnil komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
 bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol bude tvoriť sieťovú topológiu typu mesh, ktorá ma oproti hviezdicovej topológií, 
-využívanej pri LoRaWAN, niekoľko výhod. Su nimi napríklad istá dynamickosť siete, kedy sa môžu zo siete odoberať alebo do nej pridávať nové zariadenia, 
-bez nutnosti akejkoľvek konfigurácie na ostatných zariadeniach v sieti. Z toho vyplýva aj mobilita zariadení. Zariadenia sa môžu fyzicky pohybovať a 
-pokiaľ sa nachádzajú v dosahu hocijakého iného zariadenia, majú prístup do siete. Medzi ďalšie výhody patrí redundancia spojenia. Ak sa nejaký 
-uzol nečakane odpojí, tak sa dáta pošlu prostredníctvom iného uzlu.
+využívanej pri LoRaWAN, niekoľko výhod. Su nimi napríklad škálovatelnosť siete, kedy sa môžu zo siete odoberať alebo do nej pridávať nové zariadenia, 
+bez nutnosti akejkoľvek konfigurácie na ostatných zariadeniach. Z toho vyplýva aj mobilita zariadení. Zariadenia sa môžu fyzicky pohybovať a 
+pokiaľ sa nachádzajú v dosahu hocijakého iného uzla, majú prístup do siete.
 
-\chapter{LoRa, spôsob prenosu dát a dostupné LoRa moduly }
+\chapter{LoRa a spôsob prenosu dát}
 LoRa je proprietárna technológia na bezdrôtový prenos dát za pomoci rádiovych vĺn.
 Používa bezlicenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou a poskytuje rádiovy prenos na veľkú vzdialenosť s nízkou spotrebou energie.
-V otvorenom priestranstve môže mať rádiovy prenos dosah až 10-15 km. LoRa má avšak veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
+V otvorenom priestranstve môže mať rádiovy prenos dosah až 10-15 km. LoRa má však veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
 Rýchlosti prenosu sa pohybujú medzi 0.3 až 37.5 kbps.
 
 Vďaka týmto aspektom je vhodná pre použitie v IoT senzorových sieťach, kde sa často vyskytujú senzory poháňané batériami a je potrebné aby vydržali dlhú dobu 
-bez výmeny baterii.  Okrem toho senzory často odosielajú veľmi malý obsah dát, takže nízka prenosová rýchlosť v tomto prípade nieje problémom.
+bez výmeny batérií. Okrem toho senzory väčšinou odosielajú veľmi malý obsah dát a dáta posielaju v určitých intervaloch (napr. raz za hodinu atď.), 
+takže nízka prenosová rýchlosť v tomto prípade nieje problémom.
 
 Na prenos je použitá proprietárna chirp spread-spectrum modulácia, pri ktorej sú 
 vysielané symboly a každý vysielaný symbol je reprezentovaný takzvaným chirp signálom. Tento chirp signál sa postupne posúva po intervale 
 vo frekvenčnom pásme, ktoré je dané vybraným bandwidth-om. 
 Ako rýchlo sa chirp posúva po frekvenčnom pásme je určené parametrom spreading factor (SF). Spreading factor taktiež vyjadruje, kolko bitov je v každom 
-symbole prenesených. Pri nižšiom spreading factore sa chirp posúva po frekvenčnom pásme rýchlejšie (viď \ref{fig:spreadingfactors}) a tým sa zvyšuje datovy prenos, 
+symbole prenesených. Pri nižšiom spreading factore sa chirp posúva po frekvenčnom pásme rýchlejšie (viď Obr. \ref{fig:spreadingfactors}) a tým sa zvyšuje dátovy prenos, 
 avšak zhoršuje sa citlivosť a s tým aj použitelný dosah.
-\newpage
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.6\textwidth]{Figures/spreading factors.png}
-	\caption{Porovnanie spreading factorov. Prevzate z \cite{spreadfactorimage}}
+	\includegraphics[width=0.5\textwidth]{Figures/spreading factors.png}
+	\caption{Porovnanie spreading factorov. Prevzaté z \cite{spreadfactorimage}}
 	\label{fig:spreadingfactors}
 \end{figure}
+\newpage
 
-TODO ako sa data moduluju do signalu + obrazek daky
+Existujú dva druhy chirp signálu, sú nimi up-chirp a down-chirp. Pri up-chirp signále sa prechádza z najnižšej frekvencie na najvyššiu a pri 
+down-chirp naopak.
+
+Vysielaný chirp signal sa ďalej rozdeluje na X častí - tzv. chips. Koľko týchto chips jeden chirp obsahuje je závisle od vybraného spreading factoru. 
+Jeden chirp ma v sebe $2^{SF}$ častí alebo chips. Vysielaný symbol sa potom skladá z cyklicky posunutého chirp signálu viď 
+Obr. \ref{fig:loraModulation}, kde posun definuje hodnotu daného symbolu.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{Figures/loraModulation.png}
+	\caption{Nemodulovaný a modulovaný LoRa signál. Prevzaté z \cite{loraMod}, \cite{loraMod2}}
+	\label{fig:loraModulation}
+\end{figure}
+
+\subsection{Legislativa TODO}
+TODO legislativne limitacie zakona v CR
 Consequat proident ipsum incididunt laboris officia eiusmod sint non magna aute qui labore anim. Lorem exercitation amet esse voluptate fugiat 
 nisi elit veniam cupidatat cupidatat sint veniam ut. Dolore nostrud minim labore exercitation consectetur enim deserunt esse id mollit laborum enim. 
 Proident sint ipsum id aliqua qui in.
-
-Consequat proident ipsum incididunt laboris officia eiusmod sint non magna aute qui labore anim. Lorem exercitation amet esse voluptate fugiat 
-nisi elit veniam cupidatat cupidatat sint veniam ut. Dolore nostrud minim labore exercitation consectetur enim deserunt esse id mollit laborum enim. 
-Proident sint ipsum id aliqua qui in.
-
+\newpage
 
 \subsection{LoRa parametre}
 Pri používaní LoRa je nutné správne zvoliť parametre prenosu. Sú nimi frekvencia, bandwidth, spreading factor a coding rate.
-Použitá frekvencia je závisla od regiónu, v ktorom sa používa. V Európe sa používa 868 MHz, v USA 915 MHz a v Ázii 923 MHz. Okrem toho existuje ešte globálne používaná 
-frekvencia 2.4 GHz.
+Použitá frekvencia je závisla od regiónu, v ktorom sa používa viď Obr. \ref{fig:ismBands}. 
+V Európe je možné okrem 866MHz pásma používať aj 433MHz pásmo. Okrem toho existuje ešte globálne používaná frekvencia 2.4 GHz.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.9\textwidth]{Figures/ism_bands.png}
+	\caption{Frekvenčne pásma používane pre LoRa. Prevzaté z \cite{loraMod}}
+	\label{fig:ismBands}
+\end{figure}
 
-Ostatné parametre sú vyberané na základe toho ako ďaleko a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu a dosahom.
+Ostatné parametre sú vyberané na základe toho ako ďaleko a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu ň
+a dosahom prenosu.
 
-Parameter bandwidth určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššom bandwidthe sa zvyšuje rýchlosť prenosu, avšak zníži sa dosah.
+Parameter bandwidth určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššom bandwidthe sa zvyšuje rýchlosť prenosu, avšak znižuje sa dosah.
 
-Spreading factor určuje koľko bitov dát je prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom zvyšuje alebo znižuje rýchlosť 
-prenosu na úkor zniženia alebo zvýšenia dosahu prenosu.
-%TODO lepsi preklad error-correcting data
-LoRa obsahuje korekciu errorov spôsobených rušením. Parameter coding rate vyjadruje aky pomer dát, ku error-correcting dátam - parity bitom sa má použiť. Vyšší coding rate zabezpečí spolahlivejší prenos ak 
-sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát pretože ku každému prenášanému packetu pridáva dáta navyše.
+Spreading factor určuje koľko bitov dát môže byť prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom 
+zvyšuje alebo znižuje rýchlosť prenosu na úkor zniženia alebo zvýšenia dosahu prenosu.
+
+LoRa obsahuje korekciu chýb spôsobených rušením. Využíva k tomu samoopravný kód - forward error correction, pri ktorom 
+sa ku dátam pridavajú korekčné bity. Tieto bity môžu byť použité na opravu chyby ak k nejakej došlo.
+
+Parameter coding rate vyjadruje aky pomer dát, ku error korekčným dátam sa má použiť. Vyšší coding rate zabezpečí spolahlivejší prenos ak 
+sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát, pretože ku prenášaným dátam pridáva navyše dáta potrebné na korekciu chýb.
+
+Rýchlosť prenosu dát (Data rate - DR) môžme vyjadriť vzťahom:
+\begin{equation}
+  DR = SF * \frac{BW}{2^{SF}} * \frac{4}{4+CR}
+\end{equation}
 
 \subsection{LoRaWAN}
 LoRa je definovaná len na fyzickej vrstve. Na používanie LoRa v IoT sieťach sú však potrebné aj vyššie vrstvy sieťového modelu.
@@ -123,7 +152,8 @@ K tomu vznikol protokol LoRaWAN, ktorý je spravovaný organizáciou LoRa Allian
 LoRaWAN definuje komunikačný protokol a architektúru sieti. Siete používaju hviezdicovu alebo hviezda hviezd topológiu, kde 
 centrálnym uzlom je LoRaWAN gateway, ktorá je pripojená k internetu. Ostatne uzly siete posielajú dáta na gateway, ktorá ich preposiela na internet.
 
-
+\chapter{Dostupné LoRa moduly }
+%TODO pridat sem text ze moduly sa rozdeluju na end device moduly a gateway moduly. Ja popisujem iba end device moduly
 \section{SX127x/SX126x}
 Výrobca Semtech \cite{semtech}, prináša LoRa modemy série SX127x a SX126x. V dnešnej dobe sú to najrozšírenejšie používané LoRa modemy.
 Ponukajú vysoký výkon za pomerne nízku cenu.

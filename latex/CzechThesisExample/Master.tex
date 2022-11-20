@@ -3,8 +3,6 @@
 \usepackage[autostyle=true,czech=quotes]{csquotes} % korektni sazba uvozovek, podpora pro balik biblatex
 \usepackage[backend=biber, style=iso-numeric, alldates=iso]{biblatex} % bibliografie
 
-
-
 \ThesisAuthor{Matúš Ozaniak}
 
 \ThesisSupervisor{Mgr. Ing. Michal Krumnikl, Ph.D.}
@@ -53,15 +51,15 @@ zariadenia, ktoré je možné ovládať na diaľku. Zariadenia tvoria sieť, v k
 dáta a informácie.
 
 K realizacií tejto siete je potrebné mať niečo, čo by zariadenia spájalo a umožňovalo im komunikáciu. Velmi používanou technológiou
-v tejto oblasti je práve technológia LoRa, ktorá umožnuje komunikáciu na veľmi veľké vzdialenosti. Spôsobov ako môžu zariadenia 
+v tejto oblasti je práve technológia LoRa, ktorá umožnuje bezdrôtovú komunikáciu na veľmi veľké vzdialenosti. Spôsobov ako môžu zariadenia 
 v sieti tvorenej pomocou technológie LoRa komunikovať je viacero a je to populárna téma, kde neustálne vznikajú nové návrhy rôznych riešení[1][2 TODO]. %TODO sem pridat ref na zopar protokolov... meshtastic atd.
 
-Často sa využíva riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov, ktoré sú pripojené k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom. 
+Často sa využíva riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov pripojených k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom. 
 Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svojé dáta. Centrálny uzol potom dáta posiela cez internet na nejakú službu kde 
 k ním môžu uživatelia pristupovať z internetu.
 
 Pri LoRaWAN je potrebné mať nejaký centrálny uzol a ak chceme nejaké zariadenie pripojiť do siete, musí mať dosah na daný centrálny uzol. 
-Takto sme limitovaní existenciou a dosahom centrálnych uzlov, čož nieje v niektorých prípadoch užitia vhodné. Neustále sa vznikajú nové 
+Takto sme limitovaní existenciou a dosahom centrálnych uzlov, čož nieje v niektorých prípadoch užitia vhodné. Neustále vznikajú nové 
 protokoly, ktoré by tieto problémy riešili [1][2][3 TODO]. %TODO ref na lorawan multihop daky.
 
 V tejto práci sa budeme venovať návrhu a vytvoreniu protokolu, ktorý by umožnil komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
@@ -98,7 +96,7 @@ avšak zhoršuje sa citlivosť a s tým aj použitelný dosah.
 Existujú dva druhy chirp signálu, sú nimi up-chirp a down-chirp. Pri up-chirp signále sa prechádza z najnižšej frekvencie na najvyššiu a pri 
 down-chirp naopak.
 
-Vysielaný chirp signal sa ďalej rozdeluje na X častí - tzv. chips. Koľko týchto chips jeden chirp obsahuje je závisle od vybraného spreading factoru. 
+Vysielaný chirp signal je ďalej rozdelený na X častí - tzv. chips. Koľko týchto chips jeden chirp obsahuje je závisle od vybraného spreading factoru. 
 Jeden chirp ma v sebe $2^{SF}$ častí alebo chips. Vysielaný symbol sa potom skladá z cyklicky posunutého chirp signálu viď 
 Obr. \ref{fig:loraModulation}, kde posun definuje hodnotu daného symbolu.
 \begin{figure}
@@ -112,18 +110,18 @@ Obr. \ref{fig:loraModulation}, kde posun definuje hodnotu daného symbolu.
 V Európe sa k frekvenčnému pásmu používaného pre LoRa viažu určité obmedzenia. 
 Obmedzenia sa týkaju používania fyzického média. Regulácia určuje maximálnu povolenú dobu, v ktorú môže vysielač na daných frekvenciach vysielať 
 v rámci jednej hodiny a maximálny vysielací výkon.
-Určuje sa klučovací pomer, ktorý hovorí koľko percent času z nejakého celkového času môže vysielač vysielat.
+Určuje sa klučovací pomer, ktorý hovorí koľko percent času z nejakého celkového času môže vysielač vysielať.
 
 Ak by zariadenie vysielalo signál po dobu jednej jednotky času z celkových 10 jednotiek času, tak kľučovací pomer by bol 10\%.
 
-Český Telekomunikačný úrad \cite{ctu} stanovuje vyhláškou \textit{všeobecné oprávnění č. VO-R/10/07.2021-8 \cite{vor}}, že 
+Český Telekomunikačný úrad \cite{ctu} stanovuje v \textit{všeobecné oprávnění č. VO-R/10/07.2021-8 \cite{vor}}, že 
 frekvenčné pásmo, do ktorého spadá LoRa, patrí do skupiny g. Pre túto skupinu je maximálny povolený kľučovací pomer 1\% a maximálny 
-vysielací výkon 25 mW. Znamená to teda, že zariadenia môžu každú hodinu vysielať maximálne po dobu 36 sekund.
+vysielací výkon 25 mW. Znamená to teda, že zariadenia môžu každú hodinu vysielať maximálne po dobu 36 sekúnd.
 
 \subsection{LoRa parametre}
 Pri používaní LoRa je nutné správne zvoliť parametre prenosu. Sú nimi frekvencia, bandwidth, spreading factor a coding rate.
-Použitá frekvencia je závisla od regiónu, v ktorom sa používa viď Obr. \ref{fig:ismBands}. 
-V Európe je možné okrem 866MHz pásma používať aj 433MHz pásmo. Okrem toho existuje ešte globálne používaná frekvencia 2.4 GHz.
+Použitá frekvencia je závisla od regiónu, v ktorom sa používa, viď Obr. \ref{fig:ismBands}. 
+V Európe je možné mimo 866MHz pásma používať aj 433MHz pásmo. Okrem toho existuje ešte globálne používaná frekvencia 2.4 GHz.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.9\textwidth]{Figures/ism_bands.png}
@@ -131,7 +129,7 @@ V Európe je možné okrem 866MHz pásma používať aj 433MHz pásmo. Okrem toh
 	\label{fig:ismBands}
 \end{figure}
 
-Ostatné parametre sú vyberané na základe toho ako ďaleko a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu ň
+Ostatné parametre sú vyberané na základe toho ako ďaleko a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu 
 a dosahom prenosu.
 
 Parameter bandwidth určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššom bandwidthe sa zvyšuje rýchlosť prenosu, avšak znižuje sa dosah.
@@ -145,7 +143,7 @@ sa ku dátam pridavajú korekčné bity. Tieto bity môžu byť použité na opr
 Parameter coding rate vyjadruje aky pomer dát, ku error korekčným dátam sa má použiť. Vyšší coding rate zabezpečí spolahlivejší prenos ak 
 sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát, pretože ku prenášaným dátam pridáva navyše dáta potrebné na korekciu chýb.
 
-Rýchlosť prenosu dát (Data rate - DR) môžme vyjadriť vzťahom:
+Rýchlosť prenosu dát (Data rate - DR) v kbps môžme vyjadriť vzťahom:
 \begin{equation}
   DR = SF * \frac{BW}{2^{SF}} * \frac{4}{4+CR}
 \end{equation}
@@ -156,17 +154,18 @@ K tomu vznikol protokol LoRaWAN, ktorý je spravovaný organizáciou LoRa Allian
 
 LoRaWAN definuje komunikačný protokol a architektúru sieti. Siete používaju hviezdicovu alebo hviezda hviezd topológiu, kde 
 centrálnym uzlom je LoRaWAN gateway, ktorá je pripojená k internetu. Ostatne uzly siete posielajú dáta na gateway, ktorá ich preposiela na internet.
+%TODO viacej textu sem. Napr ze su tam dake skupiny zariadeni, su tam dake stanovene limity atd
 
 \chapter{Dostupné LoRa moduly }
-%TODO pridat sem text ze moduly sa rozdeluju na end device moduly a gateway moduly. Ja popisujem iba end device moduly
+TODO pridat sem text ze moduly sa rozdeluju na end device moduly a gateway moduly. Ja popisujem iba end device moduly
+
 \section{SX127x/SX126x}
-Výrobca Semtech \cite{semtech}, prináša LoRa modemy série SX127x a SX126x. V dnešnej dobe sú to najrozšírenejšie používané LoRa modemy.
+Výrobca Semtech \cite{semtech}, prináša LoRa chipy série SX127x a SX126x. V dnešnej dobe sú to najrozšírenejšie používané LoRa chipy.
 Ponukajú vysoký výkon za pomerne nízku cenu.
 
 \subsection{SX127x}
 
-SX127x LoRa moduly používajú frequency hopping spread-spectrum moduláciu. Čo znamená, že viaceré vysielané signály zaberajú rovnaký kanál, ktorý ma 
-vysokú ochranu proti rušeniu a zároveň majú nízku spotrebu energie.
+SX127x LoRa moduly používajú frequency hopping spread-spectrum moduláciu. Čo znamená, že viaceré vysielané signály zaberajú rovnaký kanál, ktorý ma vysokú ochranu proti rušeniu a zároveň majú nízku spotrebu energie.
 
 Moduly používajú LoRa modulačnú techniku, patentovanú firmou Semtech. Maximálny vysielací výkon modulov je 100mW.
 Vďaka tejto modulačnej technike je možné dosiahnúť vysokej citlivosti modulov.

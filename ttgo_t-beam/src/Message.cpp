@@ -1,5 +1,9 @@
 #include "message.h"
 
+Message::Message(){
+  this->valid = false;
+}
+
 Message::Message(uint16_t destinationAddress, uint16_t senderAddress, uint32_t messageID, uint8_t messageType, uint8_t priority, uint8_t maxHop, byte *payload, uint32_t payloadSize, float rssi, float snr){
   this->destinationAddress = destinationAddress;
   this->senderAddress = senderAddress;
@@ -12,6 +16,7 @@ Message::Message(uint16_t destinationAddress, uint16_t senderAddress, uint32_t m
   this->rssi = rssi;
   this->snr = snr;
   this->strMsg = this->getStringFromMessage(this->payload, this->payloadSize);
+  this->valid = true;
 }
 
 Message::~Message(){}
@@ -36,4 +41,7 @@ String Message::toString()
 
 uint16_t Message::getSenderAddress(){
   return this->senderAddress;
+}
+bool Message::isValid(){
+  return this->valid;
 }

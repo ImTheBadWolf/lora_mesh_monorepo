@@ -88,6 +88,10 @@ void loop()
         if (state == RADIOLIB_ERR_NONE)
         {
           Message* receivedMessage = messageHandler.processNewMessage(data, packetLength, radio.getRSSI(), radio.getSNR());
+          if (!receivedMessage->isValid()){
+            delete receivedMessage;
+            return;
+          }
           if (DEBUG){
             Serial.println("Received message:");
             Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");

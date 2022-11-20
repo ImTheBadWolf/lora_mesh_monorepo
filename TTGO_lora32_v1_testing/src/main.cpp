@@ -109,6 +109,7 @@ void checkForMessage(){
     Message *receivedMessage = messageHandler.processNewMessage(data, newPacketSize, rssi, snr);
     if (!receivedMessage->isValid()){
       delete receivedMessage;
+      newMessage = false;
       return;
     }
     if (DEBUG)

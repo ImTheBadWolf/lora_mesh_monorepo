@@ -48,9 +48,29 @@ byte* MessageHandler::createHeader(uint16_t destinationAddress, uint16_t senderA
   header[6] = fourByteVal.Bytes[1];
   header[7] = fourByteVal.Bytes[0];
 
-  header[8] = messageType;
-  header[9] = priority;
+  twoByte checksum;
+  checksum.value = this->calculateChecksum(header);
+  header[8] = checksum.Bytes[1];
+  header[9] = checksum.Bytes[0];
+
+  header[10] = messageType;
+  header[11] = priority;
   return header;
+}
+
+uint16_t MessageHandler::calculateChecksum(byte* data){
+  // Calculates CRC-CCITT checksum
+  uint8_t length = 8;
+  unsigned char x;
+  unsigned short crc = 0xFFFF;
+
+  while (length--)
+  {
+    x = crc >> 8 ^ *data++;
+    x ^= x >> 4;
+    crc = (crc << 8) ^ ((unsigned short)(x << 12)) ^ ((unsigned short)(x << 5)) ^ ((unsigned short)x);
+  }
+  return crc;
 }
 
 byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &byteArraySize, String message, bool receiveAck, uint8_t maxHop, uint8_t priority){
@@ -110,78 +130,91 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
       }
       Serial.println();
     }
-    //Check if destination address is my address or broadcast
-    twoByte destination;
-    destination.Bytes[1] = data[0];
-    destination.Bytes[0] = data[1];
 
-    if (destination.value == MY_ADDRESS || destination.value == BROADCAST_ADDRESS){
-      // TODO may break if random message with FF FF is received
+    uint16_t checksum = calculateChecksum(data);
+    twoByte receivedChecksum;
+    receivedChecksum.Bytes[1] = data[8];
+    receivedChecksum.Bytes[0] = data[9];
+    if (checksum == receivedChecksum.value){
+      //Check if destination address is my address or broadcast
+      twoByte destination;
+      destination.Bytes[1] = data[0];
+      destination.Bytes[0] = data[1];
 
-      uint8_t messagePrefixLength;
-      switch (data[8])
-      {
-      case 0:
-      case 1:
-        messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
-        break;
-      case 2:
-        messagePrefixLength = SENSORMESSAGE_PREFIX_LENGTH;
-        break;
-      default:
-        messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
-        break;
-      }
+      if (destination.value == MY_ADDRESS || destination.value == BROADCAST_ADDRESS){
+        // TODO may break if random message with FF FF is received
 
-      uint32_t messageLength = newPacketSize - HEADER_LENGTH - messagePrefixLength;
-      byte header[HEADER_LENGTH];
-      byte messagePrefix[messagePrefixLength];
-      byte message[messageLength];
-
-      memcpy(header, data, HEADER_LENGTH);
-      memcpy(messagePrefix, &data[HEADER_LENGTH], messagePrefixLength);
-      memcpy(message, &data[HEADER_LENGTH + messagePrefixLength], messageLength);
-
-      twoByte sender;
-      sender.Bytes[1] = header[2];
-      sender.Bytes[0] = header[3];
-
-      fourByte messageId;
-      messageId.Bytes[3] = header[4];
-      messageId.Bytes[2] = header[5];
-      messageId.Bytes[1] = header[6];
-      messageId.Bytes[0] = header[7];
-
-      byte messageDecrypted[messageLength];
-      this->ctraes128.setKey(this->key, 16);
-      this->ctraes128.setIV(this->key, 16);
-      this->ctraes128.decrypt(messageDecrypted, message, messageLength);
-
-      Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[8], header[9], messagePrefix[4], messageDecrypted, messageLength, rssi, snr);
-
-      if (DEBUG)
-      {
-        Serial.print("Decrypted: ");
-        for (int i = 0; i < messageLength; i++)
+        uint8_t messagePrefixLength;
+        switch (data[8])
         {
-          Serial.print(messageDecrypted[i], HEX);
-          Serial.print(" ");
+        case 0:
+        case 1:
+          messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
+          break;
+        case 2:
+          messagePrefixLength = SENSORMESSAGE_PREFIX_LENGTH;
+          break;
+        default:
+          messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
+          break;
         }
-        Serial.println();
-        /*
-        Serial.println("Received message:");
-        Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");
-        Serial.println("##########################################################################################################");
-        Serial.println(receivedMessage->toString()); */
-      }
-      /*TODO if msg type = 1, send ACK of received message
-      sendConfirmation(data[8], data[9], data[10], data[11]);*/
 
-      return receivedMessage;
+        uint32_t messageLength = newPacketSize - HEADER_LENGTH - messagePrefixLength;
+        byte header[HEADER_LENGTH];
+        byte messagePrefix[messagePrefixLength];
+        byte message[messageLength];
+
+        memcpy(header, data, HEADER_LENGTH);
+        memcpy(messagePrefix, &data[HEADER_LENGTH], messagePrefixLength);
+        memcpy(message, &data[HEADER_LENGTH + messagePrefixLength], messageLength);
+
+        twoByte sender;
+        sender.Bytes[1] = header[2];
+        sender.Bytes[0] = header[3];
+
+        fourByte messageId;
+        messageId.Bytes[3] = header[4];
+        messageId.Bytes[2] = header[5];
+        messageId.Bytes[1] = header[6];
+        messageId.Bytes[0] = header[7];
+
+        byte messageDecrypted[messageLength];
+        this->ctraes128.setKey(this->key, 16);
+        this->ctraes128.setIV(this->key, 16);
+        this->ctraes128.decrypt(messageDecrypted, message, messageLength);
+
+        Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[8], header[9], messagePrefix[4], messageDecrypted, messageLength, rssi, snr);
+
+        if (DEBUG)
+        {
+          Serial.print("Decrypted: ");
+          for (int i = 0; i < messageLength; i++)
+          {
+            Serial.print(messageDecrypted[i], HEX);
+            Serial.print(" ");
+          }
+          Serial.println();
+          /*
+          Serial.println("Received message:");
+          Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");
+          Serial.println("##########################################################################################################");
+          Serial.println(receivedMessage->toString()); */
+        }
+        /*TODO if msg type = 1, send ACK of received message
+        sendConfirmation(data[8], data[9], data[10], data[11]);*/
+
+        return receivedMessage;
+      }
+      else{
+        //TODO if message is not for me, add it to rebroadcast queue
+        //Validation is needed before, to not queue messages that are not part of this protocol
+      }
     }
-    else{
-      //TODO if message is not for me, add it to rebroadcast queue
-      //Validation is needed before, to not queue messages that are not part of this protocol
+    else
+    {
+      Serial.println("Checksum does not match");
+      Serial.println("Received checksum: " + String(receivedChecksum.value));
+      Serial.println("Calculated checksum: " + String(checksum));
     }
   }
   return new Message();

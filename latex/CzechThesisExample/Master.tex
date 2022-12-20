@@ -44,7 +44,7 @@
 \listoftables
 \clearpage
 
-\chapter{Úvod} %TODO skratit uvod
+\chapter{Úvod}
 V dnešnej dobe sa čoraz viac stretávame s pojmom IoT alebo internet vecí. Jedna sa o lokálne siete, zložené z fyzických zariadení, ktoré tvoria uzly siete.
 Zariadenia môžu byť jednoduché senzory na monitorovanie nejakej fyzikalnej veličiny, domáce spotrebiče, vozidla, prípadne 
 zariadenia, ktoré je možné ovládať na diaľku. Zariadenia tvoria sieť, v ktorej si môžu medzi sebou posielať 
@@ -52,7 +52,8 @@ dáta a informácie.
 
 K realizacií tejto siete je potrebné mať niečo, čo by zariadenia spájalo a umožňovalo im komunikáciu. Velmi používanou technológiou
 v tejto oblasti je práve technológia LoRa, ktorá umožnuje bezdrôtovú komunikáciu na veľmi veľké vzdialenosti. Spôsobov ako môžu zariadenia 
-v sieti tvorenej pomocou technológie LoRa komunikovať je viacero a je to populárna téma, kde neustálne vznikajú nové návrhy rôznych riešení[1][2 TODO]. %TODO sem pridat ref na zopar protokolov... meshtastic atd.
+v sieti tvorenej pomocou technológie LoRa komunikovať je viacero a je to populárna téma, kde neustálne vznikajú nové návrhy rôznych riešení[1][2 TODO].
+%TODO sem pridat ref na zopar protokolov... meshtastic atd.
 
 Často sa využíva riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov pripojených k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom. 
 Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svojé dáta. Centrálny uzol potom dáta posiela cez internet na nejakú službu kde 
@@ -71,8 +72,8 @@ pokiaľ sa nachádzajú v dosahu hocijakého iného uzla, majú prístup do siet
 \chapter{LoRa a spôsob prenosu dát}
 LoRa je proprietárna technológia na bezdrôtový prenos dát za pomoci rádiovych vĺn.
 Používa bezlicenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou a poskytuje rádiovy prenos na veľkú vzdialenosť s nízkou spotrebou energie.
-V otvorenom priestranstve môže mať rádiovy prenos dosah až 10-15 km. LoRa má však veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
-Rýchlosti prenosu sa pohybujú medzi 0.3 až 37.5 kbps.
+V otvorenom priestranstve môže mať rádiovy prenos dosah až 10--15 km. LoRa má však veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
+Rýchlosti prenosu sa pohybujú medzi 0,3 až 37,5 kbps.
 
 Vďaka týmto aspektom je vhodná pre použitie v IoT senzorových sieťach, kde sa často vyskytujú senzory poháňané batériami a je potrebné aby vydržali dlhú dobu 
 bez výmeny batérií. Okrem toho senzory väčšinou odosielajú veľmi malý obsah dát a dáta posielaju v určitých intervaloch (napr. raz za hodinu atď.), 
@@ -93,10 +94,10 @@ avšak zhoršuje sa citlivosť a s tým aj použitelný dosah.
 \end{figure}
 \newpage
 
-Existujú dva druhy chirp signálu, sú nimi up-chirp a down-chirp. Pri up-chirp signále sa prechádza z najnižšej frekvencie na najvyššiu a pri 
+Existujú dva druhy chirp signálov, sú nimi up-chirp a down-chirp. Pri up-chirp signále sa prechádza z najnižšej frekvencie na najvyššiu a pri 
 down-chirp naopak.
 
-Vysielaný chirp signal je ďalej rozdelený na X častí - tzv. chips. Koľko týchto chips jeden chirp obsahuje je závisle od vybraného spreading factoru. 
+Vysielaný chirp signal je ďalej rozdelený na X častí -- tzv. chips. Koľko týchto chips jeden chirp obsahuje je závisle od vybraného spreading factoru. 
 Jeden chirp ma v sebe $2^{SF}$ častí alebo chips. Vysielaný symbol sa potom skladá z cyklicky posunutého chirp signálu viď 
 Obr. \ref{fig:loraModulation}, kde posun definuje hodnotu daného symbolu.
 \begin{figure}
@@ -106,28 +107,44 @@ Obr. \ref{fig:loraModulation}, kde posun definuje hodnotu daného symbolu.
 	\label{fig:loraModulation}
 \end{figure}
 
-\subsection{Legislativa}
+\section{Legislativa}
 V Európe sa k frekvenčnému pásmu používaného pre LoRa viažu určité obmedzenia. 
 Obmedzenia sa týkaju používania fyzického média. Regulácia určuje maximálnu povolenú dobu, v ktorú môže vysielač na daných frekvenciach vysielať 
-v rámci jednej hodiny a maximálny vysielací výkon.
+v rámci jednej hodiny a maximálny vysielací výkon, akým môžme signal vysielať.
 Určuje sa klučovací pomer, ktorý hovorí koľko percent času z nejakého celkového času môže vysielač vysielať.
 
-Ak by zariadenie vysielalo signál po dobu jednej jednotky času z celkových 10 jednotiek času, tak kľučovací pomer by bol 10\%.
+Ak by zariadenie vysielalo signál po dobu jednej jednotky času z celkových 10 jednotiek času, tak kľučovací pomer by bol 10 \%.
 
-Český Telekomunikačný úrad \cite{ctu} stanovuje v \textit{všeobecné oprávnění č. VO-R/10/07.2021-8 \cite{vor}}, že 
-frekvenčné pásmo, do ktorého spadá LoRa, patrí do skupiny g. Pre túto skupinu je maximálny povolený kľučovací pomer 1\% a maximálny 
-vysielací výkon 25 mW. Znamená to teda, že zariadenia môžu každú hodinu vysielať maximálne po dobu 36 sekúnd.
+Český Telekomunikačný úrad \cite{ctu} stanovuje vo všeobecné oprávnění č. VO-R/10/07.2021-8 \cite{vor}, že 
+frekvenčné pásmo, do ktorého spadá LoRa, patrí do skupiny g. Pre túto skupinu je maximálny povolený kľučovací pomer 1 \% a maximálny 
+vysielací výkon 25 mW (14 dBm). Znamená to teda, že zariadenia môžu každú hodinu vysielať maximálne po dobu 36 sekúnd.
+Pre pásmo 869,40--869,65 MHz je ale udelená výnimka, ktorá umožňuje vysielať s kľučovacím pomerom 10 \% a maximálnym vysielacím výkonom 500 mW (27 dBm).
 
-\subsection{LoRa parametre}
+\section{LoRa parametre}
 Pri používaní LoRa je nutné správne zvoliť parametre prenosu. Sú nimi frekvencia, bandwidth, spreading factor a coding rate.
-Použitá frekvencia je závisla od regiónu, v ktorom sa používa, viď Obr. \ref{fig:ismBands}. 
-V Európe je možné mimo 866MHz pásma používať aj 433MHz pásmo. Okrem toho existuje ešte globálne používaná frekvencia 2.4 GHz.
-\begin{figure}[h!]
+Použitá frekvencia je závisla od regiónu, v ktorom sa používa, viď Tabuľka \ref{tab:ismBands}. 
+V Európe je možné mimo 866 MHz pásma používať aj 433 MHz pásmo. Okrem toho existuje ešte globálne používaná frekvencia 2,4 GHz.
+
+\begin{table}[h!]
 	\centering
-	\includegraphics[width=0.9\textwidth]{Figures/ism_bands.png}
-	\caption{Frekvenčne pásma používane pre LoRa. Prevzaté z \cite{loraMod}}
-	\label{fig:ismBands}
-\end{figure}
+  \small
+  \setlength\tabcolsep{6pt}
+	\caption[Frekvenčne pásma používane pre LoRa]{Frekvenčne pásma používane pre LoRa}
+  \begin{tabular}{c|c}
+    \toprule
+    Region & Frekvencia (MHz)\\
+    \midrule
+    Ázia & 433 \\
+    Európa, Rusko, India, Afrika & 863--870 \\
+    Severná Amerika & 902--928 \\
+    Austrália & 915--928 \\
+    Kanada & 779--787 \\
+    Čína & 779--787, 470--510 \\
+    \midrule
+  \end{tabular}
+  \label{tab:ismBands}
+\end{table}
+
 
 Ostatné parametre sú vyberané na základe toho ako ďaleko a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu 
 a dosahom prenosu.
@@ -137,62 +154,100 @@ Parameter bandwidth určuje šírku pásma, v ktorom sa bude chirp posúvať. Pr
 Spreading factor určuje koľko bitov dát môže byť prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom 
 zvyšuje alebo znižuje rýchlosť prenosu na úkor zniženia alebo zvýšenia dosahu prenosu.
 
-LoRa obsahuje korekciu chýb spôsobených rušením. Využíva k tomu samoopravný kód - forward error correction, pri ktorom 
+LoRa obsahuje korekciu chýb spôsobených rušením. Využíva k tomu samoopravný kód -- forward error correction, pri ktorom 
 sa ku dátam pridavajú korekčné bity. Tieto bity môžu byť použité na opravu chyby ak k nejakej došlo.
 
 Parameter coding rate vyjadruje aky pomer dát, ku error korekčným dátam sa má použiť. Vyšší coding rate zabezpečí spolahlivejší prenos ak 
 sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát, pretože ku prenášaným dátam pridáva navyše dáta potrebné na korekciu chýb.
 
-Rýchlosť prenosu dát (Data rate - DR) v kbps môžme vyjadriť vzťahom:
+Rýchlosť prenosu dát (Data rate -- DR) v kbps môžme vyjadriť vzťahom:
 \begin{equation}
   DR = SF * \frac{BW}{2^{SF}} * \frac{4}{4+CR}
 \end{equation}
 
-\subsection{LoRaWAN}
+\section{LoRaWAN}
 LoRa je definovaná len na fyzickej vrstve. Na používanie LoRa v IoT sieťach sú však potrebné aj vyššie vrstvy sieťového modelu.
 K tomu vznikol protokol LoRaWAN, ktorý je spravovaný organizáciou LoRa Alliance \cite{lora}.
 
-LoRaWAN definuje komunikačný protokol a architektúru sieti. Siete používaju hviezdicovu alebo hviezda hviezd topológiu, kde 
-centrálnym uzlom je LoRaWAN gateway, ktorá je pripojená k internetu. Ostatne uzly siete posielajú dáta na gateway, ktorá ich preposiela na internet.
-%TODO viacej textu sem. Napr ze su tam dake skupiny zariadeni, su tam dake stanovene limity atd
+LoRaWAN definuje komunikačný protokol a architektúru sieti. Siete používaju hviezdicovú alebo hviezdu hviezd topológiu, kde 
+centrálnym uzlom je LoRaWAN gateway, ktorý je pripojený k internetu. Ostatne uzly siete posielajú dáta na gateway, ktorá ich preposiela na internet.
+
+LoRaWAN definuje tri triedy zariadení, ktoré sa v sieti vyskytujú. Sú nimi triedy A, B a C, kde do triedy A spadajú zariadenia 
+väčšinou poháňané batériami, ktoré po odvysielaní svojích dát otvarajú dve prijímacie okna, v ktorých čakajú na príjem dát z gateway.
+Trieda B je rozšírením triedy A. Zariadenia v tejto triede môžu otvárať dodatočné prijímacie okna v naplánovaných časových intervaloch.
+Zariadenia z triedy C môžu prijímať neustále. Z tohto dôvodu majú vyššiu spotrebu energie a zvyčajne su pripojené k stálemu napájaniu.
+%TODO trosku viacej nech nieje prazdna skoro cela strana pred dalsiou kapitolou
 
 \chapter{Dostupné LoRa moduly }
-TODO pridat sem text ze moduly sa rozdeluju na end device moduly a gateway moduly. Ja popisujem iba end device moduly
+Pri práci s LoRa technológiou máme na výber z rôznych modulov od rôznych výrobcov.
+Moduly môžme rozdeliť podla použitia na moduly pre koncové zariadenia a moduly pre gateway.
+Moduly pre koncové zariadenia obvykle dokážu prijímať a odosielať iba na jednom kanále ( kombinácia LoRa parametrov --  BW, SF a frekvencia ) súčasne a majú 
+nízku spotrebu energie. Moduly pre gateway dokážu prijímať a odosielať na viacerých kanáloch súčasne a majú vyššiu spotrebu energie.
+
+V tejto časti sa budeme zaoberať dostupnými modulmi pre koncové zariadenia.
+Kedže je technológia LoRa patentovaná výrobcom Semtech \cite{semtech}, tak všetky dostupné LoRa chipy su od tohto výrobcu a moduly od iných výrobcov 
+sú založené na používani týchto chipov.
 
 \section{SX127x/SX126x}
-Výrobca Semtech \cite{semtech}, prináša LoRa chipy série SX127x a SX126x. V dnešnej dobe sú to najrozšírenejšie používané LoRa chipy.
-Ponukajú vysoký výkon za pomerne nízku cenu.
+Výrobca Semtech \cite{semtech}, prináša LoRa chipy série SX127x a SX126x. Ponukajú vysoký výkon za pomerne nízku cenu a ako sme už spomínali, ostatné LoRa moduly 
+implementuju tieto chipy -- modemy a rozširujú ich o ďalšiu funkcionalitu.
 
 \subsection{SX127x}
 
-SX127x LoRa moduly používajú frequency hopping spread-spectrum moduláciu. Čo znamená, že viaceré vysielané signály zaberajú rovnaký kanál, ktorý ma vysokú ochranu proti rušeniu a zároveň majú nízku spotrebu energie.
+SX127x LoRa modemy používajú frequency hopping spread-spectrum moduláciu. Čo znamená, že viaceré vysielané signály môžu zaberať rovnaký kanál, ktorý ma vysokú ochranu proti rušeniu a zároveň majú nízku spotrebu energie. %TODO divna veta ??
 
-Moduly používajú LoRa modulačnú techniku, patentovanú firmou Semtech. Maximálny vysielací výkon modulov je 100mW.
-Vďaka tejto modulačnej technike je možné dosiahnúť vysokej citlivosti modulov.
-Výrobca uvádza citlivosť cez -137 dBm pri moduloch SX1272/73 a -148 dBm pri moduloch SX1276/78/79.
+Modemy používajú LoRa modulačnú techniku, patentovanú firmou Semtech. Maximálny vysielací výkon modemov je 100 mW.
+Vďaka tejto modulačnej technike je možné dosiahnúť vysokej citlivosti modemov.
+Výrobca uvádza citlivosť cez -137 dBm pri modemoch SX1272/73 a -148 dBm pri modemoch SX1276/78/79.
 
-Moduly SX1272 a SX1273 ponukajú menší link budget 157 dB oproti 168 dB pri moduloch SX1276/77/78/79 a majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz.
+Modemy SX1272 a SX1273 ponukajú menší link budget 157 dB oproti 168 dB pri modemoch SX1276/77/78/79 a majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz.
 Okrem toho majú aj vyššiu spotrebu energie.
 
-Pri moduloch SX1276/77/78/79 je možné vybrať frekvenčné pásma z rozsahu 137 až 1020 MHz.
+Pri modemoch SX1276/77/78/79 je možné vybrať frekvenčné pásma z rozsahu 137 až 1020 MHz.
 
 \subsection{SX126x}
-TODO tabulka preteka
 
-Moduly zo série SX126x - SX1261/62/68 sú následovníkmi modulov SX127x. Majú väčší vysielací výkon vďaka integrovanému zosilovaču a menšiu spotrebu energie. Obsahujú precízny TCXO oscilátor, 
-ktorý zabezpečuje presnejšie a stabilnejšie riadenie počas prevádzky modulu. Okrem LoRa modulácie obsahujú aj G(FSK) moduláciu, ktorá je vhodná pre staršie 
+Modemy zo série SX126x - SX1261/62/68 sú následovníkmi modemov SX127x. Majú väčší vysielací výkon vďaka integrovanému zosilovaču a menšiu spotrebu energie. Obsahujú precízny TCXO oscilátor, 
+ktorý zabezpečuje presnejšie a stabilnejšie riadenie počas prevádzky modemu. Okrem LoRa modulácie obsahujú aj G(FSK) moduláciu, ktorá je vhodná pre staršie 
 prípady užitia.
 
-Moduly taktiež obsahujú +22/+15 dBm zosilovač, vďaka ktorému majú vyšší link budget oproti modulom zo série SX127x - 170 dBm,
+Modemy taktiež obsahujú +22/+15 dBm zosilovač, vďaka ktorému majú vyšší link budget oproti modemom zo série SX127x -- 170 dBm,
 takže sú optimálne pre aplikácie vyžadujúce väčší dosah alebo robustnosť.
+%TODO tu sa trochu este rozpisat viac... co je link budget napr atd. este modem 1280/1281 - 2.4ghz
+
+\begin{table}[!h]
+	\centering
+  \small
+  \setlength\tabcolsep{6pt}
+	\caption[Parametre Semtech modemov]{Parametre Semtech modemov}
+  \begin{tabular}{c|c|c|c|c|c|c|c|c}
+    \toprule
+    Modem & Frekvencia & SF & BW (kHz) & Citlivosť & Spotreba \footnotemark[0] & Rozhranie & Výkon\footnotemark[1] & Cena\footnotemark[2]\\
+    \midrule
+    SX1272 & 860--1020 MHz & 6--12 & 125--500 & -137 dBm & 11,2 mA & SPI & 20 dbm & 9€ \\
+    SX1273 & 860--1020 MHz & 6--9 & 125--500 & -130 dBm & 11,2 mA & SPI & 20 dbm & 7€ \\
+    SX1276 & 137--1020 MHz & 6--12 & 7,8--500 & -148 dBm & 12 mA & SPI & 20 dbm & 10€ \\
+    SX1277 & 137--1020 MHz & 6--9 & 7,8--500 & -139 dBm & 12 mA & SPI & 20 dbm & 7€ \\
+    SX1278 & 137--525 MHz & 6--12 & 7,8--500 & -148 dBm & 12 mA & SPI & 20 dbm & 8€ \\
+    SX1279 & 137--960 MHz & 6--12 & 7,8--500 & -148 dBm & 12 mA & SPI, UART & 20 dbm & 11€ \\
+    \hline
+    SX1261 & 150--690 MHz & 5--12 & 7,80--500 & -125 dBm & 8 mA & SPI & 15 dbm & 7€ \\
+    SX1262 & 150--690 MHz & 5--12 & 7,80--500 & -125 dBm & 8 mA & SPI & 22 dbm & 8€ \\
+    SX1268 & 410--810 MHz & 5--12 & 7,80--500 & -148 dBm & 4.6 mA & SPI & 22 dbm & 7€ \\
+    \midrule
+  \end{tabular}
+\end{table}
+\footnotetext[0]{Spotreba počas prijímania (mA)}
+\footnotetext[1]{Maximálny vysielací výkon}
+\footnotetext[2]{Cena platná ku Q4 2022}
 
 \section{RFM9xW}
-Moduly RFM95W/96W/97W/98W od výrobcu HopeRF \cite{hoperf}, používajúce SX LoRa modemy od výrobcu Semtech, %TOTO asi nieje pravda idk
+Moduly RFM95W/96W/97W/98W od výrobcu HopeRF \cite{hoperf}, používajúce SX LoRa modemy od výrobcu Semtech,
  poskytujú bezdrôtový prenos na vysokú vzdialenosť s veľkou odolnosťou voči rušeniu. 
- Jedná sa vlastne len o rozšírujucí modul, ktorý obsahuje LoRa modem a elektroniku potrebnú na riadenie modemu.
+ Jedná sa vlastne len o rozšírujucí modul, ktorý obsahuje LoRa modem a elektroniku potrebnú na riadenie Semtech modemu.
  %toto pozret https://www.disk91.com/2019/technology/lora/hoperf-rfm95-and-arduino-a-low-cost-lorawan-solution/
 
-Existuje niekoľko verzií modulov RFM9xW, kde každá verzia používa iný semtech LoRa modem.
+Existuje niekoľko verzií modulov RFM9xW, kde každá verzia používa iný semtech LoRa modem a ponúka iné parametre.
 
 \section{STM32WL}
 Mikrokontroller s loramodemom
@@ -220,7 +275,7 @@ Modem
   \setlength\tabcolsep{2pt}
 	\caption[Parametre LoRa modulov]{LoRa moduly a ich parametre}
   \begin{tabular}{c|c|c|c|c|c|c|c}
-    \toprule %TODO pridat air data rate
+    \toprule %TODO pridat air data rate, pridat ktory SX modem pouziva
     Modul & Frekvencia & Spreading factor & Bandwidth & Citlivosť & Spotreba počas vysielania & Zbernica & Cena(TODO do footeru *k tomuto kvartalu)\\
     \midrule
     SX1272 & 860-1020 MHz & 6-12 & 125-500 kHz & -137 dBm & 10mA & SPI & X€ \\ 

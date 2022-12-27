@@ -51,17 +51,15 @@ zariadenia, ktoré je možné ovládať na diaľku. Zariadenia tvoria sieť, v k
 dáta a informácie.
 
 K realizacií tejto siete je potrebné mať niečo, čo by zariadenia spájalo a umožňovalo im komunikáciu. Velmi používanou technológiou
-v tejto oblasti je práve technológia LoRa, ktorá umožnuje bezdrôtovú komunikáciu na veľmi veľké vzdialenosti. Spôsobov ako môžu zariadenia 
-v sieti tvorenej pomocou technológie LoRa komunikovať je viacero a je to populárna téma, kde neustálne vznikajú nové návrhy rôznych riešení[1][2 TODO].
-%TODO sem pridat ref na zopar protokolov... meshtastic atd.
+v tejto oblasti je práve technológia LoRa, ktorá umožnuje bezdrôtovú komunikáciu na veľmi veľké vzdialenosti.
 
 Často sa využíva riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov pripojených k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom. 
 Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svojé dáta. Centrálny uzol potom dáta posiela cez internet na nejakú službu kde 
 k ním môžu uživatelia pristupovať z internetu.
 
 Pri LoRaWAN je potrebné mať nejaký centrálny uzol a ak chceme nejaké zariadenie pripojiť do siete, musí mať dosah na daný centrálny uzol. 
-Takto sme limitovaní existenciou a dosahom centrálnych uzlov, čož nieje v niektorých prípadoch užitia vhodné. Neustále vznikajú nové 
-protokoly, ktoré by tieto problémy riešili [1][2][3 TODO]. %TODO ref na lorawan multihop daky.
+Takto sme limitovaní existenciou a dosahom centrálnych uzlov, a hviedzicovou topológiou, čož nieje v niektorých prípadoch užitia vhodné. Neustále vznikajú nové 
+protokoly, ktoré by tieto problémy riešili, napríklad za použitia mesh topológií (napr. Meshtastic \cite{meshtastic}, LoRaMesher \cite{loramesher}).
 
 V tejto práci sa budeme venovať návrhu a vytvoreniu protokolu, ktorý by umožnil komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
 bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol bude tvoriť sieťovú topológiu typu mesh, ktorá ma oproti hviezdicovej topológií, 
@@ -178,6 +176,8 @@ Trieda B je rozšírením triedy A. Zariadenia v tejto triede môžu otvárať d
 Zariadenia z triedy C môžu prijímať neustále. Z tohto dôvodu majú vyššiu spotrebu energie a zvyčajne su pripojené k stálemu napájaniu.
 %TODO trosku viacej nech nieje prazdna skoro cela strana pred dalsiou kapitolou
 
+TODO tu este daky text na vyplnenie strany
+
 \chapter{Dostupné LoRa moduly }
 Pri práci s LoRa technológiou máme na výber z rôznych modulov od rôznych výrobcov.
 Moduly môžme rozdeliť podla použitia na moduly pre koncové zariadenia a moduly pre gateway.
@@ -271,50 +271,86 @@ V tejto práci boli mikrokontroléry použité spolu s RFM96W modulmi pre prácu
 
 \subsection{Raspberry Pi 3?4? TODO}
 Na rozdiel od predchádzajúcich mikrokontrolérov má tento mikropočítáč ovela väčši výkon a pamäť. Z toho dôvodu bude na tomto zariadeni pridaná 
-možnosť monitorovania a zachytavania správ v LoRa sieti. Zariadenie obsahuje ethernetový port, ktorý bude slúžiť na pevné pripojenie do internetovej siete.
+možnosť monitorovania a zachytavania správ v LoRa sieti. Zariadenie obsahuje ethernetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
 Pre prácu s LoRa bude použitý RFM96W modul.
 
 
-\chapter{TODO Porovnanie existujucich rieseni}
-TODO tu daky text
+\chapter{Existujúce riešenia}
+Téma mesh sietí je v tejto dobe velmi aktuálna a vývojári sa snažia vytvoriť rôzne riešenia, ktoré by boli vhodné pre rôzne účely.
+Existujú rozvinuté projekty ako napríklad Meshtastic, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť za použitia lacných zariadení.
 
-TODO porovnat ich voci sebe
+Ďalším zaujímavým projektom je Armachat \cite{armachat}, ktorý ponúka možnosť komunikácie v prípade nedostupnosti ostatných sieti, napríklad po nejakej prírodnej alebo inej katastrofe.
+Súčastou projektu Armachat sú dostupné návhry plošných spojov, ktoré implementujú Raspbery Pi Pico mikrokontroléry, RFMx LoRa moduly, display a ďalšie vymoženosti.
+Výsledkom poskladania týchto plošných spojov je malé mobilné zariadenie s klávesnicou a displejom, ktoré sa dá použiť na komunikáciu prostredníctvom LoRa siete.
+Originálny projekt avšak zatial nepodporuje využívane mesh topológie ( rozpracovaná verzia, ktora využíva protocol Meshtastic ), existujú však forky projektu, ktoré su o meshe rozšírene.
+%TODO toto su len informacie z komentov na fb a v github issues...
+
+TODO porovnat ich voci sebe, az na konci
 
 \section{Lora mesher}
-Pouziva distance vector routing protocol.
-Vytvara si routovaciu tabulku, kde zaznamenava IDcka nodov, cez ktore susedne nody sa knim dostane a kolko hopov ho to bude stat.
+LoRaMesher \cite{loramesher} je knižnica, ktorú je možné použiť na komunikáciu cez LoRa mesh sieť.
 
-Kazda noda drzi routing table, periodicky je updatovana cez specialny typ packetu, ktory sa posiela vsetkymi nodami v sieti. (routing packet)
+Na smerovanie v sieti sa používa distance vector routing protocol. Tento protokol vyberá cestu, kadiaľ pôjde správa od odosielateľa k príjemcovi, na základe 
+najlepšej cesty. Najlepšiu cestu definuje ako cestu s najmenším počtom hopov -- preskokov medzi uzlami v mesh sieti.
 
-Pouziva freeRtos na zabezpecenie schedulingu taskov. Rozlicne tasky sa staraju o prijatie a odoslanie packetov, iny task sa stara o samotne spracovanie packetov.
+K realizacií distance vector smerovania je potrebné mať smerovaciu tabuľku, ktorá obsahuje informácie o ID uzlov, cez ktoré susedné uzly sa dajú dosiahnuť a 
+koľko preskokov bude potrebných na dosiahnutie týchto uzlov. Smerovacia tabuľka je periodicky aktualizovaná cez špeciálny typ správ, ktoré sú odosielané 
+všetkými uzlami v sieti. Túto smerovaciu tabuľku si drží každý uzol v sieti.
+
+LoRaMesher používa FreeRTOS, čož je operačný systém reálneho času. Takéto operačné systémy garantujú dokončenie úloh v určitom čase.
+FreeRTOS je použitý na zabezpečenie plánovania úloh. Rozličné úlohy sa starajú o prijatie a odoslanie packetov, iné úlohy sa starajú o samotne 
+spracovanie prijatých packetov.
+
+LoRaMesher dokáže nájsť novo vytvorené uzly v sieti vďaka smerovaciemu protokolu. Pri odoslaní správ čaká na prijatie ACK správy, ktorá potvrdzuje, 
+že správa bola prijatá a tým zaistuje spoľahlivosť. Správy väčšie ako 222 bajtov rozdeluje na viacero správ, ktore pošle postupne.
 
 \section{Meshtastic}
-Mesh siet tvorena lora modulmi. Princip fungovania je zalozeny na jednoduchom multi-hop floodingu.
-Kazda node znovu odvysiela prijaty packet (pokial nedosiel maxhop na 0) az kym sa packet nedostane do destinacie napriec mesh sietou.
+Meshtastic \cite{meshtastic} vytvára mesh sieť za použitia lacných mikrokontrolérov s LoRa modulmi.
+Myšlienka tohto projektu spočíva v tom, že vytvára komunikačnú sieť na miestach kde neexistuje spoľahlivá infraštruktúra na bezdrôtovú komunikáciu (napr. v horách).
 
-Pouzivane Lora moduly maju zabudovany bluetooth chip, vdaka ktoremu je mozne k modulu pripojit smarthphone, ktory sluzi ako rozhranie pre
- uzivatela. Cez aplikaciu v mobile potom vytvara a prijma spravy, ktore su cez bluetooth posielane do modulu a cez lora sa posielaju do siete.
+Posielanie správ v sieti je založené na jednoduchom multi-hop floodingu.
+Každý uzol znovu odvysiela packet, ktorý prijal ( pokial nedošiel počet preskokov na 0 ), až kým sa packet nedostane do určenej destinácie naprieč mesh sietou.
+Prenášane správy su šifrované.
 
-Dosah siete sa da rozsirit cez pripojenie k oficialnemu meshtastic mqtt brokerovi. Umoznuje to tak prepojit mensie lokalne mesh siete do globalnej siete. TODO pozriet viac k tomuto
+Používane zariadenia s LoRa modulmi majú zabudovaný bluetooth chip, vďaka ktorému je možne sa k zariadeniu pripojit cez smartphone, ktorý slúži ako rozhranie pre 
+užívateľa. Cez aplikáciu v smartphone môže používateľ vytvárať a prijímať správy. Správy sa cez bluetooth prenášaju zo smartphone do zariadenia a odošlu sa cez 
+LoRa do siete. %TODO trosku preformulovat
 
-Myslienka meshtasticu spociva v tom, ze vytvara komunikacnu siet na miestach kde bezne nieje napr. mobilny signal.(V horach)
-
-timestamp sa posiela iba v GPS datach. TODO pridat text ktomu ze sa posiela pozicia z gpsky.
+Meshtastic poskytuje možnosť pripojenia sa k oficiálnemu meshtastic mqtt brokerovi. Toto umožňuje prepojiť malé lokálne mesh siete do väčšej globálnej siete a 
+tak rozšíriť dosah siete.
 
 \section{LoRaBlink}
-Multi-hop protokol, ktory pouziva casovu synchronizaciu medzi nodami. Casova synchronizacia definuje sloty na pristup ku prenosovemnu kanalu.
-Spravy sa sietou siria pomocou floodingu.
+Multi-hop protokol, ktorý požíva časovú synchronizáciu medzi uzlami. Časová synchronizácia definuje sloty, v ktorých môže uzol pristupovať ku prenosovému médiu a 
+vysielať svojé dáta. Správy sa sieťou šíria pomocou multi-hop floodingu.
 
-Siet sa sklada z jedneho datasinku (gateway) a viacerych nodov, ktore posielaju data do datasinku alebo data zneho prijmaju.
-V urcitych intervaloch datasink vysle tzv. beacon. Tento sluzi na casovu synchronizaciu a znaci novu epochu. Kazda epocha obsahuje N 
-slotov, v ktorych mozu nody vysielat data. Beacon sprava obsahuje hop count, ktora udava vzdialenost ku data-sinku.
+Sieť sa skladá z jedneho datasinku (gateway) a viacerých uzlov. Uzly sieťe posielajú data do datasinku alebo data z neho prijímaju.
+V určitých intervaloch datasink vyšle tzv. beacon signál. Tento signál slúži na časovú synchronizáciu medzi uzlami a znači začiatok novej epochy. 
+Každá epocha obsahuje N slotov, v ktorých môžu uzly vysielať data. Beacon správa obsahuje hop count, ktorá udáva vzdialenosť ku datasinku.
+Ked nejaký uzol príjme beacon signál, vyšle svoj vlastný beacon signál v dalšiom volnom slote, ktorý vyberá na základe vzdialenosti od datasinku (hop count).
 
-Ked node prijme beacon signal, vysle svoj vlastny beacon signal v dalsom volnom slote, ktory vybera na zaklade vzdialenosti od data-sinku.
+Ked uzol potrebuje poslať nejaké data, tak vyberie najskorší volný slot a v nom vysiela data. Ak tieto data príjme uzol, ktorý nieje datasink a 
+hop count daného uzlu ku sinku je menší ako hop count vysielajucého uzlu, tak data v dalšiom slote znovu prepošle. Toto sa opakuje, až 
+kým data nedosiahnu datasink.
+%TODO dostudovat, rozsirit popis
 
-Ked node potrebuje poslat data, tak vybere dalsi volny slot a v nom vysiela data. Ak tieto data prijme node, ktora nieje sink a jej hop count ku sinku je mensi ako hop count
-vysielajucej nody tak data v dalsom slote retransmitne. Toto sa opakuje az kym data nedosiahnu datasink. TODO dostudovat, spravit lepsi popis
+Takto tvorená sieť avšak vyžaduje existenciu nejakého hlavného uzlu (datasinku), ktorý je potrebný na riadenie siete prostredníctvom časovej synchronizácie.
 
-- je to siet vyzadujuca jeden hlavny node (data-sink/gateway), tento node je potrebny na riadenie siete, pretoze vsetky ostatne nody sa synchronizuju na neho
+\section{Ešte dake dalšie 2 protkoly Pymesh?}
+Tempor tempor eiusmod exercitation eiusmod deserunt laborum et. Ipsum ea fugiat ullamco laboris incididunt qui ad anim ad esse elit sint anim. Excepteur dolore commodo pariatur adipisicing incididunt duis esse labore ut Lorem esse officia exercitation. Aute dolor irure minim est elit culpa officia sit ad officia mollit mollit.
+
+Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+
+Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+
+Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+\section{Ešte dake dalšie 2 protkoly}
+Tempor tempor eiusmod exercitation eiusmod deserunt laborum et. Ipsum ea fugiat ullamco laboris incididunt qui ad anim ad esse elit sint anim. Excepteur dolore commodo pariatur adipisicing incididunt duis esse labore ut Lorem esse officia exercitation. Aute dolor irure minim est elit culpa officia sit ad officia mollit mollit.
+
+Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+
+Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+
+Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
 
 
 

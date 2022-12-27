@@ -242,55 +242,37 @@ takže sú optimálne pre aplikácie vyžadujúce väčší dosah alebo robustno
 \footnotetext[2]{Cena platná ku Q4 2022}
 
 \section{RFM9xW}
-Moduly RFM95W/96W/97W/98W od výrobcu HopeRF \cite{hoperf}, používajúce SX LoRa modemy od výrobcu Semtech,
- poskytujú bezdrôtový prenos na vysokú vzdialenosť s veľkou odolnosťou voči rušeniu. 
- Jedná sa vlastne len o rozšírujucí modul, ktorý obsahuje LoRa modem a elektroniku potrebnú na riadenie Semtech modemu.
- %toto pozret https://www.disk91.com/2019/technology/lora/hoperf-rfm95-and-arduino-a-low-cost-lorawan-solution/
+Moduly RFM95W/96W/98W od výrobcu HopeRF \cite{hoperf} implementujú SX LoRa modemy od výrobcu Semtech.
+Jedná sa o jednoduchý modul, ktorý obsahuje všetku riadiaciu elektroniku potrebnú na riadenie Semtech LoRa modemu.
+Okrem riadiacej elektroniky obsahuje modul aj zosilovač signálu (+14 dBm), ktorý zvyšuje dosah bezdrôtového prenosu.
 
-Existuje niekoľko verzií modulov RFM9xW, kde každá verzia používa iný semtech LoRa modem a ponúka iné parametre.
+Existuje niekoľko verzií modulov RFM9xW, kde každá verzia používa iný semtech LoRa modem a zdiela parametre daného modemu.
 
-\section{STM32WL}
-Mikrokontroller s loramodemom
-%https://www.st.com/en/microcontrollers-microprocessors/stm32wl-series.html
+\section{Moduly a zariadenia použité v tejto práci}
+Na vývoj a testovanie tejto práce boli použité rôzne zariadenia s rôznymi platformami. Na simulovanie jednoduchých koncových zariadení, 
+ktoré môžu predstavovať napríklad nejaký senzor, boli použité mikrokontroléry TTGO od výrobcu LILYGO \cite{lilygo}.
 
-\section{SAM R34/R35}
-Mikrokontroller s loramodemom
-%https://www.microchip.com/en-us/products/wireless-connectivity/lora-technology/sam-r34-r35
+Okrem mikrokontrolérov TTGO boli použité aj mikrokontroléry Raspberry Pi Pico a mikropočítáč Raspberry Pi.
+Všetky mikrokontroléry môžu byť rozšírene o batériu a byť mobilné.
+%TODO obrazky ttgo modulov?
 
-\section{HPD13A}
-Modem
-%Tento je v T-beame tak ho spomenut + zistit co je v tom druhom ttgo...
-%Je shielded
+\subsection{TTGO LoRa32}
+Mikrokontrolér založený na module ESP32. Obsahuje Wi-Fi a bluetooth. Používa SX1276 LoRa modem.
+Dá sa prepnúť do úsporného režimu, ktorý znižuje spotrebu mikrokontroléru na 0,6 mA.
+Mikrokontrolér obsahuje aj display, ktorý je pripojený cez I2C rozhranie.
 
-\section {EBYTE E32}
-%https://www.ebyte.com/en/product-view-news.html?id=108
+\subsection{TTGO T-Beam}
+Tento mikrokontrolér je taktiež založený na module ESP32 a používa SX1276 LoRa modem. Okrem Wi-Fi a bluetooth obsahuje aj GPS modul.
+V režime spánku ma spotrebu 0,2 mA.
 
-% + Popisat aj zariadenia ktore pouzijem - TTGO obe, RPI, armachat....
+\subsection{Raspberry Pi Pico}
+Mikrokontrolér založený na dvoj-jadrovom Arm procesore. Existuje verzia s Wi-Fi modulom. Na programovanie sa využíva microPython. %TODO ref na microputhon?
+V tejto práci boli mikrokontroléry použité spolu s RFM96W modulmi pre prácu s LoRa.
 
-
-%TODO tabulka vyteka von
-\begin{table}
-	\centering
-  \small
-  \setlength\tabcolsep{2pt}
-	\caption[Parametre LoRa modulov]{LoRa moduly a ich parametre}
-  \begin{tabular}{c|c|c|c|c|c|c|c}
-    \toprule %TODO pridat air data rate, pridat ktory SX modem pouziva
-    Modul & Frekvencia & Spreading factor & Bandwidth & Citlivosť & Spotreba počas vysielania & Zbernica & Cena(TODO do footeru *k tomuto kvartalu)\\
-    \midrule
-    SX1272 & 860-1020 MHz & 6-12 & 125-500 kHz & -137 dBm & 10mA & SPI & X€ \\ 
-    SX1273 & 860-1020 MHz & 6-9 & 125-500 kHz & -130 dBm & 10mA & SPI & X€ \\
-    SX1276 & 137-1020 MHz & 6-12 & 7.8-500 kHz & -148 dBm & 9.9mA & SPI & X€ \\
-    SX1277 & 137-1020 MHz & 6-9 & 7.8-500 kHz & -139 dBm & 9.9mA & SPI & X€ \\
-    SX1278 & 137-525 MHz & 6-12 & 7.8-500 kHz & -148 dBm & 9.9mA & SPI & X€ \\
-    SX1279 & 137-960 MHz & 6-12 & 7.8-500 kHz & -148 dBm & 9.9mA & SPI & X€ \\
-    SX1261 & TODO & TODO & TODO & TODO & 4.6mA & TODO & X€ \\
-    RFM95W & 868/915 MHz & 6-12 & 7.8-500 kHz & -148 dBm & 10.3 mA & SPI & ~8€ \\
-    RFM97W & 868/915 MHz & 6-9 & 7.8-500 kHz & -139 dBm & 10.3 mA & SPI & ~8€ \\
-    RFM96W/RFM98W & 433/470 MHz & 6-12 & 7.8 - 500 kHz & -148 dBm & 10.3 mA & SPI & ~8€ \\
-    \midrule
-  \end{tabular}
-\end{table}
+\subsection{Raspberry Pi 3?4? TODO}
+Na rozdiel od predchádzajúcich mikrokontrolérov má tento mikropočítáč ovela väčši výkon a pamäť. Z toho dôvodu bude na tomto zariadeni pridaná 
+možnosť monitorovania a zachytavania správ v LoRa sieti. Zariadenie obsahuje ethernetový port, ktorý bude slúžiť na pevné pripojenie do internetovej siete.
+Pre prácu s LoRa bude použitý RFM96W modul.
 
 
 \chapter{TODO Porovnanie existujucich rieseni}

@@ -335,24 +335,65 @@ kým data nedosiahnu datasink.
 
 Takto tvorená sieť avšak vyžaduje existenciu nejakého hlavného uzlu (datasinku), ktorý je potrebný na riadenie siete prostredníctvom časovej synchronizácie.
 
-\section{Ešte dake dalšie 2 protkoly Pymesh?}
-Tempor tempor eiusmod exercitation eiusmod deserunt laborum et. Ipsum ea fugiat ullamco laboris incididunt qui ad anim ad esse elit sint anim. Excepteur dolore commodo pariatur adipisicing incididunt duis esse labore ut Lorem esse officia exercitation. Aute dolor irure minim est elit culpa officia sit ad officia mollit mollit.
+\section{Pymesh}
+Pymesh je súčasťou Pycom \cite{pycom} ekosystému. Tento ekosystém je určený na vývoj IoT systémov. Ponúka rôzne zariadenia, ktoré su určené na použitie s týmto 
+ekosystémom. Zariadenia WiFi, bluetooth a LoRa. Zariadenia je možné rozšíriť o rôzne moduly so senzormi, ktoré rozšírujú ich schopnosti. %TODO preformulovat
 
-Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v roli gateway alebo bežného uzla. Uzly typu gateway su označované ako Border Routers a prepájajú LoRa sieť s 
+internetom. Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situacií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolizií.
+Aby sa zabránilo takýmto situáciam, je použitá metóda Listen Before Talk, pri ktorej sa pred vysielaním signálu overí, či nie je v sieti už niekto iný, kto by 
+vysielal. Pokial je, tak sa signál vyšle neskôr.
 
-Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na inom zariadení by vyžadovalo väčšie úpravy zdrojového kódu.
 
-Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
-\section{Ešte dake dalšie 2 protkoly}
-Tempor tempor eiusmod exercitation eiusmod deserunt laborum et. Ipsum ea fugiat ullamco laboris incididunt qui ad anim ad esse elit sint anim. Excepteur dolore commodo pariatur adipisicing incididunt duis esse labore ut Lorem esse officia exercitation. Aute dolor irure minim est elit culpa officia sit ad officia mollit mollit.
+\section{Synchronous LoRa Mesh}
+%https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8703036
+%zaujimavy projekt, rozsiruje lorawan o RN nody ktore sluzia ako root pre podzemny mesh
+%pridat sem obrazek schemy jak to je zapojene
 
-Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+Tento projekt\cite{synchronouslorameshnetwork} vznikol z potreby získavania real-time dát z podzemných kanalizácií. Tieto dáta sú potrebné k monitorovaniu a predikcií kritických situacií akými 
+sú napríklad záplavy.
 
-Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+LoRaWan však nema moc velký dosah do podzemia. Z toho dôvodu by bolo potrebné v podzemných priestoroch implementovať LoRaWan gateway-e, ktoré su ale energeticky náročne, drahé a vyžadujú 
+pevné pripojenie do elektrickej a prípadne aj internetovej siete. Okrem toho, by museli byť všetky ostatné uzly v podzemnej sieti v dosahu gateway a pri väčšej podzemnej sieti 
+by teda bolo potrebné implementovať viacero LoRaWan gateway.
 
-Ex velit deserunt aute ullamco magna duis reprehenderit nisi esse proident labore nostrud irure. Eu consectetur ut irure Lorem cupidatat nostrud proident tempor labore voluptate tempor aliquip qui fugiat. Magna aliqua voluptate laboris eu exercitation incididunt mollit. Proident anim eiusmod sit occaecat.
+Tento projekt sa snaží vyriešiť tieto problémy. Prináša protokol, ktorý rozširuje LoRaWan o tzv. repeater uzly (RN) viď Obr. \ref{fig:synchronouslora}. Tieto uzly sa vyskytujú na povrchu a preposielajú dáta z 
+podzemných monitorovacích uzlov (sensor node  - SN) do LoRaWan siete. Monitorovacie uzly pod zemou tvoria mesh sieť a RN plní funkciu riadiaceho uzlu pre podzemnú mesh siet. 
+Komunikácia medzi RN a SN je synchronizovaná pomocou presného časovania, čo umožňuje koordináciu zmeny stavov SN z režimu spánku do normálneho režimu v čase, kedy 
+potrebuje SN prijímať a odosielať dáta. Komunikácia sa cez uzly šíri multi-hop prístupom, za použitia smerovacej tabulky.
 
+Protokol používa na riadenie komunikácie metódu TDMA. RN priradí každej SN časový slot, v ktorom SN môže vyslať alebo prijať dáta.
+Monitorovacie uzly su väčšinu času v režime spánku, zobudia sa len v ich určenom časovom slote a vďaka tomu maju tieto uzly nízku spotrebu energie.
 
+Novo pripojený uzol do sieťe musí čakať na periodicky beacon, vysielaný RN uzlom. Všetky uzly si držia v sebe smerovaciu tabuľku. Po pripojení nového uzla sa sieťou sa propaguje 
+správa na aktualizovanie smerovacej tabuľky.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\textwidth]{Figures/synchronouslorameshnetwork.png}
+	\caption{Schéma Synchronous Lora Mesh. Prevzaté z \cite{synchronouslorameshnetwork}}
+	\label{fig:synchronouslora}
+\end{figure}
+
+\section{Porovnanie voči nášmu riešeniu}
+Niektoré zo spomenutých riešení využívaju smerovacie tabuľky na efektívnejši prenos dát v rámci siete. Smerovacie tabuľky sú však limitáciou pokiaľ 
+chceme dosiahnuť mobility uzlov. V tom prípade je potrebné zabezpečiť dostatočne časté aktualizácie smerovacích tabuliek.
+
+Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime.
+
+Protokol navrhnutý v tejto práci nebude využívať žiadne smerovacie tabuľky. Vďaka tomu dosiahneme mobility uzlov bez potreby 
+periodických aktualizacií smerovacích tabuliek. Protokol nebude používať žiadnu časovú synchronizáciu ani časové okná vyhradené na komunikáciu, 
+uzly siete tak budu môcť prijímať a odosielať dáta hocikedy.
+
+Funckionalita navrhnutého protokolu bude podobná ako projekt Meshtastic, kedy sa správa v sieti preposiela až kým nedorazí do destinácie.
+Správa sa odošle a uzol, ktorý túto správu prijal ako posledný ju prepošle dalej. Toto sa opakuje na dalších uzloch až kým sa správa nedostane do destinácie alebo kym správe nedojde hoplimit.
+
+Ak nieje destinácia v dosahu, tak o správu prídeme. Tento problém vyriešime tak, že odosielatel si bude odoslané správy ukladať a v prípade, že sa nepodarí správu doručiť, môže ju opätovne 
+odoslať niekedy neskôr.
+
+Navrhnutý protokol nieje závisly na žiadnych špeciálnych uzloch typu gateway, pripadne riadiacich uzloch. Každý uzol v sieti môže byť primitivným uzlom, ktorý bude prijímať a preposielať dáta.
+Vďaka tomu môžu byť uzly realizované prostredníctvom lacných a malých zariadeni.
 
 \chapter{TODO Vlastna implementacia}
 \chapter{TODO Testovanie vykonnosti + test voci existujucim protokolom?}

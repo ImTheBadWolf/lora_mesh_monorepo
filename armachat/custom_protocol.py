@@ -22,100 +22,48 @@ import digitalio
 import gc
 import aesio
 import random
+import sys
+import time
+import digitalio
+import board
+import busio
+#TODO sort imports, remove unused
+
+sys.path.append("custom_protocol_lib")
+import protocol_config
+from base_utils import *
+from message import Message
+import rfm9x_lora
 
 key_set = 0
-message_to_send = ""
-received_msg = "TODO"
 keypad = adafruit_matrixkeypad.Matrix_Keypad(config.rows, config.cols, config.keys1)
+message_to_send = "Hello world from pi pico"
 
-HEADER_LENGTH = 12
-TEXTMESSAGE_PREFIX_LENGTH = 5
-MY_ADDRESS = 0xA62C
-AES_KEY = "SuperTajne heslo"#TODOconfig.password
+def show_info_notification(text):
+  global screen
+  screen[2].text = text
+  global info_timeout
+  info_timeout = round(time.monotonic() * 1000)
 
-def calculate_checksum(header):
-  #Calculates CRC-16/CCITT-FALSE checksum of first 8 bytes of data
-  crc = 0xFFFF
-  polynomial = 0x1021
-  for byte in header[0:8]:
-    crc ^= byte << 8
-    for bit in range(0, 8):
-      if crc & 0x8000:
-        crc = (crc << 1) ^ polynomial
-      else:
-        crc <<= 1
-  return crc & 0xFFFF
-
-def create_header(destinationAddress, senderAddress,  messageType=0, priority=0):
-  header = bytearray(HEADER_LENGTH)
-
-  destination = destinationAddress.to_bytes(2, 'big')
-  header[0] = destination[0] #TODO check if endianess is correct
-  header[1] = destination[1]
-
-  sender = senderAddress.to_bytes(2, 'big')
-  header[2] = sender[0]
-  header[3] = sender[1]
-
-  header[4] = random.randint(0, 255)
-  header[5] = random.randint(0, 255)
-  header[6] = random.randint(0, 255)
-  header[7] = random.randint(0, 255)
-
-  checksum = calculate_checksum(header)
-  checksum = checksum.to_bytes(2, 'big')
-  header[8] = checksum[0]
-  header[9] = checksum[1]
-
-  header[10] = messageType
-  header[11] = priority
-
-  return header
-
-def create_text_message(destinationAddress, message, receiveAck=False, maxHop=5, priority=0):
-  header = create_header(destinationAddress, MY_ADDRESS, 1 if receiveAck else 0, priority)
-  message_prefix = bytearray(TEXTMESSAGE_PREFIX_LENGTH)# TODO only for text messages !
-
-  #TODO for compatibility adding 4 bytes of random data, this will be removed later
-
-  message_prefix[0] = 1#random.randint(0, 255)
-  message_prefix[1] = 2#random.randint(0, 255)
-  message_prefix[2] = 3#random.randint(0, 255)
-  message_prefix[3] = 4#random.randint(0, 255)
-
-  message_prefix[4] = maxHop
-
-  #encrypt message with aes and combine with header and return
-  encrypted_message = bytearray(len(message))
-  cipher = aesio.AES(AES_KEY, aesio.MODE_CTR, AES_KEY)
-  cipher.encrypt_into(bytes(message, "utf-8"), encrypted_message)
-
-  return list(header) + list(message_prefix) + list(encrypted_message)
-
-def send_message():
-  new_message = create_text_message(0xE67E, "Hello from armachat")
-  rfm9x.send(new_message)
-
-  global message_to_send
-  message_to_send = "Sent"
+def send_message(message):
+  msg_object = Message()
+  msg_object.new_message(protocol_config.CONTACT, protocol_config.MY_ADDRESS, message, max_hop=13)
+  #rfm9x.send(new_message)
+  rfm9x.send(msg_object.get_message_bytes())
+  show_info_notification("Sent")
 
 def receive_message():
-  out = None
   packet = rfm9x.receive(timeout=0.1)
   if packet is not None:
+    message = Message()
+    message.construct_message_from_bytes(packet)
 
-    message_prefix_length = TEXTMESSAGE_PREFIX_LENGTH #TODO this length depends on message type (data[10])
-    encrypted_message = bytes(packet[HEADER_LENGTH + message_prefix_length:])
-    # Decrypt
-    cipher = aesio.AES(AES_KEY, aesio.MODE_CTR, AES_KEY)
-    outp = bytearray(len(encrypted_message))
-    cipher.encrypt_into(encrypted_message, outp)
-    try:
-      out = str(outp, "utf-8")
-    except UnicodeError:
-      print("error")
-
-  return out
+    if protocol_config.MONITORING or message.get_destination() == protocol_config.MY_ADDRESS:
+      show_info_notification("Received")
+      global screen
+      screen[6].text = f'Received SNR:{rfm9x.last_snr} RSSI:{rfm9x.last_rssi}'
+      screen[7].text = f'From: 0x{message.get_sender():04x}, maxhop: {message.get_max_hop()}'
+      screen[8].text = f'{message.get_text_message().decode("utf-8")}'
 
 def get_char_set_label():
   if(key_set == 0):
@@ -140,12 +88,12 @@ def increment_key_set():
 
 def handle_key_press(pressed_key):
   global message_to_send
-  if pressed_key == "alt":
-    increment_key_set()
-  elif pressed_key == "bsp":
+  """ if pressed_key == "alt":
+    increment_key_set() """
+  if pressed_key == "bsp":
     message_to_send = message_to_send[:-1]
   elif pressed_key == "ent":
-    send_message()
+    send_message(message_to_send)
   else:
     message_to_send += pressed_key
 
@@ -161,7 +109,7 @@ backlight = board.GP20
 CS = digitalio.DigitalInOut(board.GP13)
 RESET = digitalio.DigitalInOut(board.GP17)
 
-font_file = "fonts/neep-24.pcf"
+font_file = "fonts/gomme-20.pcf"
 font = bitmap_font.load_font(font_file)
 
 display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs)
@@ -178,36 +126,52 @@ screen = SimpleTextDisplay(
     colors=(
         SimpleTextDisplay.BLUE,
         SimpleTextDisplay.GREEN,
+        SimpleTextDisplay.YELLOW,
+        (176, 196, 245),
+        SimpleTextDisplay.WHITE,
+        SimpleTextDisplay.WHITE,
+        (176, 196, 245),
+        SimpleTextDisplay.WHITE,
         SimpleTextDisplay.WHITE,
         SimpleTextDisplay.WHITE,
     ),
 )
 screen[0].text = "OoogaBooga messenger"
-screen[1].text = "Character set: " + get_char_set_label() + " (ALT)"
-screen[2].text = "Message:"
-screen[3].text = message_to_send
-screen[7].text = "Receved:"
-screen[8].text = received_msg
+screen[1].text = f'My address: 0x{protocol_config.MY_ADDRESS:04x}'
+screen[3].text = f'Message to send(to 0x{protocol_config.CONTACT:04x})'
+screen[4].text = message_to_send
+screen[6].text = f'Received SNR:{0} RSSI:{0} :'
+screen[7].text = ""
 screen.show()
 
 #500kBW, 7SF, 4/5CR, 0x34 sync?, 8 preamble length
 #TODO load settings from config
-#TODO find out how to make event listener for received lora packets. When new packed is received, interupt is fired and new message is processed
-#TODO use newer version of u-lora https://github.com/martynwheeler/u-lora
-#lora.on_recv
-rfm9x = ulora.LoRa(spi_lora, CS, freq=868.0, modem_config=(0x92, 0x74, 0x04), tx_power=config.power)
+rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=500000)
+rfm9x.signal_bandwidth = 500000
+rfm9x.coding_rate = 5
+rfm9x.spreading_factor = 7
+rfm9x.tx_power = 23
+rfm9x.preamble_length = 8
+#rfm9x.on_recv = on_recv
+#rfm9x.set_mode_rx()
+info_timeout = 0
 
 while True:
-
-    r_msg = receive_message()
     keys = keypad.pressed_keys
+    #TODO circuit python doesnt support interrupts...
+    #https://github.com/adafruit/circuitpython/issues/1380
+    r_msg = receive_message()
+    if r_msg is not None:
+      screen[7].text = r_msg
+
     if keys:
       handle_key_press(keys[0])
+      screen[4].text = message_to_send
+      sleep(0.2)
 
-    if r_msg:
-      screen[8].text = r_msg
+    #Clear notification after 3 seconds
+    if info_timeout > 0 and round(time.monotonic() * 1000) - info_timeout > 3000:
+      screen[2].text = ""
+      info_timeout = 0
 
-    screen[1].text = "Character set: " + get_char_set_label() + " (ALT)"
-    screen[3].text = message_to_send
     screen.show()
-    sleep(0.2)

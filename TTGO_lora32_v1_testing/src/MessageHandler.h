@@ -7,14 +7,15 @@
 #include "QueueMessage.h"
 
 
-#define MY_ADDRESS 0xA02C
+#define MY_ADDRESS 0x0004
 #define AES_KEY "SuperTajne heslo" //Must be 16 characters long
 #define DEBUG 1
+#define MONITORING 0
 #define MESSAGE_QUEUE_SIZE 20
 
 #define BROADCAST_ADDRESS 0xFFFF
 #define HEADER_LENGTH 12
-#define TEXTMESSAGE_PREFIX_LENGTH 5
+#define TEXTMESSAGE_PREFIX_LENGTH 1
 #define SENSORMESSAGE_PREFIX_LENGTH 6
 
 class MessageHandler {

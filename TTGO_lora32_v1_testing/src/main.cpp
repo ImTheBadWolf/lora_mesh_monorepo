@@ -156,7 +156,7 @@ void loop()
     buttonFlag = true;
 
     uint32_t byteArraySize;
-    byte *bytes = messageHandler.createTextMessage(0xe67e, byteArraySize, "Hello from TTGO LoRa32 v1.0");
+    byte *bytes = messageHandler.createTextMessage(0x0003, byteArraySize, "Hello from TTGO LoRa32 v1.0");
     // TODO lookup table for "contacts". Instead of displaying hex addresses in received messages, display names
     //table can contain aes keys also, if we want to encrypt messages uniquely for each contact
     //TODO add message to rebroadcast queue and rebroadcast it X times or until ACK or rebroadcast from another node is received (which comes first)

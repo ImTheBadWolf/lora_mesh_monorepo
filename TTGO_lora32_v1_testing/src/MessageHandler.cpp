@@ -12,17 +12,21 @@ union fourByte
   unsigned char Bytes[4];
 } fourByteVal;
 
-MessageHandler::MessageHandler(){
+MessageHandler::MessageHandler()
+{
   CTR<AES128> ctraes128 = CTR<AES128>();
   this->generateAesKey();
   Array<QueueMessage *, MESSAGE_QUEUE_SIZE> messageQueue;
 };
 
-void MessageHandler::generateAesKey(){
+void MessageHandler::generateAesKey()
+{
   String keyStr = AES_KEY;
-  if (keyStr.length() != 16){
-    while(true){
-      Serial.println("AES_KEY must be 16 characters long");//TODO console displays some weird characters instead of this... Serial is not initialised yet
+  if (keyStr.length() != 16)
+  {
+    while (true)
+    {
+      Serial.println("AES_KEY must be 16 characters long"); // TODO console displays some weird characters instead of this... Serial is not initialised yet
       delay(2000);
     }
   }
@@ -30,8 +34,9 @@ void MessageHandler::generateAesKey(){
   keyStr.getBytes(this->key, 16 + 1);
 }
 
-byte* MessageHandler::createHeader(uint16_t destinationAddress, uint16_t senderAddress, uint8_t messageType, uint8_t priority){
-  uint32_t messageId = (uint32_t)((random(200) / 100.0) * (uint32_t)random(LONG_MAX)); //TODO random returns signed long, but messageId is unsigned
+byte *MessageHandler::createHeader(uint16_t destinationAddress, uint16_t senderAddress, uint8_t messageType, uint8_t priority)
+{
+  uint32_t messageId = (uint32_t)((random(200) / 100.0) * (uint32_t)random(LONG_MAX)); // TODO random returns signed long, but messageId is unsigned
 
   static byte header[10];
   twoByteVal.value = destinationAddress;
@@ -58,8 +63,9 @@ byte* MessageHandler::createHeader(uint16_t destinationAddress, uint16_t senderA
   return header;
 }
 
-uint16_t MessageHandler::calculateChecksum(byte* data){
-  // Calculates CRC-CCITT checksum
+uint16_t MessageHandler::calculateChecksum(byte *data)
+{
+  // Calculates CRC-CCITT checksum of first 8 bytes of data
   uint8_t length = 8;
   unsigned char x;
   unsigned short crc = 0xFFFF;
@@ -73,16 +79,12 @@ uint16_t MessageHandler::calculateChecksum(byte* data){
   return crc;
 }
 
-byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &byteArraySize, String message, bool receiveAck, uint8_t maxHop, uint8_t priority){
+byte *MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &byteArraySize, String message, bool receiveAck, uint8_t maxHop, uint8_t priority)
+{
   byte *header = createHeader(destinationAddress, MY_ADDRESS, receiveAck ? 1 : 0, priority);
 
-  byte messagePrefix[TEXTMESSAGE_PREFIX_LENGTH];
-  fourByteVal.value = 1667116784; //TODO timestamp should go here, ttgo doesnt have rtc
-  messagePrefix[0] = fourByteVal.Bytes[3];
-  messagePrefix[1] = fourByteVal.Bytes[2];
-  messagePrefix[2] = fourByteVal.Bytes[1];
-  messagePrefix[3] = fourByteVal.Bytes[0];
-  messagePrefix[4] = maxHop;
+  byte messagePrefix[TEXTMESSAGE_PREFIX_LENGTH]; // TODO timestamp is removed, text message prefix contains only maxhop, sensor message contains TTL, ping message contains ping type
+  messagePrefix[1] = maxHop;                     // TODO for sensor data this is ttl
 
   byte messageByteArr[message.length() + 1];
   message.getBytes(messageByteArr, message.length() + 1);
@@ -93,15 +95,16 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
   this->ctraes128.setIV(this->key, 16);
   this->ctraes128.encrypt(encryptedMessage, messageByteArr, message.length());
 
-  byte* wholePayload = new byte[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH + message.length()];
+  byte *wholePayload = new byte[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH + message.length()];
   memcpy(wholePayload, header, HEADER_LENGTH);
   memcpy(&wholePayload[HEADER_LENGTH], messagePrefix, TEXTMESSAGE_PREFIX_LENGTH);
 
   // TODO if crypto disabled, this option will not be available
-  //memcpy(&wholePayload[HEADER_LENGTH+TEXTMESSAGE_PREFIX_LENGTH], messageByteArr, message.length());
+  // memcpy(&wholePayload[HEADER_LENGTH+TEXTMESSAGE_PREFIX_LENGTH], messageByteArr, message.length());
   memcpy(&wholePayload[HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH], encryptedMessage, message.length());
 
-  if (DEBUG){
+  if (DEBUG)
+  {
     Serial.println("Payload: ");
     for (int i = 0; i < HEADER_LENGTH + TEXTMESSAGE_PREFIX_LENGTH + message.length(); i++)
     {
@@ -117,10 +120,13 @@ byte* MessageHandler::createTextMessage(uint16_t destinationAddress, uint32_t &b
   return wholePayload;
 }
 
-Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize, float rssi, float snr){
-  if (newPacketSize){
+Message *MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize, float rssi, float snr)
+{
+  if (newPacketSize)
+  {
     byte data[newPacketSize];
-    if (DEBUG){
+    if (DEBUG)
+    {
       Serial.print("\nReceived packet: ");
       for (int i = 0; i < newPacketSize; i++)
       {
@@ -135,17 +141,17 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
     twoByte receivedChecksum;
     receivedChecksum.Bytes[1] = data[8];
     receivedChecksum.Bytes[0] = data[9];
-    if (checksum == receivedChecksum.value){
-      //Check if destination address is my address or broadcast
+
+    if (checksum == receivedChecksum.value)
+    {
+      // Check if destination address is my address or broadcast
       twoByte destination;
       destination.Bytes[1] = data[0];
       destination.Bytes[0] = data[1];
-
-      if (destination.value == MY_ADDRESS || destination.value == BROADCAST_ADDRESS){
-        // TODO may break if random message with FF FF is received
-
+      if (destination.value == MY_ADDRESS || destination.value == BROADCAST_ADDRESS || MONITORING)
+      {
         uint8_t messagePrefixLength;
-        switch (data[8])
+        switch (data[10])
         {
         case 0:
         case 1:
@@ -163,7 +169,6 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
         byte header[HEADER_LENGTH];
         byte messagePrefix[messagePrefixLength];
         byte message[messageLength];
-
         memcpy(header, data, HEADER_LENGTH);
         memcpy(messagePrefix, &data[HEADER_LENGTH], messagePrefixLength);
         memcpy(message, &data[HEADER_LENGTH + messagePrefixLength], messageLength);
@@ -183,7 +188,7 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
         this->ctraes128.setIV(this->key, 16);
         this->ctraes128.decrypt(messageDecrypted, message, messageLength);
 
-        Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[8], header[9], messagePrefix[4], messageDecrypted, messageLength, rssi, snr);
+        Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[10], header[11], messagePrefix[0], messageDecrypted, messageLength, rssi, snr);
 
         if (DEBUG)
         {
@@ -205,9 +210,10 @@ Message* MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
 
         return receivedMessage;
       }
-      else{
-        //TODO if message is not for me, add it to rebroadcast queue
-        //Validation is needed before, to not queue messages that are not part of this protocol
+      else
+      {
+        // TODO if message is not for me and checksum matches, add it to rebroadcast queue
+        // Validation is needed before, to not queue messages that are not part of this protocol
       }
     }
     else

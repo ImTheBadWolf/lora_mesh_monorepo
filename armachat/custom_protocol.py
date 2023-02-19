@@ -28,16 +28,20 @@ import digitalio
 import board
 import busio
 #TODO sort imports, remove unused
+#TODO circuit python doesnt support interrupts...
+#https://github.com/adafruit/circuitpython/issues/1380
 
 sys.path.append("custom_protocol_lib")
 import protocol_config
 from base_utils import *
 from message import Message
+from node_process import *
 import rfm9x_lora
 
 key_set = 0
 keypad = adafruit_matrixkeypad.Matrix_Keypad(config.rows, config.cols, config.keys1)
-message_to_send = "Hello world from pi pico"
+message_to_send = f'Hello world from 0x{protocol_config.MY_ADDRESS:04x}'
+
 
 def show_info_notification(text):
   global screen
@@ -45,25 +49,27 @@ def show_info_notification(text):
   global info_timeout
   info_timeout = round(time.monotonic() * 1000)
 
-def send_message(message):
-  msg_object = Message()
-  msg_object.new_message(protocol_config.CONTACT, protocol_config.MY_ADDRESS, message, max_hop=13)
-  #rfm9x.send(new_message)
-  rfm9x.send(msg_object.get_message_bytes())
-  show_info_notification("Sent")
-
 def receive_message():
   packet = rfm9x.receive(timeout=0.1)
   if packet is not None:
     message = Message()
     message.construct_message_from_bytes(packet)
 
-    if protocol_config.MONITORING or message.get_destination() == protocol_config.MY_ADDRESS:
-      show_info_notification("Received")
+    #TODO monitoring just for testing
+    if protocol_config.MONITORING:
+      show_info_notification("Received, destination:" + str(message.get_destination()))
+
+    if message.get_destination() == protocol_config.MY_ADDRESS:
+      #Success, message arrived to destination
+      show_info_notification("You received new message")
       global screen
       screen[6].text = f'Received SNR:{rfm9x.last_snr} RSSI:{rfm9x.last_rssi}'
       screen[7].text = f'From: 0x{message.get_sender():04x}, maxhop: {message.get_max_hop()}'
       screen[8].text = f'{message.get_text_message().decode("utf-8")}'
+
+      #Rebroadcast received message with maxHop = 0, to let neighbor nodes know that message was received,
+      # and they dont need to rebroadcast it
+      message_queue.add_message(message, rfm9x.last_snr, True)
 
 def get_char_set_label():
   if(key_set == 0):
@@ -93,7 +99,7 @@ def handle_key_press(pressed_key):
   if pressed_key == "bsp":
     message_to_send = message_to_send[:-1]
   elif pressed_key == "ent":
-    send_message(message_to_send)
+    node_process.send_message(protocol_config.CONTACT, message_to_send)
   else:
     message_to_send += pressed_key
 
@@ -156,13 +162,17 @@ rfm9x.preamble_length = 8
 #rfm9x.set_mode_rx()
 info_timeout = 0
 
+node_process = NodeProcess(rfm9x, show_info_notification)
+
 while True:
     keys = keypad.pressed_keys
-    #TODO circuit python doesnt support interrupts...
-    #https://github.com/adafruit/circuitpython/issues/1380
-    r_msg = receive_message()
+    node_process.tick()
+    r_msg = node_process.receive_message()
     if r_msg is not None:
-      screen[7].text = r_msg
+      (msg_obj, rssi, snr) = r_msg
+      screen[6].text = f'Received SNR:{snr} RSSI:{rssi}'
+      screen[7].text = f'From: 0x{msg_obj.get_sender():04x}, maxhop: {msg_obj.get_max_hop()}'
+      screen[8].text = f'{msg_obj.get_text_message().decode("utf-8")}'
 
     if keys:
       handle_key_press(keys[0])

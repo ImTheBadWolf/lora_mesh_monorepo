@@ -13,9 +13,7 @@ class Header:
   def __init__(self):
     pass
 
-  #TODO this for some reason doesnt work on pi pico but works on PC  -> enums are not working correctly?
-  #def new_header(self, destination_address, sender_address, message_type=MessageType.TEXT_MSG, priority=Priority.NORMAL):
-  def new_header(self, destination_address, sender_address, message_type=0, priority=0):
+  def new_header(self, destination_address, sender_address, message_type=MessageType.TEXT_MSG, priority=Priority.NORMAL):
     self.destination_address = destination_address
     self.sender_address = sender_address
     self.message_type = message_type

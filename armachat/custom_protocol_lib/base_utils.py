@@ -24,12 +24,16 @@ def fill_spaces(string, length):
 def hex_print(bytes):
   return "" + ",".join("%02x" % b for b in bytes)
 
-class Enum(tuple):
-  __getattr__ = tuple.index
+class Enum():
+  def __init__(self, tupleItems):
+    self.tupleItems = tupleItems
 
-MessageType = Enum(['TEXT_MSG', 'TEXT_MSG_W_ACK', 'SENSOR_DATA', 'PING', 'ACK'])
-Priority = Enum(['NORMAL', 'HIGH'])
-MessageStatus = Enum(['NEW', 'SENT', 'REBROADCASTED', 'ACK', 'NAK', 'DONE', 'FAILED', 'REBROADCASTED_ONCE'])
+  def __getattr__(self, item):
+    return self.tupleItems.index(item)
+
+MessageType = Enum(('TEXT_MSG', 'TEXT_MSG_W_ACK', 'SENSOR_DATA', 'PING', 'ACK'))
+Priority = Enum(('NORMAL', 'HIGH'))
+MessageStatus = Enum(('NEW', 'SENT', 'REBROADCASTED', 'ACK', 'NAK', 'DONE', 'FAILED', 'REBROADCASTED_ONCE'))
 
 """ class MessageType(Enum):
   TEXT_MSG = 0

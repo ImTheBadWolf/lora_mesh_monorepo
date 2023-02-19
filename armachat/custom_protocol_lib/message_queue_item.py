@@ -3,14 +3,15 @@ from message import Message
 from base_utils import *
 
 class MessageQueueItem():
-  def __init__(self, message_object: Message, snr, last_rebroadcast):
+  def __init__(self, message_object: Message, timeout=0, last_rebroadcast=False):
+    #If timeout == 0 -> message is newly created and sent from the same node,
+    # so no wait timeout (unless csma ? #TODO not implemented yet) before broadcasting it
     self.key = message_object.get_header().get_message_key()
     self.message = message_object.get_message_bytes()
     self.state = MessageStatus.NEW
     self.counter = protocol_config.DEFAULT_RESEND_COUNTER if not last_rebroadcast else 1
-    self.snr = snr
     self.maxhop = self.get_maxhop_from_message()
-    self.timeout = self.__calculate_timeout()
+    self.timeout = timeout
     self.last_millis = round(time.monotonic() * 1000)
     self.last_rebroadcast = last_rebroadcast
 
@@ -18,13 +19,14 @@ class MessageQueueItem():
     return self.message[protocol_config.HEADER_LENGTH]
 
   def decrement_maxhop(self):
-    #Important to decrement maxhop only in message bytes, not class variable
+    #Important to decrement maxhop only in message bytes, not class variable #TODO refactor this shitty hack...
     if not self.last_rebroadcast:
       self.message[protocol_config.HEADER_LENGTH] -= 1
     else:
       self.message[protocol_config.HEADER_LENGTH] = 0
 
     #TODO move these to another method
+    #This happens only once the message is sent for the first time
     if self.state == MessageStatus.NEW:
       self.state = MessageStatus.SENT
 
@@ -34,13 +36,17 @@ class MessageQueueItem():
   def decrement_counter(self):
     self.counter -= 1
 
+  def get_sent_counter(self):
+    return self.counter
+
   def update_message_state(self, state:MessageStatus):
     self.state = state
 
-  def __calculate_timeout(self):
-    #TODO implemenet timeout randomization when enabled
-    #return 30*random.randint(1, 15)
-    return 30*self.snr
+  def get_key(self):
+    return self.key
+
+  def get_state(self):
+    return self.state
 
   def update_last_millis(self):
     self.last_millis = round(time.monotonic() * 1000)
@@ -56,11 +62,3 @@ class MessageQueueItem():
 
   def get_last_millis(self):
     return self.last_millis
-
-class MessageQueue():
-  def __init__(self):
-    self.messages = []
-
-  def add_message(self, message_object: Message, snr=0, last_rebroadcast=False):
-    #If snr == 0 -> message is newly created and sent on the same node, so no timeout (unless csma)
-    self.messages.append(MessageQueueItem(message_object, snr, last_rebroadcast))

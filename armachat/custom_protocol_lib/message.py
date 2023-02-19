@@ -5,14 +5,11 @@ class Message():
   def __init__(self):
     pass
 
-  #TODO this for some reason doesnt work on pi pico but works on PC  -> enums are not working correctly?
-  #def new_message(self, destination_address, sender_address, message, message_type=MessageType.TEXT_MSG, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
-  def new_message(self, destination_address, sender_address, message, message_type=0, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=0):
+  def new_message(self, destination_address, sender_address, message, message_type=MessageType.TEXT_MSG, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
     self.header = Header()
     self.header.new_header(destination_address, sender_address, message_type, priority)
 
-    #if message_type == MessageType.TEXT_MSG or message_type == MessageType.TEXT_MSG_W_ACK: doenst work on pi pico
-    if message_type == 0 or message_type == 1:
+    if message_type == MessageType.TEXT_MSG or message_type == MessageType.TEXT_MSG_W_ACK:
       self.text_message = message
       self.max_hop = max_hop
       self.payload = self.__construct_text_message_payload(message, max_hop)

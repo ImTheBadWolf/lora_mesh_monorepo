@@ -32,11 +32,6 @@ class NodeProcess():
       if message.get_destination() == protocol_config.MY_ADDRESS:
         #Success, message arrived to destination
         self.notification_callback("You received new message")
-        #TODO display message on display
-        """ global screen
-        screen[6].text = f'Received SNR:{rfm9x.last_snr} RSSI:{rfm9x.last_rssi}'
-        screen[7].text = f'From: 0x{message.get_sender():04x}, maxhop: {message.get_max_hop()}'
-        screen[8].text = f'{message.get_text_message().decode("utf-8")}' """
 
         #Rebroadcast received message with maxHop = 0, to let neighbor nodes know that message was received,
         # and they dont need to rebroadcast it
@@ -68,7 +63,7 @@ class NodeProcess():
   def tick(self):
     for message_queue_itm in self.message_queue:
       if (message_queue_itm.get_state() == MessageStatus.NEW or message_queue_itm.get_state() == MessageStatus.SENT) and message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000):
-        if message_queue_itm.get_sent_counter != 0 and message_queue_itm.get_maxhop() != 0:
+        if message_queue_itm.get_sent_counter() > 0 and message_queue_itm.get_max_hop() > 0:
           #Message is in message_queue and wait timeout has passed.
           #Maxhop and sent-counter (number of times the message can be sent) is not 0 =>  rebroadcast it
           message_queue_itm.decrement_maxhop()

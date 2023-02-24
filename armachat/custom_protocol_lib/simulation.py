@@ -1,29 +1,29 @@
 from header import *
 from message import *
-from node import *
+from simulation_node import *
 from time import sleep
 
-node0 = Node(0x0000)
-node1 = Node(0x0001)
-node2 = Node(0x0002)
-node3 = Node(0x0003)
-node4 = Node(0x0004)
-node5 = Node(0x0005)
-node6 = Node(0x0006)
-node7 = Node(0x0007)
-node8 = Node(0x0008)
-node9 = Node(0x0009)
-node10 = Node(0x00010)
-node11 = Node(0x00011)
-node12 = Node(0x00012)
-node13 = Node(0x00013)
-node14 = Node(0x00014)
-node15 = Node(0x00015)
-node16 = Node(0x00016)
+node0 = SimulationNode(0x0000)
+node1 = SimulationNode(0x0001)
+node2 = SimulationNode(0x0002)
+node3 = SimulationNode(0x0003)
+node4 = SimulationNode(0x0004)
+node5 = SimulationNode(0x0005)
+node6 = SimulationNode(0x0006)
+node7 = SimulationNode(0x0007)
+node8 = SimulationNode(0x0008)
+node9 = SimulationNode(0x0009)
+node10 = SimulationNode(0x00010)
+node11 = SimulationNode(0x00011)
+node12 = SimulationNode(0x00012)
+node13 = SimulationNode(0x00013)
+node14 = SimulationNode(0x00014)
+node15 = SimulationNode(0x00015)
+node16 = SimulationNode(0x00016)
 
 
-node0.add_neighbor(node1, 15)
-node0.add_neighbor(node2)
+node0.add_neighbor(node1, 250)
+node0.add_neighbor(node2, 500)
 
 node1.add_neighbor(node0)
 node1.add_neighbor(node2)
@@ -106,3 +106,5 @@ for i in range(0, 2000000):
   node14.tick()
   node15.tick()
   node16.tick()
+  sleep(0.1)
+

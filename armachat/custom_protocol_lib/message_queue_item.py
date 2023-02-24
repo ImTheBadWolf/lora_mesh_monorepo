@@ -30,7 +30,7 @@ class MessageQueueItem():
     if self.state == MessageStatus.NEW:
       self.state = MessageStatus.SENT
 
-  def get_maxhop(self):
+  def get_max_hop(self):
     return self.message[protocol_config.HEADER_LENGTH]
 
   def decrement_counter(self):

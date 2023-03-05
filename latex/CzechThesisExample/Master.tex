@@ -68,56 +68,104 @@ bez nutnosti akejkoľvek konfigurácie na ostatných zariadeniach. Z toho vyplý
 pokiaľ sa nachádzajú v dosahu hocijakého iného uzla, majú prístup do siete.
 
 \chapter{LoRa a spôsob prenosu dát}
+\section {LPWAN}
+%TODO viac rozpisat, preforulovat
+LPWAN (Low Power Wide Area Network) je kategória sieti s veľkou rozlohou a nízkou spotrebou energie. Tieto siete sa vyznačujú nízkymi obstaravacími 
+nákladmi a dlhodobou prevádzkou. Sieť je tvorená jednoduchými lacnými zariadeniami, ktoré vďaka nizkej spotrebe energie dokážu pracovať dlhú dobu bez 
+nutnosti pripojenia do elektrickej siete. Zariadenia môžu nepretržite fungovať aj niekoľko rokov. 
+Tieto siete sú teda vhodné pre aplikácie, kde je potrebná dlhodobá prevádzka.
+
+LPWAN siete majú veľké pokrytie, v niektorých prípadoch až desiatky kilometrov v otvorenom priestranstve. Zväčša využívaju na prenos 
+Sub-GHz frekvenčné pásma, vďaka čomu dosahujú take veľké pokrytie.
+
+Technológii využívajucich LPWAN siete je viacero. Medzi tie najznámejšie patria napríklad Sigfox \cite{sigfox}, LoRa \cite{lora}, NB-IoT a iné.
+
+\section {LoRa}
 LoRa je proprietárna technológia na bezdrôtový prenos dát za pomoci rádiovych vĺn.
-Používa bezlicenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou a poskytuje rádiovy prenos na veľkú vzdialenosť s nízkou spotrebou energie.
+Používa bezlicenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou, a poskytuje rádiovy prenos na veľkú vzdialenosť s nízkou spotrebou energie.
 V otvorenom priestranstve môže mať rádiovy prenos dosah až 10--15 km. LoRa má však veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
-Rýchlosti prenosu sa pohybujú medzi 0,3 až 37,5 kbps.
+Rýchlosti prenosu sa pohybujú medzi 0,3 až 37,5 kbps. %TODO opravit rychlosti prenosu
 
 Vďaka týmto aspektom je vhodná pre použitie v IoT senzorových sieťach, kde sa často vyskytujú senzory poháňané batériami a je potrebné aby vydržali dlhú dobu 
-bez výmeny batérií. Okrem toho senzory väčšinou odosielajú veľmi malý obsah dát a dáta posielaju v určitých intervaloch (napr. raz za hodinu atď.), 
-takže nízka prenosová rýchlosť v tomto prípade nieje problémom.
+bez výmeny batérií. Okrem toho senzory väčšinou odosielajú veľmi malý obsah dát a dáta posielajú iba v určitých intervaloch (napr. raz za hodinu atď.), 
+takže nízka prenosová rýchlosť v tomto prípade nieje veľkým problémom.
 
-Na prenos je použitá proprietárna chirp spread-spectrum modulácia, pri ktorej sú 
-vysielané symboly a každý vysielaný symbol je reprezentovaný takzvaným chirp signálom. Tento chirp signál sa postupne posúva po intervale 
-vo frekvenčnom pásme, ktoré je dané vybraným bandwidth-om. 
-Ako rýchlo sa chirp posúva po frekvenčnom pásme je určené parametrom spreading factor (SF). Spreading factor taktiež vyjadruje, kolko bitov je v každom 
+Na prenos dát v LoRa, je použitá proprietárna chirp spread-spectrum modulácia -- modulácia rozprestreného spektra, pri ktorej sú dáta kódovane do symbolov 
+a každý vysielaný symbol je prenášaný takzvaným chirp signálom, do ktorého sa daný symbol moduluje.
+
+Chirp signál ma konštantnú amplitúdu ale mení svojú frekvenciu lineárne s časom. 
+Frekvencia sa mení v rozmedzí od spodnej hranice frekvenčného pásma, po hornu hranicu frekvenčného pasma.
+Po dosiahnutí hraničnej frekvencie sa frekvencia vráti na opačnú hranicu a proces sa opakuje.
+Frekvenčné pásmo, v ktorom sa chirp signál prenáša je určené vybraným bandwidth-om.
+Graf frekvenčnej charakteristiky a postupne zvyšovanie frekvencie chirp signálu môžme vidieť na Obr. \ref{fig:loraSymbols}.
+
+Existujú dva druhy chirp signálov, sú nimi up-chirp a down-chirp. Pri up-chirp signále sa prechádza zo spodnej hranice frekvenčného pásma na hornú hranicu a pri 
+down-chirp naopak.
+
+Ako rýchlo sa chirp posúva po frekvenčnom pásme - tzn. ako rýchlo chirp signál mení svojú frekvenciu, je určené parametrom spreading factor (SF). Spreading factor taktiež vyjadruje, kolko bitov informácie je v každom 
 symbole prenesených. Pri nižšiom spreading factore sa chirp posúva po frekvenčnom pásme rýchlejšie (viď Obr. \ref{fig:spreadingfactors}) a tým sa zvyšuje dátovy prenos, 
 avšak zhoršuje sa citlivosť a s tým aj použitelný dosah.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.5\textwidth]{Figures/spreading factors.png}
-	\caption{Porovnanie spreading factorov. Prevzaté z \cite{spreadfactorimage}}
+	\caption{Chirp signál a porovnanie spreading factoru. Prevzaté z \cite{spreadfactorimage}}
 	\label{fig:spreadingfactors}
 \end{figure}
-\newpage
 
-Existujú dva druhy chirp signálov, sú nimi up-chirp a down-chirp. Pri up-chirp signále sa prechádza z najnižšej frekvencie na najvyššiu a pri 
-down-chirp naopak.
+Chirp signál je rozdelený na X častí -- tzv. chips. Tieto chips predstavujú skoky vo vysielacej frekvencii signálu. 
+Koľko týchto chips jeden chirp obsahuje je závisle od vybraného spreading factoru. 
+Jeden chirp je rozdelený na $2^{SF}$ častí alebo chips. Vysielaný symbol sa potom skladá z cyklicky posunutého chirp signálu, kde posun definuje hodnotu daného symbolu. 
+To znamená, že vysielaný chirp nebude začínať na spodnej hranici frekvenčného pásma, ale na určitej frekvencii korešpondujúcej so symbolom, 
+ktorý je modulovaný do daného chirpu. Viď Obr. \ref{fig:loraSymbols}.
 
-Vysielaný chirp signal je ďalej rozdelený na X častí -- tzv. chips. Koľko týchto chips jeden chirp obsahuje je závisle od vybraného spreading factoru. 
-Jeden chirp ma v sebe $2^{SF}$ častí alebo chips. Vysielaný symbol sa potom skladá z cyklicky posunutého chirp signálu viď 
-Obr. \ref{fig:loraModulation}, kde posun definuje hodnotu daného symbolu.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.9\textwidth]{Figures/loraModulation.png}
-	\caption{Nemodulovaný a modulovaný LoRa signál. Prevzaté z \cite{loraMod}, \cite{loraMod2}}
+	\includegraphics[width=1\textwidth]{Figures/loraSymbols.png}
+	\caption{Chirp signály, do ktorých boli modulované symboly. Prevzaté z TODO}
+	\label{fig:loraSymbols}
+\end{figure}
+
+Celý proces vyslania správy cez LoRa sa teda skladá z nasledujúcich krokov:
+\begin{enumerate}
+  \item Konverzia správy do binárneho kódu
+  \item Pridanie korekčných bitov slúžiacich na opravu chýb
+  \item Pridanie preambuly a kontrolného súčtu, a poskladanie do LoRa packetu
+  \item Modulacia bitov do chirp signálov
+  \item Odvysielanie chirp signálov
+\end{enumerate}
+Ukážku môžme vidieť na Obr. \ref{fig:loraModulation}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{Figures/loraModulation2.png}
+	\caption{Proces spracovania odosielaných dát v LoRa (Binárne hodnoty su vymyslené, nezodpovedajú reálnej konverzií). Prevzaté z TODO}
 	\label{fig:loraModulation}
 \end{figure}
 
-\section{Legislativa}
-V Európe sa k frekvenčnému pásmu používaného pre LoRa viažu určité obmedzenia. 
-Obmedzenia sa týkaju používania fyzického média. Regulácia určuje maximálnu povolenú dobu, v ktorú môže vysielač na daných frekvenciach vysielať 
-v rámci jednej hodiny a maximálny vysielací výkon, akým môžme signal vysielať.
-Určuje sa klučovací pomer, ktorý hovorí koľko percent času z nejakého celkového času môže vysielač vysielať.
+\section{LoRa packet}
+Štruktúra LoRa packetu môže byť závisla od daného použitia. Bežné sa ale stretávame s LoRa packetom 
+, zloženým z preambuly, dát a kontrolného súčtu.
 
-Ak by zariadenie vysielalo signál po dobu jednej jednotky času z celkových 10 jednotiek času, tak kľučovací pomer by bol 10 \%.
+Preambula slúži na synchronizáciu prijímacieho zariadenia. Je tvorená X opakovaniami prázdneho chirp signálu.
+Dĺžka preambuly, tzn. počet opakovaní prázdneho chirp signálu, je stanovená konfiguráciou zariadenia. Bežne je používana dĺžka preambuly 8.
+Na Obr. \ref{fig:loraModulation} môžme vidieť, že na preambulu boli použité iba 2 prázdne chirp signály -- teda dĺžka preambuly je 2.
 
-Český Telekomunikačný úrad \cite{ctu} stanovuje vo všeobecné oprávnění č. VO-R/10/07.2021-8 \cite{vor}, že 
-frekvenčné pásmo, do ktorého spadá LoRa, patrí do skupiny g. Pre túto skupinu je maximálny povolený kľučovací pomer 1 \% a maximálny 
-vysielací výkon 25 mW (14 dBm). Znamená to teda, že zariadenia môžu každú hodinu vysielať maximálne po dobu 36 sekúnd.
-Pre pásmo 869,40--869,65 MHz je ale udelená výnimka, ktorá umožňuje vysielať s kľučovacím pomerom 10 \% a maximálnym vysielacím výkonom 500 mW (27 dBm).
+Prijímacie zariadenie číta prijaté symboly v určitom časovom intervale. Tento interval sa ale nemusí zhodovať s intervalom, ktorý bol použitý pri vysielaní daných symbolov.
+Je preto potreba synchronizovať prijímacie zariadenie aby hodnoty symbolov boli správne interpretované.
 
+Zariadenie po prijatí nového packetu očakáva, že na začiatku bude preambula definovanej dĺžky. Ak z packetu prečíta počet symbolov rovnakej hodnoty, zhodný 
+s definovanou dĺžkou preambuly, vie že sa jedná o preambulu a synchronizuje čítacie okno tak aby bolo zarovnané so symbolmi preambuly. Tzn. tak, aby symboly preambuly boli 
+symbol 0. Zjednodušené znázornenie procesu čítania symbolov a posun čítacieho okna môžme vidieť na Obr. \ref{fig:loraPreamble1}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=1\textwidth]{Figures/preambulaSmall.png}
+	\caption{Čítanie symbolov preambuly prijatého packetu a synchronizácia čítacieho okna na základe posunu preambuly.}
+	\label{fig:loraPreamble1}
+\end{figure}
+
+\newpage
 \section{LoRa parametre}
 Pri používaní LoRa je nutné správne zvoliť parametre prenosu. Sú nimi frekvencia, bandwidth, spreading factor a coding rate.
 Použitá frekvencia je závisla od regiónu, v ktorom sa používa, viď Tabuľka \ref{tab:ismBands}. 
@@ -144,19 +192,26 @@ V Európe je možné mimo 866 MHz pásma používať aj 433 MHz pásmo. Okrem to
 \end{table}
 
 
-Ostatné parametre sú vyberané na základe toho ako ďaleko a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu 
+Ostatné parametre sú vyberané na základe toho ako ďaleko, ako spoľahlivo a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu 
 a dosahom prenosu.
 
-Parameter bandwidth určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššom bandwidthe sa zvyšuje rýchlosť prenosu, avšak znižuje sa dosah.
+Parameter bandwidth určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššom bandwidthe sa zvyšuje rýchlosť prenosu, avšak znižuje sa použitelný dosah.
 
-Spreading factor určuje koľko bitov dát môže byť prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom 
-zvyšuje alebo znižuje rýchlosť prenosu na úkor zniženia alebo zvýšenia dosahu prenosu.
+Spreading factor určuje koľko bitov dát bude prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom 
+zvyšuje alebo znižuje rýchlosť prenosu na úkor zniženia alebo zvýšenia dosahu prenosu. Spreading factor je vo väčšine prípadov možné zvoliť z intervalu 6--12. 
+Avšak niektoré LoRa moduly umožnujú nastavit aj nižšie hodnoty. 
+%TODO ortogonalita spravne slovo ?
+Používanie spreading factorov prináša výhodu v podobe ortogonality sprav. To znamená, že prijímač dokáže správne prijať a dekódovať správu poslanú so spreading factorom X aj 
+keď sa vysielaná správa časovo prekrýva s inou vysielanou správou s iným spreading factorom.
 
 LoRa obsahuje korekciu chýb spôsobených rušením. Využíva k tomu samoopravný kód -- forward error correction, pri ktorom 
-sa ku dátam pridavajú korekčné bity. Tieto bity môžu byť použité na opravu chyby ak k nejakej došlo.
-
-Parameter coding rate vyjadruje aky pomer dát, ku error korekčným dátam sa má použiť. Vyšší coding rate zabezpečí spolahlivejší prenos ak 
-sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát, pretože ku prenášaným dátam pridáva navyše dáta potrebné na korekciu chýb.
+sa ku prenášaným dátam pridavajú korekčné bity. Tieto bity sú potom na prijímacej strane použité na detekciu a prípadnu opravu chyby ak k nejakej došlo.
+K nastaveniu korekcie chýb slúži parameter coding rate.
+%TODO preformulovat pomer, realne je to pomer bitov ktore nesu informaciu ku bitom ktore nesu uinformaciu + opravne bity (4/5 => 4 + 1 opravny bit == 5)
+V LoRa máme na výber zo štyroch možností coding rate: 4/5, 4/6, 4/7 a 4/8. Označenie vyjadruje pomer bitov, ktoré nesú informáciu, ku bitom, ktoré sú 
+použité na korekciu chýb. Napríklad pri coding rate 4/5 sa na každé 4 bity informácie pridáva 1 korekčný bit.
+Vyšší coding rate zabezpečí spolahlivejší prenos ak sa nachádzame v rušivom prostredí, ale zníži rýchlosť prenosu dát, 
+pretože ku prenášaným dátam pridáva navyše dáta potrebné na korekciu chýb.
 
 Rýchlosť prenosu dát (Data rate -- DR) v kbps môžme vyjadriť vzťahom:
 \begin{equation}
@@ -176,7 +231,19 @@ Trieda B je rozšírením triedy A. Zariadenia v tejto triede môžu otvárať d
 Zariadenia z triedy C môžu prijímať neustále. Z tohto dôvodu majú vyššiu spotrebu energie a zvyčajne su pripojené k stálemu napájaniu.
 %TODO trosku viacej nech nieje prazdna skoro cela strana pred dalsiou kapitolou
 
-TODO tu este daky text na vyplnenie strany
+\section{Legislativa}
+V Európe sa k frekvenčnému pásmu používaného pre LoRa viažu určité obmedzenia. 
+Obmedzenia sa týkaju používania fyzického média. Regulácia určuje maximálnu povolenú dobu, v ktorú môže vysielač na daných frekvenciach vysielať 
+v rámci jednej hodiny a maximálny vysielací výkon, akým môžme signal vysielať.
+Určuje sa klučovací pomer, ktorý hovorí koľko percent času z nejakého celkového času môže vysielač vysielať.
+
+Ak by zariadenie vysielalo signál po dobu jednej jednotky času z celkových 10 jednotiek času, tak kľučovací pomer by bol 10 \%.
+
+Český Telekomunikačný úrad \cite{ctu} stanovuje vo všeobecné oprávnění č. VO-R/10/07.2021-8 \cite{vor}, že 
+frekvenčné pásmo, do ktorého spadá LoRa, patrí do skupiny g. Pre túto skupinu je maximálny povolený kľučovací pomer 1 \% a maximálny 
+vysielací výkon 25 mW (14 dBm). Znamená to teda, že zariadenia môžu každú hodinu vysielať maximálne po dobu 36 sekúnd.
+Pre pásmo 869,40--869,65 MHz je ale udelená výnimka, ktorá umožňuje vysielať s kľučovacím pomerom 10 \% a maximálnym vysielacím výkonom 500 mW (27 dBm).
+
 
 \chapter{Dostupné LoRa moduly }
 Pri práci s LoRa technológiou máme na výber z rôznych modulov od rôznych výrobcov.
@@ -282,10 +349,8 @@ Existujú rozvinuté projekty ako napríklad Meshtastic, ktorý sa snaží vytvo
 Ďalším zaujímavým projektom je Armachat \cite{armachat}, ktorý ponúka možnosť komunikácie v prípade nedostupnosti ostatných sieti, napríklad po nejakej prírodnej alebo inej katastrofe.
 Súčastou projektu Armachat sú dostupné návhry plošných spojov, ktoré implementujú Raspbery Pi Pico mikrokontroléry, RFMx LoRa moduly, display a ďalšie vymoženosti.
 Výsledkom poskladania týchto plošných spojov je malé mobilné zariadenie s klávesnicou a displejom, ktoré sa dá použiť na komunikáciu prostredníctvom LoRa siete.
-Originálny projekt avšak zatial nepodporuje využívane mesh topológie ( rozpracovaná verzia, ktora využíva protocol Meshtastic ), existujú však forky projektu, ktoré su o meshe rozšírene.
-%TODO toto su len informacie z komentov na fb a v github issues...
-
-TODO porovnat ich voci sebe, az na konci
+Originálny projekt avšak plne nepodporuje využívanie mesh topologie. Používa ale rovnakú štruktúru správ ako projekt Meshtastic a vďaka tomu je možné 
+v Armachate využívať mesh sieť projektu Meshtasticu.
 
 \section{Lora mesher}
 LoRaMesher \cite{loramesher} je knižnica, ktorú je možné použiť na komunikáciu cez LoRa mesh sieť.
@@ -347,10 +412,6 @@ vysielal. Pokial je, tak sa signál vyšle neskôr.
 PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na inom zariadení by vyžadovalo väčšie úpravy zdrojového kódu.
 
 \section{Synchronous LoRa Mesh}
-%https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8703036
-%zaujimavy projekt, rozsiruje lorawan o RN nody ktore sluzia ako root pre podzemny mesh
-%pridat sem obrazek schemy jak to je zapojene
-
 Tento projekt\cite{synchronouslorameshnetwork} vznikol z potreby získavania real-time dát z podzemných kanalizácií. Tieto dáta sú potrebné k monitorovaniu a predikcií kritických situacií akými 
 sú napríklad záplavy.
 
@@ -377,27 +438,68 @@ správa na aktualizovanie smerovacej tabuľky.
 \end{figure}
 
 \section{Porovnanie voči nášmu riešeniu}
-Niektoré zo spomenutých riešení využívaju smerovacie tabuľky na efektívnejši prenos dát v rámci siete. Smerovacie tabuľky sú však limitáciou pokiaľ 
+Niektoré zo spomenutých riešení využívaju smerovacie tabuľky na efektívnejši prenos dát v rámci siete. Smerovacie tabuľky môžu byť však limitáciou pokiaľ 
 chceme dosiahnuť mobility uzlov. V tom prípade je potrebné zabezpečiť dostatočne časté aktualizácie smerovacích tabuliek.
 
-Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime.
+Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime. To môže byť 
+veľkou limitacou pri niektorých aplikáciách, kde je potrebná komunikácia v reálnom čase  (napr. chat).
 
 Protokol navrhnutý v tejto práci nebude využívať žiadne smerovacie tabuľky. Vďaka tomu dosiahneme mobility uzlov bez potreby 
 periodických aktualizacií smerovacích tabuliek. Protokol nebude používať žiadnu časovú synchronizáciu ani časové okná vyhradené na komunikáciu, 
 uzly siete tak budu môcť prijímať a odosielať dáta hocikedy.
 
 Funckionalita navrhnutého protokolu bude podobná ako projekt Meshtastic, kedy sa správa v sieti preposiela až kým nedorazí do destinácie.
-Správa sa odošle a uzol, ktorý túto správu prijal ako posledný ju prepošle dalej. Toto sa opakuje na dalších uzloch až kým sa správa nedostane do destinácie alebo kym správe nedojde hoplimit.
+Správa sa odošle a uzol, ktorý túto správu prijal ako posledný ju prepošle dalej. Toto sa opakuje na dalších uzloch až kým sa správa nedostane do destinácie alebo kym správe nedôjde hoplimit.
 
 Ak nieje destinácia v dosahu, tak o správu prídeme. Tento problém vyriešime tak, že odosielatel si bude odoslané správy ukladať a v prípade, že sa nepodarí správu doručiť, môže ju opätovne 
 odoslať niekedy neskôr.
 
-Navrhnutý protokol nieje závisly na žiadnych špeciálnych uzloch typu gateway, pripadne riadiacich uzloch. Každý uzol v sieti môže byť primitivným uzlom, ktorý bude prijímať a preposielať dáta.
+Navrhnutý protokol nieje závisly na žiadnych špeciálnych uzloch typu gateway, prípadne riadiacich uzloch. Každý uzol v sieti môže byť primitivným uzlom, ktorý bude prijímať a preposielať dáta.
 Vďaka tomu môžu byť uzly realizované prostredníctvom lacných a malých zariadeni.
 
-\chapter{TODO Vlastna implementacia}
-\chapter{TODO Testovanie vykonnosti + test voci existujucim protokolom?}
+Protokol bude možné používať na rôznych platformách. V tejto práci vznikne implementácia protokolu pre mikrokontroléry používajúce programovací jazyk C++ a 
+mikrokontroléry alebo mikropočítače podporujúce microPython/Python.
 
+\chapter{TODO Vlastna implementacia}
+\section{Navrh packetu}
+header, vysvetlenie jednotlivych poli, crc, hoplimit,
+\subsection{Typy sprav XXXX}
+popis typov sprav
+textova sprava, sensor data sprava, ping sprava, ACK sprava
+
+\section{Funkcionalita protokolu}
+dlhy popis funkcionality protokolu, ako funguje, priebeh odoslania spravy, priebeh sirenia spravy cez ostatne node,
+vysvetlenie statov sprav (sent, rebroadcasted, acked atd)
+vysvetlenie message queue, timeouty, retry atd
+alternativne scenare, napr final node mimo dosahu, zla topologia siete atd
+
+\section{Navrh a implementacia web gui}
+popis co bude vo webgui, popis funkci, na rpi bude aj monitorovacia zalozka
+mozno poriesit cachovanie dat v localstoragi -- to asi prinesie viac problemov ako vyhod...
+popis implementacie, kedze webgui bude aj na slabych ttgo zariadeniach, bude treba dost optimalizovat kod webu
+
+\section{implementacia na micropythone}
+jak prebiehala implementacia, ukazky kodu atd.
+
+\section{implementacia na pythone}
+rozsirenie a uprava implementacie na micropythonupythone, ukazky kodu atd.
+ak bude cas rozbehat na rpi grafanu na zobrazenie monitorovacich dat
+
+\section{implementacia c++++}
+jak prebiehala implementacia, ukazky kodu atd.
+porovnanie voci micro/pythonu + rozdiely, problemy ktore sa vyskytli, ako sa to riesilo, mozno porovnanie rychlosti kodu ?
+poriesit kde a akobude ulozeny kod webu... dlhy string ??
+
+\section{Testovanie funkcnosti + medziplatformova komunikacia}
+test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
+
+\chapter{Testovanie vykonnosti + test voci existujucim protokolom?}
+Test bude mozny asi len voci meshtasticu a to len na ttgo zariadeniach. Tie mam len dve takze to bude slaby test
+meshtastic ponuka simulator kde by mohlo byt mozne zmenit kod nody a simulovat vnom moj protokol
+V meshtasticu nebude fungovat mesh siet ak bude mat tvar V, moj protokol to ale ma vyriesene tak to spomenut
+meranie casu dorucenia spravy pri rovnakych podmienkach, parametroch atd
+
+Ak bude cas rozsirit armachat o moj protokol. Upravit armachat shitcode bude ale casovo narocne a vo vysledku pride armachat o moznost pouzit ho s meshtasticom.
 
 % Seznam literatury
 \printbibliography[title={Literatura}, heading=bibintoc]

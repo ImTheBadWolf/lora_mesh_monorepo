@@ -8,12 +8,18 @@
   url     = {https://lora-alliance.org/},
   urldate = {2022-07-10}
 }
+@online{sigfox,
+  title   = {Sigfox - První celorepublikový mobilní operátor pro internet věcí},
+  url     = {https://sigfox.cz/},
+  urldate = {2022-07-10}
+}
 @online{semtech,
   title   = {Semtech},
   url     = {https://www.semtech.com/},
   urldate = {2022-07-10}
 }
 @online{spreadfactorimage,
+  author  = "Ermanno Pietrosemoli",
   title   = {LoRa details},
   url     = {http://wireless.ictp.it/school_2017/Slides/LoRaDetails.pdf},
   urldate = {2022-17-11}
@@ -28,10 +34,19 @@
   url     = {https://www.rfwireless-world.com/Tutorials/LoRaWAN-Physical-Layer.html},
   urldate = {2022-17-11}
 }
-@online{loraModData,
-  title   = {9 - Performance of LoRa technology: link-level and cell-level performance},
-  url     = {https://www.sciencedirect.com/science/article/pii/B9780128188804000107},
-  urldate = {2022-17-11}
+@incollection{loraModData,
+  title     = {9 - Performance of LoRa technology: link-level and cell-level performance},
+  editor    = {Bharat S. Chaudhari and Marco Zennaro},
+  booktitle = {LPWAN Technologies for IoT and M2M Applications},
+  publisher = {Academic Press},
+  pages     = {181-197},
+  year      = {2020},
+  isbn      = {978-0-12-818880-4},
+  doi       = {https://doi.org/10.1016/B978-0-12-818880-4.00010-7},
+  url       = {https://www.sciencedirect.com/science/article/pii/B9780128188804000107},
+  author    = {Daniele Croce and Michele Gucciardo and Giuseppe Santaromita and Stefano Mangione and Ilenia Tinnirello},
+  keywords  = {LoRa, IoT, spreading factor, interference, capacity, performance},
+  abstract  = {LoRa is a chirp spread spectrum technology that is becoming very popular for low-power wide-area networks, with high-density devices. In this chapter, we study the capacity of LoRa in rejecting different interfering signals. First, we analyze LoRa modulation numerically demonstrating that channel captures appear easily and that collisions between packets modulated with different spreading factors (SFs) are not uncommon. We validate such findings in experiments based on commercial devices and software-defined radios. Second, we model the network capacity obtainable in a typical LoRa cell: we show that high SFs can be seriously influenced by inter-SF collisions and that fading has a negligible impact compared to collisions. Finally, we discuss capacity improvements that can be achieved by increasing the density of LoRa gateways. Our results demonstrate that inter-SF collisions are indeed an issue in LoRa networks and, thus, allocating higher SFs to users far from the gateway might not necessarily improve their link capacity, in the case of congested networks.}
 }
 @online{vor,
   title   = {všeobecné oprávnění č. VO-R/10/07.2021-8 k využívání rádiových kmitočtů a k provozování zařízení krátkého dosahu},
@@ -49,27 +64,36 @@
   urldate = {2022-27-12}
 }
 @online{loramesher,
-  title   = {LoRaMesher},
+  author  = {Joan Miquel Solé, et al},
+  title   = {LoRaMesher - implementing a distance-vector routing protocol for communicating messages among LoRa nodes},
   url     = {https://github.com/LoRaMesher/LoRaMesher},
   urldate = {2022-27-12}
 }
 @online{meshtastic,
-  title   = {Meshtastic},
+  author  = {K. Hester, et al},
+  title   = {Meshtastic—An Opensource Hiking,
+  Pilot, Skiing, Secure GPS Mesh Communicator, 2020.},
   url     = {https://meshtastic.org/},
   urldate = {2022-27-12}
 }
 @online{armachat,
-  title   = {Armachat},
+  author  = "Peter Misenko",
+  title   = {Armachat - Doomsday LORA QWERTY communicator},
   url     = {https://github.com/bobricius/armachat},
   urldate = {2022-27-12}
 }
 @online{pycom,
-  title   = {Pycom},
-  url     = {https://docs.pycom.io/},
+  title   = {Pycom, Pymesh—LoRa Full-Mesh Network Technology},
+  url     = {https://docs.pycom.io/pymesh},
   urldate = {2022-28-12}
 }
-@online{synchronouslorameshnetwork,
+@article{synchronouslorameshnetwork,
+  author  = {Ebi, Christian and Schaltegger, Fabian and Rüst, Andreas and Blumensaat, Frank},
+  journal = {IEEE Access},
   title   = {Synchronous LoRa Mesh Network to Monitor Processes in Underground Infrastructure},
-  url     = {https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8703036&tag=1},
-  urldate = {2022-28-12}
+  year    = {2019},
+  volume  = {7},
+  number  = {},
+  pages   = {57663-57677},
+  doi     = {10.1109/ACCESS.2019.2913985}
 }

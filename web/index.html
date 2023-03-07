@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>SCF protocol</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <style>
       body {
         margin: 0;
@@ -253,11 +254,77 @@
     <script type="">
       const MAX_MESSAGE_LENGTH = 250; //TODO this will be dependent on the length of header and other bytes added to message
       let WACK = false;
+      //TODO vytvorit new Map na spravy, tam sa budu ukladat, v urcitych intervaloch sa budu pullovat data zo servera a do mapy sa budu pridavat iba nove spravy, tym zamedzim prepisovaniu timestampu spravy.
+      //Tato mapa sa bude musiet ukladat do local storage, aby sa pri refreshi stranky neztratili data, zaroven sa bude musiet po refreshi alebo znovu nacitani stranky zvalidovat ci su v nej aktualne data
+      //mohlo by stacit nieco take ze v lokalstoragi mam mapu sprav, po nacitani stranky sa pullnu spravy zo serveru a porovnavam ich s tym co je v localstorage.
+      //Tie IDcka ktore prisli zo serveru a mam ich ja v lokalstorage si necham, zvysne spravy zmazem. Tie co ostanu mozem zaroven aj updatnut (stav spravy, ACK/NAK)
 
-      setTimeout(() => {
+      let messageList = new Map();
+
+      function isFailed(messageState) {
+        return messageState === 'FAILED' || messageState === 'NAK'
+      }
+
+      function showStatusIcons(message) {
+        return !!(message.my_msg && !isFailed(message.state) && message.msg_type === 'wack_text')
+      }
+
+      function getTime(datetime) {
+        return `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
+      }
+
+      function updateMessageList() {
         let messagesElement = document.getElementsByClassName("messages")[0];
-        messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' });
-      }, 100);
+        messagesElement.innerHTML = '';//TODO not really efficient way of doing this...
+
+        messageList.forEach((message)=>{
+           //TODO this is painfully disgusting, create some sort of message builder based on template?
+           messagesElement.innerHTML = messagesElement.innerHTML + `
+            <div class="message ${message.msg_type === 'sensor' ? 'sns-message' : ''}">
+              ${(message.my_msg && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
+                <img class="fail-icon" src="icons/refresh-arrow.png" >
+                <span>Message failed</span>
+              </button>` : ''}
+              <span class="message__header ${message.my_msg ? 'my-header':''}">
+                ${message.from} ⟶ ${message.to}&nbsp;&nbsp;${getTime(message.receivedTime)}
+              </span>
+              <div class="message__content ${message.msg_type === 'sensor' ? 'sns-content':''} ${message.my_msg ? 'my-content':''} ${message.my_msg && isFailed(message.state) ? 'failed':''}">
+                ${message.payload}
+              </div>
+              ${showStatusIcons(message) ? (message.state === 'ACK' ? '<img class="icon" src="icons/check.png">' :'<img class="icon" src="icons/check_empty.png">') : ''}
+            </div>
+           `
+          })
+
+          //messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' }); //TODO scrollni iba po prvom loade stranky, potom to nechaj tak ako je bo je to otravne ked ta to furt scrolluje dole 
+      }
+
+      function pullNewMessages() {
+        $.get("/messages", function(data, status){
+          if (status !== 'success') {
+            return null;
+          }
+          const jsonData = JSON.parse(data);
+          jsonData.messages.forEach((message)=>{
+            //TODO tu este dorobit check ci sa nezmenil state spravy, ak ano tak ju updatnut
+            if (!messageList.has(message.id)) {
+              messageList.set(message.id, {...message, receivedTime: new Date()})
+            }
+            else {
+              const oldMessage = messageList.get(message.id);
+              if (oldMessage.state !== message.state) {
+                messageList.set(message.id, {...oldMessage, state:message.state})
+              }
+            }
+          })
+          updateMessageList();
+        });
+      }
+
+      $(document).ready(function(){
+        pullNewMessages();
+        setInterval(pullNewMessages, 5000);
+      });
 
       function handleToggleChange(e) {
           const snsMessages = document.querySelectorAll('.sns-message');
@@ -297,11 +364,11 @@
         }
 
         const message = {
-          address: addressInput.value,
-          message: messageInput.value,
-          WACK
-        }//TODO pass this data to the message handler somehow. Page refresh may be needed once the new message is sent
-        console.log('message :>> ', message);
+          'destination': addressInput.value,
+          'message': messageInput.value,
+          'wack': WACK
+        }
+        $.post("/send_message", JSON.stringify(message));
         messageInput.value = '';
       }
       function resendMessage(messageId){
@@ -329,99 +396,6 @@
         </label>
       </div>
       <div class="messages">
-
-        <div class="message">
-          <span class="message__header">
-            John Doe ⟶ YOU&nbsp;&nbsp;12:38
-          </span>
-          <div class="message__content">
-            Et fugiat et cillum aliquip est laborum et veniam. Nostrud aliqua deserunt sunt enim voluptate esse commodo non non laboris. Exercitation ad aliquip occaecat nisi nulla labore labore tempor do id nulla officia sit sint. Dolor esse aute duis elit. Et velit sunt aliqua minim mollit esse ut duis non.
-            Minim aute voluptate laboris cupidatat proident consectetur enim dolor aute deserunt dolore tempor. Esse minim officia duis esse commodo esse exercitation nulla fugiat incididunt nisi aute fugiat ipsum. Esse eu dolor aliqua minim nisi.
-          </div>
-        </div>
-
-        <div class="message sns-message">
-          <span class="message__header">
-            Enviroment sensor ⟶ ALL&nbsp;&nbsp;12:39
-          </span>
-          <div class="message__content sns-content">
-            Temperature: 25°C Humidity: 50% <br>
-            125 ppm CO2
-          </div>
-        </div>
-
-        <div class="message">
-          <span class="message__header">
-            John Doe ⟶ ALL&nbsp;&nbsp;12:39
-          </span>
-          <div class="message__content">
-            Sit eiusmod proident et incididunt consequat deserunt ipsum velit eu aliqua minim do. Nisi proident enim eiusmod ullamco excepteur veniam. Excepteur laboris eu consectetur aliqua velit eu. Id proident proident culpa enim labore fugiat mollit in ut exercitation non cillum ex fugiat. Culpa cupidatat pariatur dolore elit tempor sit ad nostrud esse. Sint id nulla id cillum pariatur ullamco minim qui occaecat consequat ea ea aliqua.
-            Ea duis
-          </div>
-        </div>
-
-        <div class="message">
-          <span class="message__header my-header">
-            YOU ⟶ Frederic&nbsp;&nbsp;14:15
-          </span>
-          <div class="message__content my-content">
-            WACK message, for which i already received ACK. Anim proident amet laborum qui amet Lorem aute.
-          </div>
-          <img class="icon" src="icons/check.png" >
-        </div>
-
-        <div class="message">
-          <span class="message__header my-header">
-            YOU ⟶ Frederic&nbsp;&nbsp;14:18
-          </span>
-          <div class="message__content my-content">
-            WACK message, for which i havent received ACK yet. Officia nulla ad nostrud ex mollit in fugiat reprehenderit ipsum ea exercitation. Enim reprehenderit ipsum nulla duis Lorem. Et exercitation id sit elit est laborum magna reprehenderit anim amet nostrud consectetur Lorem ipsum.
-          </div>
-          <img class="icon" src="icons/check_empty.png" >
-        </div>
-
-        <div class="message">
-          <span class="message__header">
-            0x0102 ⟶ ALL&nbsp;&nbsp;16:30
-          </span>
-          <div class="message__content">
-            Vžum
-          </div>
-        </div>
-
-        <div class="message sns-message">
-          <span class="message__header">
-            Enviroment sensor ⟶ ALL&nbsp;&nbsp;16:33
-          </span>
-          <div class="message__content sns-content">
-            Temperature: 25°C Humidity: 50% <br>
-            125 ppm CO2
-          </div>
-        </div>
-
-        <div class="message">
-          <button class="fail-msg" onclick="resendMessage(68431)">
-            <img class="fail-icon" src="icons/refresh-arrow.png" >
-            <span>Message failed</span>
-          </button>
-          <span class="message__header my-header">
-            YOU ⟶ 0xABCD&nbsp;&nbsp;16:39
-          </span>
-          <div class="message__content my-content failed">
-            WACK message, for which i havent received ACK and ack waiting timeout has passed OR nonWACK message which was not rebroadcasted by any other node. This message is considered as failed and can be sent again later.
-          </div>
-        </div>
-
-        <div class="message">
-          <span class="message__header my-header">
-            YOU ⟶ Frederic&nbsp;&nbsp;23:05
-          </span>
-          <div class="message__content my-content">
-            WACK message, for which i havent received ACK yet. Officia nulla ad nostrud ex mollit in fugiat reprehenderit ipsum ea exercitation. Enim reprehenderit ipsum nulla duis Lorem. Et exercitation id sit elit est laborum magna reprehenderit anim amet nostrud consectetur Lorem ipsum.
-          </div>
-          <img class="icon" src="icons/check_empty.png" >
-        </div>
-
       </div>
       <div class="new_msg">
         <div class="toggle">

@@ -1,7 +1,7 @@
 import random
 from binascii import hexlify
 import protocol_config
-#import aesio
+import aesio
 
 def calculate_checksum(data):
   #Calculates CRC-16/CCITT-FALSE checksum of first 8 bytes of data

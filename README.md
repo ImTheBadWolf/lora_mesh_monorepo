@@ -54,9 +54,13 @@
 * FAILED - message has been sent maximum amount of times(`RESEND_COUNT`) without any other node rebroadcasting it
 
 ---
+
 ## Configuration variables
+
 * RESEND_COUNT - how many times should the message be resent until considered as failed
 * ACK_WAIT_TIME - how long to wait for ACK message until message is considered as failed(NAK)
+
 ---
 ## State flow
+
 ![State flow](state_flow.png)

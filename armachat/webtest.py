@@ -126,9 +126,7 @@ def ajax(request: HTTPRequest):
 
 @server.route("/send_message", method=HTTPMethod.POST)
 def send_message(request: HTTPRequest):
-   #receive message from client using POST
-  #add message to MESSAGE_LIST
-  #send response to client
+  #TODO data.get('max_hop')
   data = json.loads(request.body)
   print(data)
   MESSAGE_LIST.append({

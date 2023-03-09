@@ -172,12 +172,16 @@
         align-items: center;
         justify-content: flex-end;
       }
-      #addressInput {
+      #addressInput, #maxHopInput {
         border: none;
         background: #fff;
         width: 56px;
         height: 31px;
         text-align: center;
+      }
+      #maxHopInput {
+        margin: 0 12px;
+        width: 40px;
       }
       #addressInput:disabled {
         color: #D9D9D9;
@@ -252,8 +256,9 @@
       }
     </style>
     <script type="">
-      const MAX_MESSAGE_LENGTH = 250; //TODO this will be dependent on the length of header and other bytes added to message
+      const MAX_MESSAGE_LENGTH = 240; //TODO this will be dependent on the length of header and other bytes added to message
       let WACK = false;
+      let firstLoad = false;
       //TODO vytvorit new Map na spravy, tam sa budu ukladat, v urcitych intervaloch sa budu pullovat data zo servera a do mapy sa budu pridavat iba nove spravy, tym zamedzim prepisovaniu timestampu spravy.
       //Tato mapa sa bude musiet ukladat do local storage, aby sa pri refreshi stranky neztratili data, zaroven sa bude musiet po refreshi alebo znovu nacitani stranky zvalidovat ci su v nej aktualne data
       //mohlo by stacit nieco take ze v lokalstoragi mam mapu sprav, po nacitani stranky sa pullnu spravy zo serveru a porovnavam ich s tym co je v localstorage.
@@ -275,10 +280,9 @@
 
       function updateMessageList() {
         let messagesElement = document.getElementsByClassName("messages")[0];
-        messagesElement.innerHTML = '';//TODO not really efficient way of doing this...
+        messagesElement.innerHTML = '';
 
         messageList.forEach((message)=>{
-           //TODO this is painfully disgusting, create some sort of message builder based on template?
            messagesElement.innerHTML = messagesElement.innerHTML + `
             <div class="message ${message.msg_type === 'sensor' ? 'sns-message' : ''}">
               ${(message.my_msg && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
@@ -296,7 +300,10 @@
            `
           })
 
-          //messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' }); //TODO scrollni iba po prvom loade stranky, potom to nechaj tak ako je bo je to otravne ked ta to furt scrolluje dole 
+        if (!firstLoad) {
+          messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' });
+          firstLoad = true;
+        }
       }
 
       function pullNewMessages() {
@@ -306,7 +313,6 @@
           }
           const jsonData = JSON.parse(data);
           jsonData.messages.forEach((message)=>{
-            //TODO tu este dorobit check ci sa nezmenil state spravy, ak ano tak ju updatnut
             if (!messageList.has(message.id)) {
               messageList.set(message.id, {...message, receivedTime: new Date()})
             }
@@ -352,9 +358,15 @@
       function sendMessage() {
         const addressInput = document.getElementById('addressInput');
         const messageInput = document.getElementById('textArea');
+        const maxHopInput = document.getElementById('maxHopInput');
 
         if (!addressInput.value.match(/^0x[0-9a-fA-F]{4}$/)) {
           alert('Invalid address');
+          return;
+        }
+
+        if(!maxHopInput.value.match(/^[0-9]+$/) || maxHopInput.value < 1 || maxHopInput.value > 255) {
+          alert('Invalid max hop value');
           return;
         }
 
@@ -366,6 +378,7 @@
         const message = {
           'destination': addressInput.value,
           'message': messageInput.value,
+          'max_hop': maxHopInput.value,
           'wack': WACK
         }
         $.post("/send_message", JSON.stringify(message));
@@ -406,8 +419,10 @@
             <span class="slider round"></span>
           </label>
         </div>
-        <textarea id="textArea" maxlength="250"></textarea>
+        <textarea id="textArea" maxlength="240"></textarea>
         <div class="confirm">
+          <span class="info-label">Max Hop:</span>
+          <input id="maxHopInput" type="number" min="1" max="255" value="3">
           <span class="info-label">Destination:</span>
           <select onchange="handleSelectChange(event)">
             <option value="custom">Custom</option>

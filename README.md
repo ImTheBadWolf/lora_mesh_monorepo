@@ -14,7 +14,6 @@
   * 0 - text message
   * 1 - text message with ACK, reffered to as `W_ACK`
   * 2 - sensor data
-  * 3 - ~~ping~~ TODO
   * 255 - ACK confirmation message
 
 ---

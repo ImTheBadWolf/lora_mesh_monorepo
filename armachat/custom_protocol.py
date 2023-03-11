@@ -49,28 +49,6 @@ def show_info_notification(text):
   global info_timeout
   info_timeout = round(time.monotonic() * 1000)
 
-def receive_message():
-  packet = rfm9x.receive(timeout=0.1)
-  if packet is not None:
-    message = Message()
-    message.construct_message_from_bytes(packet)
-
-    #TODO monitoring just for testing
-    if protocol_config.MONITORING:
-      show_info_notification("Received, destination:" + str(message.get_destination()))
-
-    if message.get_destination() == protocol_config.MY_ADDRESS:
-      #Success, message arrived to destination
-      show_info_notification("You received new message")
-      global screen
-      screen[6].text = f'Received SNR:{rfm9x.last_snr} RSSI:{rfm9x.last_rssi}'
-      screen[7].text = f'From: 0x{message.get_sender():04x}, maxhop: {message.get_max_hop()}'
-      screen[8].text = f'{message.get_text_message().decode("utf-8")}'
-
-      #Rebroadcast received message with maxHop = 0, to let neighbor nodes know that message was received,
-      # and they dont need to rebroadcast it
-      message_queue.add_message(message, rfm9x.last_snr, True)
-
 def get_char_set_label():
   if(key_set == 0):
     return "abc"
@@ -99,7 +77,8 @@ def handle_key_press(pressed_key):
   if pressed_key == "bsp":
     message_to_send = message_to_send[:-1]
   elif pressed_key == "ent":
-    node_process.send_message(protocol_config.CONTACT, message_to_send)
+    node_process.new_text_message(protocol_config.CONTACT, message_to_send, w_ack = True)
+    #new_text_message(self, destination_address, string_message, w_ack = False, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
   else:
     message_to_send += pressed_key
 
@@ -166,13 +145,14 @@ node_process = NodeProcess(rfm9x, show_info_notification)
 
 while True:
     keys = keypad.pressed_keys
-    node_process.tick()
     r_msg = node_process.receive_message()
+    node_process.tick()
     if r_msg is not None:
       (msg_obj, rssi, snr) = r_msg
       screen[6].text = f'Received SNR:{snr} RSSI:{rssi}'
-      screen[7].text = f'From: 0x{msg_obj.get_sender():04x}, maxhop: {msg_obj.get_max_hop()}'
+      screen[7].text = f'From: 0x{msg_obj.get_sender():04x}, maxhop: {msg_obj.get_maxHop()}'
       screen[8].text = f'{msg_obj.get_text_message().decode("utf-8")}'
+      screen[9].text = f'Msg ID:{msg_obj.get_message_id()}'
 
     if keys:
       handle_key_press(keys[0])

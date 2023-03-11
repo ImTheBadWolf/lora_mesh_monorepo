@@ -57,7 +57,8 @@
 ## Configuration variables
 
 * RESEND_COUNT - how many times should the message be resent until considered as failed
-* ACK_WAIT_TIME - how long to wait for ACK message until message is considered as failed(NAK)
+* RESEND_TIMEOUT - how long to wait before the message is resent (In seconds)
+* ACK_WAIT_TIME - how long to wait (In seconds) for ACK message until message is considered as failed(NAK)
 
 ---
 ## State flow

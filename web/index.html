@@ -4,304 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCF protocol</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: sans-serif;
-        background: #D9D9D9;
-      }
-      .menu {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 60px;
-        background: #447ea9;
-        z-index: 1;
-      }
-      .menu ul {
-        width: 100%;
-        height: 60px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 30px;
-      }
-      .menu ul li a {
-        color: #fff;
-        font-size: 20px;
-        font-weight: normal;
-        text-decoration: none;
-      }
-      .menu ul li a:hover {
-        text-decoration: underline;
-      }
-      .underlined {
-        text-decoration: underline !important;
-      }
-      .content {
-        margin-top: 60px;
-        padding: 16px;
-        width: 100%;
-        background: #D9D9D9;
-        box-sizing: border-box;
-      }
-      .toggle {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
-      }
-      .info-label {
-        color: #000;
-        font-size: 14px;
-        margin: 8px 0;
-      }
-      .switch {
-        position: relative;
-        display: inline-block;
-        width: 45px;
-        height: 25px;
-      }
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #bbb;
-        -webkit-transition: .4s;
-        transition: .4s;
-      }
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 25px;
-        width: 25px;
-        left: 0px;
-        top: 0px;
-        background-color: white;
-        -webkit-transition: .4s;
-        transition: .4s;
-      }
-      input:checked + .slider {
-        background-color: #447EA9;
-      }
-      input:checked + .slider:before {
-        -webkit-transform: translateX(20px);
-        -ms-transform: translateX(20px);
-        transform: translateX(20px);
-      }
-      .slider.round {
-        border-radius: 34px;
-      }
-      .slider.round:before {
-        border-radius: 50%;
-      }
-      .messages {
-        padding: 8px;
-        padding-bottom: 26px;
-        background: #fff;
-        height: 280px;
-        overflow-x: hidden;
-        overflow-y: scroll;
-      }
-      .message {
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-      }
-      .message:last-child {
-        margin-bottom: 0
-      }
-      .message__header {
-        display: flex;
-        align-items: center;
-        font-size: 12px;
-        color: #bbb;
-      }
-      .my-header {
-        margin-left: auto;
-      }
-      .message__content {
-        background-color: #D9D9D9;
-        color: #242424;
-        padding: 10px 14px;
-        border-radius: 0px 15px 15px 15px;
-        box-shadow: 0px 6px 8px 1px #bebebe;
-        font-size: 14px;
-      }
-      .sns-content {
-        background-color: #CDC497;
-      }
-      .my-content {
-        background-color: #447EA9;
-        color: #fff;
-        border-radius: 15px 0px 15px 15px;
-      }
-      .new_msg {
-        margin-top: 22px;
-      }
-      #textArea {
-        display: block;
-        padding: 8px;
-        width: 100%;
-        background: #fff;
-        height: 60px;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        box-sizing: border-box;
-        resize: none;
-        border: none;
-        margin-bottom: 3px;
-      }
-      .confirm {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
-      }
-      .confirm div {
-        display: flex;
-        justify-content: flex-end;
-        position: relative;
-      }
-      #addressInput, #maxHopInput {
-        border: none;
-        background: #fff;
-        width: 56px;
-        height: 31px;
-        text-align: center;
-      }
-      #maxHopInput {
-        margin: 0 12px;
-        width: 40px;
-      }
-      #addressInput {
-        margin-right: 65px;
-      }
-      #addressInput:disabled {
-        color: #D9D9D9;
-      }
-      .confirm select {
-        margin-left: 12px;
-        height: 33px;
-        width: 100px;
-        border: none;
-        text-align: center;
-        border-right: 3px solid #D9D9D9;
-      }
-      .btn {
-        position: absolute;
-        border: none;
-        height: 36px;
-        top: -3px;
-        width: 64px;
-        font-weight: bold;
-        color: #fff;
-        text-align: center;
-        background: #447EA9;
-        border-radius: 0px 0 18px 0px;
-        box-shadow: 0px 4px 8px -1px #bebebe;
-      }
-      .btn:active {
-        box-shadow: none;
-      }
-      .icon {
-        position: absolute;
-        bottom: -9px;
-        right: 4px;
-        width: 20px;
-        height: 20px;
-        background-color: #fff;
-        border-radius: 50%;
-        padding: 1px;
-      }
-      .failed {
-        opacity: 0.35;
-      }
-      .fail-icon {
-        width: 20px;
-        height: 20px;
-      }
-      .fail-msg {
-        position: absolute;
-        z-index: 1;
-        right: 4px;
-        bottom: -4px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        color: #ff9494;
-        background: #fff;
-        border-radius: 10px;
-        padding: 3px 6px;
-        border: 1px solid;
-        box-shadow: 0px 4px 4px 1px #a1a1a182;
-        font-size: 14px;
-      }
-      .fail-msg:active {
-        box-shadow: none;
-      }
-      #prioritySelect {
-       margin-right: 12px;
-       border: none;
-      }
-      #sendButton:disabled {
-        background: #9ca4ab;
-      }
-      @media only screen and (max-width: 650px) {
-        .menu ul {
-          gap: 14px;
-        }
-        .menu ul li a {
-          font-size: 15px;
-        }
-        .content {
-          padding: 8px;
-        }
-        .messages {
-          height: 400px;
-        }
-        .confirm {
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 4px;
-        }
-        #prioritySelect {
-          margin-right: 0;
-        }
-      }
-       @media only screen and (max-width: 400px) {
-        .menu ul {
-          gap: 8px;
-        }
-        .menu ul li a {
-          font-size: 12px;
-        }
-        .content {
-          padding: 4px;
-        }
-        .message__content {
-          font-size: 12px;
-        }
-      }
-    </style>
-    <script type="">
+    <script>
       const MAX_MESSAGE_LENGTH = 240; //TODO this will be dependent on the length of header and other bytes added to message
       let WACK = false;
       let scrollToEnd = true;
@@ -347,7 +52,7 @@
           })
 
         if (scrollToEnd) {
-          const sendButton = document.getElementById('sendButton');
+          const sendButton = document.getElementById('sendBtn');
           sendButton.disabled = false;
           messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' });
           scrollToEnd = false;
@@ -408,7 +113,7 @@
         const messageInput = document.getElementById('textArea');
         const maxHopInput = document.getElementById('maxHopInput');
         const prioritySelect = document.getElementById('prioritySelect');
-        const sendButton = document.getElementById('sendButton');
+        const sendButton = document.getElementById('sendBtn');
 
         if (!addressInput.value.match(/^0x[0-9a-fA-F]{4}$/)) {
           alert('Invalid address');
@@ -448,10 +153,9 @@
     <div class="menu">
       <ul>
         <li><a href="#" class="underlined">HOME</a></li>
-        <li><a href="/sensors.html">SENSORS</a></li>
-        <li><a href="/contacts.html">CONTACTS</a></li>
-        <li><a href="/config.html">CONFIG</a></li>
-        <li><a href="/monitoring.html">MONITORING</a></li>
+        <li><a href="sensors.html">SENSORS</a></li>
+        <li><a href="contacts.html">CONTACTS</a></li>
+        <li><a href="config.html">CONFIG</a></li>
       </ul>
     </div>
     <div class="content">
@@ -492,7 +196,7 @@
               <option value="0x0CA7">Frederic</option>
             </select>
             <input id="addressInput" type="text" maxlength="6">
-            <button class="btn" id="sendButton" onclick="sendMessage()">SEND</button>
+            <button id="sendBtn" class="btn" onclick="sendMessage()">SEND</button>
           </div>
         </div>
       </div>

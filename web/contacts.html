@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCF protocol</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script>
+      let selectedIds = [];
+      function selectContact(id) {
+        let elm = document.getElementById(id);
+        if (elm) {
+          if (elm.classList.contains("selected")) {
+            elm.classList.remove("selected");
+            selectedIds = selectedIds.filter((item) => item !== id);
+          }
+          else {
+            elm.classList.add("selected");
+            selectedIds.push(id);
+          }
+        }
+        if (selectedIds.length > 0) {
+          document.getElementById("removeBtn").disabled = false;
+        }
+        else {
+          document.getElementById("removeBtn").disabled = true;
+        }
+      }
+      function removeSelected() {
+        for (let i = 0; i < selectedIds.length; i++) {
+          let elm = document.getElementById(selectedIds[i]);
+          if (elm) {
+            elm.remove();
+          }
+        }
+        console.log('Remove Ids :>> ', selectedIds);
+        selectedIds = [];
+        document.getElementById("removeBtn").disabled = true;
+      }
+      function addContact(){
+        let name = document.getElementById("contactNameInput").value;
+        let address = document.getElementById("contactAddInput").value;
+        if (name && address) {
+          if (!address.match(/^0x[0-9a-fA-F]{4}$/)) {
+            alert('Invalid address');
+            return;
+          }
+          if (name.length > 25) {
+            alert('Name too long');
+            return;
+          }
+
+          let contactsElm = document.getElementsByClassName("contacts")[0];
+          let newContact = `<button onclick="selectContact('${address}')" id="${address}" class="contact">
+            <span class="contact-name">${name}</span>
+            <span class="contact-address">${address}</span>
+          </button>`;
+          contactsElm.innerHTML += newContact;
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="menu">
+      <ul>
+        <li><a href="index.html">HOME</a></li>
+        <li><a href="sensors.html">SENSORS</a></li>
+        <li><a href="#" class="underlined">CONTACTS</a></li>
+        <li><a href="config.html">CONFIG</a></li>
+      </ul>
+    </div>
+    <div class="content">
+      <div class="contacts-container">
+        <div class="contacts">
+
+          <button onclick="selectContact('0xABCD')" id="0xABCD" class="contact">
+            <span class="contact-name">Johny VeryLongBigName Doe</span>
+            <span class="contact-address">0xABCD</span>
+          </button>
+          <button onclick="selectContact('0x0001')" id="0x0001" class="contact">
+            <span class="contact-name">John Doe</span>
+            <span class="contact-address">0x0001</span>
+          </button>
+          <button onclick="selectContact('0x0002')" id="0x0002" class="contact">
+            <span class="contact-name">Frederic</span>
+            <span class="contact-address">0x0002</span>
+          </button>
+          <button onclick="selectContact('0xDCBA')" id="0xDCBA" class="contact">
+            <span class="contact-name">Kevin IDK</span>
+            <span class="contact-address">0xDCBA</span>
+          </button>
+          <button onclick="selectContact('0x0004')" id="0x0004" class="contact">
+            <span class="contact-name">Random name</span>
+            <span class="contact-address">0x0004</span>
+          </button>
+        </div>
+        <div class="new_contact">
+          <p class="info-label">Add contact:</p>
+          <div class="contact-info">
+            <div>
+              <div>
+                <span class="info-label-small">NAME</span>
+                <input id="contactNameInput" type="text" maxlength="25">
+              </div>
+              <div>
+                <span class="info-label-small">ADDRESS</span>
+                <input id="contactAddInput" maxlength="6" type="text">
+              </div>
+              <button id="addBtn" onclick="addContact()" class="btn">ADD</button>
+            </div>
+            <button id="removeBtn" disabled onclick="removeSelected()" class="btn">REMOVE SELECTED</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

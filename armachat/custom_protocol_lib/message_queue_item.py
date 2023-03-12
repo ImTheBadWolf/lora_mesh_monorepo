@@ -23,7 +23,7 @@ class MessageQueueItem():
 
   def setMHTTL(self):
     if self.message_type == MessageType.SENSOR_DATA:
-      self.ttl = self.get_maxhop_from_message_bytes()
+      self.ttl = self.get_ttl_from_message_bytes()
     else:
       self.maxhop = self.get_maxhop_from_message_bytes()
 
@@ -31,6 +31,7 @@ class MessageQueueItem():
     return self.message_bytes[protocol_config.HEADER_LENGTH]
 
   def get_ttl_from_message_bytes(self):
+    #TODO implement
     return self.message_bytes[protocol_config.HEADER_LENGTH:protocol_config.HEADER_LENGTH + 2]#TODO check if this is correct
 
   def decrement_maxhop(self):
@@ -38,7 +39,7 @@ class MessageQueueItem():
     self.maxhop -= 1
 
   def decrement_ttl(self, decrement_amount):
-    #TODOself.message_bytes[protocol_config.HEADER_LENGTH:protocol_config.HEADER_LENGTH + 2] -= decrement_amount
+    #TODO implement self.message_bytes[protocol_config.HEADER_LENGTH:protocol_config.HEADER_LENGTH + 2] -= decrement_amount
     #self.ttl -= decrement_amount
     pass
 
@@ -89,3 +90,6 @@ class MessageQueueItem():
 
   def get_destination(self):
     return self.destination
+
+  def get_w_ack(self):
+    return self.message_instance.get_w_ack()

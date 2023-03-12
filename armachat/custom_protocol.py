@@ -142,26 +142,34 @@ rfm9x.preamble_length = 8
 info_timeout = 0
 
 node_process = NodeProcess(rfm9x, show_info_notification)
-
+counter = 0
 while True:
+    start_time = round(time.monotonic() * 1000)
     keys = keypad.pressed_keys
-    r_msg = node_process.receive_message()
+    r_msg = node_process.receive_message() #Adds 100ms delay...
     node_process.tick()
+
     if r_msg is not None:
       (msg_obj, rssi, snr) = r_msg
       screen[6].text = f'Received SNR:{snr} RSSI:{rssi}'
       screen[7].text = f'From: 0x{msg_obj.get_sender():04x}, maxhop: {msg_obj.get_maxHop()}'
       screen[8].text = f'{msg_obj.get_text_message().decode("utf-8")}'
-      screen[9].text = f'Msg ID:{msg_obj.get_message_id()}'
+      screen[9].text = f'Initial maxhop:{msg_obj.get_initialMaxHop()}'
+      screen[10].text = f'Msg ID:{msg_obj.get_message_id()}'
 
     if keys:
       handle_key_press(keys[0])
       screen[4].text = message_to_send
-      sleep(0.2)
 
     #Clear notification after 3 seconds
     if info_timeout > 0 and round(time.monotonic() * 1000) - info_timeout > 3000:
       screen[2].text = ""
       info_timeout = 0
 
-    screen.show()
+    end_time = round(time.monotonic() * 1000)
+    """ print(f'Loop time: {end_time - start_time}')
+    counter += 1
+    if counter > 25:
+      exit() """
+    #Loop time ~30ms, ~80ms when receiving a message when using rfm9x.receive() timeout 0.025
+    #screen.show()

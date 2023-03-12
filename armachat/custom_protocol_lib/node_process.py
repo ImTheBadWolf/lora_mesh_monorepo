@@ -7,7 +7,7 @@ class NodeProcess():
     self.rfm9x = rfm9x
     self.notification_callback = notification_callback #TODO used just for testing on armachat devices
 
-  def add_message(self, message_instance: Message, timeout=0, decrement=False):
+  def add_message(self, message_instance: Message, timeout=0, decrement=False, state=None):
     message_id = message_instance.get_message_id()
 
     if message_id not in self.message_queue:
@@ -15,8 +15,10 @@ class NodeProcess():
       if decrement:
         message_queue_item.decrement_maxhop()
         #TODO decrement ttl
+      if state is not None:
+        message_queue_item.update_message_state(state)
       self.notification_callback(f"Adding message {message_queue_item.get_message_id()} to queue")
-      self.message_queue[message_id] = MessageQueueItem(message_instance, timeout)
+      self.message_queue[message_id] = message_queue_item
     else:
       #TODO handle error, message with same id already exists in queue
       pass
@@ -29,8 +31,8 @@ class NodeProcess():
     self.add_message(message_instance)
 
   def receive_message(self):
-    received_packet = self.rfm9x.receive(timeout=0.1)
-    if received_packet is not None:
+    received_packet = self.rfm9x.receive(timeout=0.2) #TODO this timeout is slowing down whole process
+    if received_packet is not None and len(received_packet) >= protocol_config.HEADER_LENGTH:
       checksum = calculate_checksum(received_packet)
       checksum_bytes = checksum.to_bytes(2, 'big')
 
@@ -49,33 +51,37 @@ class NodeProcess():
         #TODO add message to userMessagesList(or Map 🤔?)
 
         if message.get_header().get_message_type() != MessageType.ACK:
-          #Success, message arrived to destination
-          self.notification_callback("You received new message")
+          if message.get_message_id() not in self.message_queue:
+            #Success, message arrived to destination
+            self.notification_callback("You received new message")
 
-          if message.get_w_ack():
-            #Received message requires to send back ACK
-            #TODO message should hold information about original maxHop, so that ACK message can have maxHop set to original maxHop
-            ack_message_instance = Message()
-            ack_message_instance.new_ack_message(message.get_sender(), protocol_config.MY_ADDRESS, message.get_message_id())
+            if message.get_w_ack():
+              #Received message requires to send back ACK
+              ack_message_instance = Message()
+              ack_message_instance.new_ack_message(message.get_sender(), protocol_config.MY_ADDRESS, message.get_message_id(), max_hop=message.get_initialMaxHop(), priority=message.get_header().get_priority())
 
-            self.add_message(ack_message_instance, 1500)
-          else:
-            #Received message does not require to send back ACK
-            #But we have to send ACK anyway, so that neighbor node can remove this message from queue and stop rebroadcasting it
-            #This ACK message will have maxHop set to 0 so that only neighbor node will receive it
-            ack_message_instance = Message()
-            ack_message_instance.new_ack_message(message.get_sender(), protocol_config.MY_ADDRESS, message.get_message_id(), max_hop=0)
+              self.add_message(ack_message_instance, 1500)
+            else:
+              #Received message does not require to send back ACK
+              #But we have to send ACK anyway, so that neighbor node can remove this message from queue and stop rebroadcasting it
+              #This ACK message will have maxHop set to 0 so that only neighbor node will receive it
+              ack_message_instance = Message()
+              ack_message_instance.new_ack_message(message.get_sender(), protocol_config.MY_ADDRESS, message.get_message_id(), max_hop=0)
 
-            self.add_message(ack_message_instance, 1500)
+              self.add_message(ack_message_instance, 1500)
+
+            #Add message to queue with state DONE so that it wont be "received" again
+            #This can be later replaced by userMessagesMap
+            self.add_message(message, 0, True, state=MessageState.DONE)
+            return (message, self.rfm9x.last_snr, self.rfm9x.last_rssi) #TODO return used only for testing on armachat devices, returns message which can be displayed on display
         else:
           #Received ACK message
           ack_message_id = message.get_ack_message_id()
           if ack_message_id in self.message_queue:
-            self.notification_callback(f"Received ACK for message {ack_message_id}")
-            self.message_queue[ack_message_id].update_message_state(MessageState.ACK)
+            if self.message_queue[ack_message_id].get_state() != MessageState.ACK:
+              self.notification_callback(f"Received ACK for message {ack_message_id}")
+              self.message_queue[ack_message_id].update_message_state(MessageState.ACK)
           return None
-
-        return (message, self.rfm9x.last_snr, self.rfm9x.last_rssi) #TODO return used only for testing on armachat devices, returns message which can be displayed on display
 
       else:
         #Received message is not for current node, add it to queue and rebroadcast it or update state
@@ -112,7 +118,7 @@ class NodeProcess():
     # - this is used when packet cant reach destination because of network topology ( V shape...)
     # Randomization is set per-message
     #return 30*random.randint(1, 15)
-    return 30*snr
+    return 150*snr
 
   def tick(self):
     for message_queue_itm in self.message_queue.values():

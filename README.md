@@ -20,11 +20,11 @@
 
 ## Payload packets
 
-### Text message /Text message with ACK packet
+### Text message /Text message with ACK confirmation
 
-| 1B | 0 - 241B |
-|----|----|
-|Max hop|Message|
+| 1B | 1B | 0 - 240B |
+|----|----|----|
+|Max hop|Initial Max hop|Message|
 
 ### Sensor data packet
 
@@ -59,6 +59,7 @@
 * RESEND_COUNT - how many times should the message be resent until considered as failed
 * RESEND_TIMEOUT - how long to wait before the message is resent (In seconds)
 * ACK_WAIT_TIME - how long to wait (In seconds) for ACK message until message is considered as failed(NAK)
+* RANDOMIZE_PATH - experimental setting, When enabled it will randomize rebroadcast timeouts (timeout wont be based on SNR). This can help deliver messages that could not be delivered because of not optimal network topology
 
 ---
 ## State flow

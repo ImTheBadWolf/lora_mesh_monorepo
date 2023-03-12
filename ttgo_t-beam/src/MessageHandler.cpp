@@ -153,11 +153,12 @@ Message *MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
         switch (data[10])
         {
         case 0:
-        case 1:
-          messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
+          messagePrefixLength = 1; //ACK message
           break;
+        case 1:
         case 2:
-          messagePrefixLength = SENSORMESSAGE_PREFIX_LENGTH;
+        case 3:
+          messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
           break;
         default:
           messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;

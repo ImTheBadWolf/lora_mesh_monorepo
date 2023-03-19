@@ -72,13 +72,12 @@ def increment_key_set():
 
 def handle_key_press(pressed_key):
   global message_to_send
-  """ if pressed_key == "alt":
-    increment_key_set() """
+  if pressed_key == "alt":
+    node_process.new_sensor_message(protocol_config.CONTACT, f"Sensor value: {random.randint(0, 100)}")
   if pressed_key == "bsp":
     message_to_send = message_to_send[:-1]
   elif pressed_key == "ent":
     node_process.new_text_message(protocol_config.CONTACT, message_to_send, w_ack = True)
-    #new_text_message(self, destination_address, string_message, w_ack = False, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
   else:
     message_to_send += pressed_key
 
@@ -121,7 +120,7 @@ screen = SimpleTextDisplay(
         SimpleTextDisplay.WHITE,
     ),
 )
-screen[0].text = "OoogaBooga messenger"
+screen[0].text = "Messenger 3000"
 screen[1].text = f'My address: 0x{protocol_config.MY_ADDRESS:04x}'
 screen[3].text = f'Message to send(to 0x{protocol_config.CONTACT:04x})'
 screen[4].text = message_to_send
@@ -129,7 +128,6 @@ screen[6].text = f'Received SNR:{0} RSSI:{0} :'
 screen[7].text = ""
 screen.show()
 
-#500kBW, 7SF, 4/5CR, 0x34 sync?, 8 preamble length
 #TODO load settings from config
 rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=500000)
 rfm9x.signal_bandwidth = 500000
@@ -137,8 +135,6 @@ rfm9x.coding_rate = 5
 rfm9x.spreading_factor = 7
 rfm9x.tx_power = 23
 rfm9x.preamble_length = 8
-#rfm9x.on_recv = on_recv
-#rfm9x.set_mode_rx()
 info_timeout = 0
 
 node_process = NodeProcess(rfm9x, show_info_notification)
@@ -150,12 +146,18 @@ while True:
     node_process.tick()
 
     if r_msg is not None:
-      (msg_obj, rssi, snr) = r_msg
+      (msg_instance, snr, rssi) = r_msg
       screen[6].text = f'Received SNR:{snr} RSSI:{rssi}'
-      screen[7].text = f'From: 0x{msg_obj.get_sender():04x}, maxhop: {msg_obj.get_maxHop()}'
-      screen[8].text = f'{msg_obj.get_text_message().decode("utf-8")}'
-      screen[9].text = f'Initial maxhop:{msg_obj.get_initialMaxHop()}'
-      screen[10].text = f'Msg ID:{msg_obj.get_message_id()}'
+
+      if msg_instance.get_message_type() == MessageType.SENSOR_DATA:
+        screen[7].text = f'From: 0x{msg_instance.get_sender():04x}, ttl: {msg_instance.get_ttl()}'
+        screen[8].text = f'{msg_instance.get_sensor_data().decode("utf-8")}'
+        screen[9].text = f'This was sensor message'
+      else:
+        screen[7].text = f'From: 0x{msg_instance.get_sender():04x}, maxhop: {msg_instance.get_maxHop()}'
+        screen[8].text = f'{msg_instance.get_text_message().decode("utf-8")}'
+        screen[9].text = f'Initial maxhop:{msg_instance.get_initialMaxHop()}'
+      screen[10].text = f'Msg ID:{msg_instance.get_message_id()}'
 
     if keys:
       handle_key_press(keys[0])
@@ -171,5 +173,5 @@ while True:
     counter += 1
     if counter > 25:
       exit() """
-    #Loop time ~30ms, ~80ms when receiving a message when using rfm9x.receive() timeout 0.025
+    #Loop time ~30ms, ~80ms when receiving a message while using rfm9x.receive() with timeout 0.025
     #screen.show()

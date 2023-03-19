@@ -70,6 +70,7 @@ class Header:
     self.message_type = bytes_array[10]
     self.priority = bytes_array[11]
     self.__construct_header()
+    #Important to override messageId and checksum on received messages
     self.header[4] = bytes_array[4]
     self.header[5] = bytes_array[5]
     self.header[6] = bytes_array[6]

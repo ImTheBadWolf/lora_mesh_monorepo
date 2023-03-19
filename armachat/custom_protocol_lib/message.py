@@ -7,13 +7,14 @@ class Message():
     self.message_id = None
 
   def new_text_message(self, destination_address, sender_address, message, w_ack = False, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
-    #This method is used only for user created new text messages
+    #This method is used only for user-created new text messages
     message_type = MessageType.TEXT_MSG
     if w_ack:
       message_type = MessageType.TEXT_MSG_W_ACK
 
     self.header = Header()
     self.header.new_header(destination_address, sender_address, message_type, priority)
+
     self.text_message = message
     self.maxHop = max_hop
     self.initialMaxHop = max_hop
@@ -24,19 +25,31 @@ class Message():
   def new_ack_message(self, destination_address, sender_address, message_id, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
     self.header = Header()
     self.header.new_header(destination_address, sender_address, MessageType.ACK, priority)
+
     self.message_id = self.header.get_message_id()
     self.maxHop = max_hop
     self.payload = self.__construct_message_payload(str(message_id), MessageType.ACK)
     self.ack_message_id = message_id
 
+  def new_sensor_message(self, destination_address, sender_address, sensor_data, ttl=protocol_config.DEFAULT_TTL, priority=Priority.NORMAL):
+    self.header = Header()
+    self.header.new_header(destination_address, sender_address, MessageType.SENSOR_DATA, priority)
+
+    self.sensor_data = sensor_data
+    self.ttl = ttl
+    self.message_id = self.header.get_message_id()
+    self.payload = self.__construct_message_payload(str(sensor_data), MessageType.SENSOR_DATA)
+
   def __construct_message_payload(self, message, message_type):
     encrypted_message = bytearray(len(message))
     cipher = aesio.AES(protocol_config.AES_KEY, aesio.MODE_CTR, protocol_config.AES_KEY)
     cipher.encrypt_into(bytes(message, "utf-8"), encrypted_message)
-    #TODO adding maxhop, initialmaxhop or ttl should be dependent on message type
+
     if message_type == MessageType.ACK:
       return list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(encrypted_message)
-    else:
+    elif message_type == MessageType.SENSOR_DATA:
+      return list(bytes(self.ttl.to_bytes(2, 'big'))) + list(encrypted_message)
+    else: #text_msg or text_msg_wack
       return list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(self.initialMaxHop.to_bytes(1, 'big'))) + list(encrypted_message)
 
   def construct_message_from_bytes(self, bytes_array):
@@ -50,14 +63,14 @@ class Message():
 
     #################
     #TODO just for testing, adding nodeID to message as a sort of traceroute
-    strMyAddress = f'{self.text_message.decode("utf-8")} 0x{protocol_config.MY_ADDRESS:04x} '
+    """ strMyAddress = f'{self.text_message.decode("utf-8")} 0x{protocol_config.MY_ADDRESS:04x} '
     encrypted_messageTMP = bytearray(len(strMyAddress))
     cipher = aesio.AES(protocol_config.AES_KEY, aesio.MODE_CTR, protocol_config.AES_KEY)
     cipher.encrypt_into(bytes(strMyAddress, "utf-8"), encrypted_messageTMP)
     if self.header.get_message_type() == MessageType.ACK:
       self.payload = list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(encrypted_messageTMP)
     else:
-      self.payload = list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(self.initialMaxHop.to_bytes(1, 'big'))) + list(encrypted_messageTMP)
+      self.payload = list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(self.initialMaxHop.to_bytes(1, 'big'))) + list(encrypted_messageTMP) """
     ######################
 
     if self.header.get_message_type() == MessageType.ACK:
@@ -81,9 +94,16 @@ class Message():
     decrypted_message = bytearray(len(input))
     cipher.encrypt_into(input, decrypted_message)
 
-    self.text_message = decrypted_message
-    self.maxHop = self.payload[0]
-    self.initialMaxHop = self.payload[1]
+    if self.header.get_message_type() == MessageType.TEXT_MSG_W_ACK or self.header.get_message_type() == MessageType.TEXT_MSG:
+      self.maxHop = self.payload[0]
+      self.initialMaxHop = self.payload[1]
+      self.text_message = decrypted_message
+    elif self.header.get_message_type() == MessageType.SENSOR_DATA:
+      self.ttl = int.from_bytes(bytes(self.payload[:2]), 'big')
+      self.sensor_data = decrypted_message
+    else: #ACK
+      self.maxHop = self.payload[0]
+      self.text_message = decrypted_message
 
   def get_message_id(self):
     return self.message_id
@@ -103,8 +123,14 @@ class Message():
   def get_initialMaxHop(self):
     return self.initialMaxHop
 
+  def get_ttl(self):
+    return self.ttl
+
   def get_text_message(self):
     return self.text_message
+
+  def get_sensor_data(self):
+    return self.sensor_data
 
   def get_message_type(self):
     return self.header.get_message_type()

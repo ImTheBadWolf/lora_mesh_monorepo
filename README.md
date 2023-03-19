@@ -76,6 +76,116 @@
 * RANDOMIZE_PATH - experimental setting, When enabled it will randomize rebroadcast timeouts (timeout wont be based on SNR). This can help deliver messages that could not be delivered because of not optimal network topology
 
 ---
+
+## API
+
+```
+MESSAGE_ENTITY = {
+  'id': Number, //Message ID
+  'from': String, //Sender, hex address is translated (on FE) to contact name if it exists
+  'to': String, //Destination, hex address is translated (on FE) to contact name if it exists
+  'payload': String
+  'msg_type': OneOf('TEXT', 'WACK_TEXT', 'SENSOR', 'TRACEROUTE'),
+  'my_msg': Bool, //Optional, set only for users own messages
+  'state': OneOf('DONE', 'REBROADCASTED', 'ACK', 'NAK', 'FAILED',), //Set only on received messages
+}
+```
+```
+NEW_MESSAGE_ENTITY = {
+  'destination': Number, //Hex address
+  'message': String, //Max 240B
+  'max_hop': Number, //0-255
+  'priority': Number, //0(Normal priority) or 1(High priority)
+  'wack': Bool //Flag if ACK should be received for that message
+}
+```
+
+## /api/messages [GET]
+
+Returns list of messages.
+```
+data = {
+  'messages': [MESSAGE_ENTITY...]
+}
+```
+
+## /api/send_text_message [POST]
+
+Create and send new message (text messages only).  
+Input: NEW_MESSAGE_ENTITY
+
+## /api/traceroute [POST]
+
+Create and send traceroute request.  
+Traceroute response will arrive later and be loaded with `/api/messages`  
+Input:
+```
+TRACEROUTE_REQUEST = {
+  'destination': Number, //Hex address
+  'max_hop': Number, //0-255
+  'priority': Number, //0(Normal priority) or 1(High priority)
+}
+```
+
+## /api/contacts [GET]
+
+Returns list of contacts
+```
+CONTACT_ENTITY = {
+  'addres': Number, //Hex address
+  'name': String, //Contact name, max 25 chars
+}
+```
+
+## /api/contact [PUT]
+
+Create new contact  
+Input: `CONTACT_ENTITY`
+
+## /api/contact [DELETE]
+
+Delete contact  
+Input: contact addres
+
+## /api/sensors [GET]
+
+Returns list of sensors
+
+```
+SENSOR_ENTITY = {
+  'addres': Number, //Hex address
+  'name': String, //Sensor name, max 25 chars
+}
+```
+
+## /api/sensor [PUT]
+
+Create new sensor  
+Input: `SENSOR_ENTITY`
+
+## /api/sensor [DELETE]
+
+Delete sensor  
+Input: sensor addres
+
+## TODO config api
+
+* list all config variables
+* list saved wifi networs (preferably without passwords ?)
+* set device address => Until the address is set, everything else should be disabled. Home page, sensor, contacts page should redirect to config and display alert about mandatory address setting. Address can be changed only once.
+* set other config variables
+* add wifi network
+* remove wifi network
+
+## TODO other processing apis
+This APIs wont be used in webGUI but can be usefull for further development and debugging/testing
+* create sensor message api
+* dump messageQueue - this will return all the messages that are currently in messageQueue, with all the usefull information about each message like timeouts, maxhop/ttl etc...
+
+
+
+---
+
 ## State flow
 
 ![State flow](state_flow.png)

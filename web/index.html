@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCF protocol</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="web/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
       const MAX_MESSAGE_LENGTH = 240; //TODO this will be dependent on the length of header and other bytes added to message
@@ -37,16 +37,16 @@
            messagesElement.innerHTML = messagesElement.innerHTML + `
             <div class="message ${message.msg_type === 'sensor' ? 'sns-message' : ''}">
               ${(message.my_msg && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
-                <img class="fail-icon" src="icons/refresh-arrow.png" >
+                <img class="fail-icon" src="web/icons/refresh-arrow.png" >
                 <span>Message failed</span>
               </button>` : ''}
               <span class="message__header ${message.my_msg ? 'my-header':''}">
                 ${message.from} ⟶ ${message.to}&nbsp;&nbsp;${getTime(message.receivedTime)}
               </span>
-              <div class="message__content ${message.msg_type === 'sensor' ? 'sns-content':''} ${message.my_msg ? 'my-content':''} ${message.my_msg && isFailed(message.state) ? 'failed':''}">
+              <div class="message__content ${message.msg_type === 'sensor' ? 'sns-content':''} ${message.msg_type === 'traceroute' ? 'trc-content':''} ${message.my_msg ? 'my-content':''} ${message.my_msg && isFailed(message.state) ? 'failed':''}">
                 ${message.payload}
               </div>
-              ${showStatusIcons(message) ? (message.state === 'ACK' ? '<img class="icon" src="icons/check.png">' :'<img class="icon" src="icons/check_empty.png">') : ''}
+              ${showStatusIcons(message) ? (message.state === 'ACK' ? '<img class="icon" src="web/icons/check.png">' :'<img class="icon" src="web/icons/check_empty.png">') : ''}
             </div>
            `
           })
@@ -62,7 +62,7 @@
       }
 
       function pullNewMessages() {
-        $.get("/messages", function(data, status){
+        $.get("/api/messages", function(data, status){
           if (status !== 'success') {
             return null;
           }
@@ -140,7 +140,7 @@
           'wack': WACK
         }
         sendButton.disabled = true;
-        $.post("/send_message", JSON.stringify(message));
+        $.post("/api/send_text_message", JSON.stringify(message));
         messageInput.value = '';
         scrollToEnd = true;
       }
@@ -169,7 +169,7 @@
 
         sendButton.disabled = true;
         traceRouteButton.disabled = true;
-        $.post("/traceroute", JSON.stringify(message));
+        $.post("/api/traceroute", JSON.stringify(message));
         scrollToEnd = true;
       }
       function resendMessage(messageId){
@@ -183,9 +183,9 @@
     <div class="menu">
       <ul>
         <li><a href="#" class="underlined">HOME</a></li>
-        <li><a href="sensors.html">SENSORS</a></li>
-        <li><a href="contacts.html">CONTACTS</a></li>
-        <li><a href="config.html">CONFIG</a></li>
+        <li><a href="/sensors">SENSORS</a></li>
+        <li><a href="/contacts">CONTACTS</a></li>
+        <li><a href="/config">CONFIG</a></li>
       </ul>
     </div>
     <div class="content">

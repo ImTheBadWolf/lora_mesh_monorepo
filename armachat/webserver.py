@@ -26,20 +26,20 @@ print("Connected to", ssid)
 pool = socketpool.SocketPool(wifi.radio)
 server = HTTPServer(pool)
 
-MESSAGE_LIST = [
+MOCK_MESSAGE_LIST = [
   {
     'id': 1,
     'from': 'John Doe',
     'to': 'YOU',
     'payload': 'Prijata sprava od hocikoho, ma byt siva, ziadne ikonky<br>Id sit adipisicing culpa cupidatat fugiat veniam proident voluptate. Ullamco nisi aliquip magna eu elit deserunt sint ea amet deserunt ex minim amet aliquip. Enim duis quis minim fugiat quis dolor aliqua Lorem elit aliquip anim. Est ex cupidatat irure et enim mollit proident. Aliqua pariatur non magna labore laboris occaecat nostrud minim aliqua.',
-    'msg_type': 'text',
+    'msg_type': 'TEXT',
   },
   {
     'id': 2,
     'from': 'YOU',
     'to': 'ALL',
     'payload': 'Sprava ktoru som poslal ale neocakavam ACK, ma byt modra, v pravo dole nemaju byt ziadne ikonky<br>Commodo culpa sit culpa in minim commodo incididunt in pariatur minim fugiat. Commodo tempor elit ut nisi ex occaecat',
-    'msg_type': 'text',
+    'msg_type': 'TEXT',
     'my_msg': 'true',
     'state': 'DONE'
   },
@@ -48,14 +48,14 @@ MESSAGE_LIST = [
     'from': 'Felix',
     'to': 'ALL',
     'payload': 'Prijata sprava od hocikoho, ma byt siva, ziadne ikonky<br>Id sit adipisicing culpa cupidatat fugiat veniam proident voluptate. Ullamco nisi aliquip magna eu elit deserunt sint ea amet deserunt ex minim amet aliquip. Enim duis quis minim fugiat quis dolor aliqua Lorem elit aliquip anim. Est ex cupidatat irure et enim mollit proident. Aliqua pariatur non magna labore laboris occaecat nostrud minim aliqua.',
-    'msg_type': 'text',
+    'msg_type': 'TEXT',
   },
   {
     'id': 23,
     'from': 'YOU',
     'to': 'Felix',
     'payload': 'Sprava ktoru som poslal a ku ktorej som ZATIAL neprijal ACK (este bezi timeout tej sprave), ma byt modra, v pravo dole ikonka s prazdnym checkom<br>esse mollit sit anim minim voluptate. Laboris deserunt exercitation exercitation commodo cupidatat ad eiusmod minim. Aute elit do dolor proident tempor cupidatat officia reprehenderit.',
-    'msg_type': 'wack_text',
+    'msg_type': 'WACK_TEXT',
     'my_msg': 'true',
     'state': 'REBROADCASTED'
   },
@@ -64,7 +64,7 @@ MESSAGE_LIST = [
     'from': 'YOU',
     'to': 'Felix',
     'payload': 'Sprava ktoru som poslal a ku ktorej som prijal ACK, ma byt modra, v pravo dole ikonka s vyfarbenym checkom<br>In eu ea esse irure aliqua culpa et aute esse laboris incididunt. Dolor laboris aliqua consectetur sint Lorem quis eu eu magna deserunt voluptate aliquip magna reprehenderit. Sit labore ipsum voluptate incididunt culpa. Labore minim irure dolor occaecat deserunt in Lorem anim nulla quis laboris labore do. Consectetur pariatur sint officia Lorem quis aute minim dolor duis occaecat.Nisi ea cillum non sit adipisicing velit sit aliquip mollit id occaecat duis et commodo. Eu officia exercitation consectetur aliquip minim cupidatat id sunt laboris occaecat consequat exercitation deserunt irure. Officia laboris consectetur consequat reprehenderit exercitation do id. Est do nostrud in irure sint. Irure sit consectetur sint enim labore incididunt sit laboris ipsum. Aliqua pariatur non in cupidatat aliquip ea quis dolore ullamco duis qui in. Exercitation occaecat cillum irure eiusmod ut ex tempor officia dolor aliqua irure velit ea.',
-    'msg_type': 'wack_text',
+    'msg_type': 'WACK_TEXT',
     'my_msg': 'true',
     'state': 'ACK'
   },
@@ -73,14 +73,14 @@ MESSAGE_LIST = [
     'from': 'Frederick',
     'to': 'YOU',
     'payload': 'Prijata sprava od hocikoho, ma byt siva, ziadne ikonky<br>Id sit adipisicing culpa cupidatat fugiat veniam proident voluptate. Ullamco nisi aliquip magna eu elit deserunt sint ea amet deserunt ex minim amet aliquip. Enim duis quis minim fugiat quis dolor aliqua Lorem elit aliquip anim. Est ex cupidatat irure et enim mollit proident. Aliqua pariatur non magna labore laboris occaecat nostrud minim aliqua.',
-    'msg_type': 'text',
+    'msg_type': 'TEXT',
   },
   {
     'id': 4,
     'from': 'YOU',
     'to': '0xABCD',
     'payload': 'WACK sprava ktoru som poslal a ku ktorej som po timeoute NEprijal ACK, ma byt modra ale s opacity, vpravo dole niesu ikonky ale bublina s informaciou o tom ze je failed, bublina sa da klikat a znovu posielat spravu<br>Culpa veniam voluptate fugiat ad consectetur sit irure non ips',
-    'msg_type': 'wack_text',
+    'msg_type': 'WACK_TEXT',
     'my_msg': 'true',
     'state': 'NAK'
   },
@@ -89,14 +89,14 @@ MESSAGE_LIST = [
     'from': 'Enviroment sensor',
     'to': 'ALL',
     'payload': ' Temperature: 25°C Humidity: 50%<br>125 ppm CO2<br>sprava ma byt oranzova, ziadne ikonky v pravo dole',
-    'msg_type': 'sensor',
+    'msg_type': 'SENSOR',
   },
   {
     'id': 5,
     'from': 'YOU',
     'to': 'ALL',
     'payload': 'obycajna sprava ktoru som poslal ale ziadna dalsia node ju nerebroadcastovala, modra, opacity, dole bublina s informaciou o tom ze je failed, bublina sa da klikat a znovu posielat spravu<br>pa veniam voluptate fugiat ad consectetur sit irure non pa veniam voluptate fugiat ad consectetur sit irure non ',
-    'msg_type': 'text',
+    'msg_type': 'TEXT',
     'my_msg': 'true',
     'state': 'FAILED'
   },
@@ -105,7 +105,14 @@ MESSAGE_LIST = [
     'from': 'Enviroment sensor',
     'to': 'ALL',
     'payload': ' Temperature: 25°C Humidity: 50%<br>125 ppm CO2<br>sprava ma byt oranzova, ziadne ikonky v pravo dole',
-    'msg_type': 'sensor',
+    'msg_type': 'SENSOR',
+  },
+  {
+    'id': 777,
+    'from': '0x0005',
+    'to': 'YOU',
+    'payload': '0x0005=>0xABCD=>0x0AC7=>YOU',
+    'msg_type': 'TRACEROUTE',
   },
 ]
 
@@ -114,23 +121,42 @@ MESSAGE_LIST = [
 def base(request: HTTPRequest):
 
     with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
-        response.send_file("index.html")
+        response.send_file("web/index.html")
 
-@server.route("/messages")
-def ajax(request: HTTPRequest):
+@server.route("/sensors")
+def sensors_route(request: HTTPRequest):
+
+    with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
+        response.send_file("web/sensors.html")
+
+@server.route("/contacts")
+def contacts_route(request: HTTPRequest):
+
+    with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
+        response.send_file("web/contacts.html")
+
+@server.route("/config")
+def config_route(request: HTTPRequest):
+
+    with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
+        response.send("Under construction")
+
+
+@server.route("/api/messages")
+def api_messages(request: HTTPRequest):
   data = {
-     'messages': MESSAGE_LIST
+     'messages': MOCK_MESSAGE_LIST
   }
   with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
     response.send(json.dumps(data))
 
-@server.route("/send_message", method=HTTPMethod.POST)
-def send_message(request: HTTPRequest):
+@server.route("/api/send_text_message", method=HTTPMethod.POST)
+def api_send_message(request: HTTPRequest):
   #TODO data.get('max_hop')
   #TODO data.get('priority')
   data = json.loads(request.body)
   print(data)
-  MESSAGE_LIST.append({
+  MOCK_MESSAGE_LIST.append({
     'id': random.randint(100,50000),
     'from': 'YOU',
     'to': data.get('destination'),
@@ -157,7 +183,7 @@ while True:
       lastMillis = 0
       newState = 'ACK' if random.randint(0,1) == 1 else 'NAK'
       print("Updating message state to: " + newState)
-      MESSAGE_LIST[-1]['state'] = newState
+      MOCK_MESSAGE_LIST[-1]['state'] = newState
 
     server.poll()
   except OSError as error:

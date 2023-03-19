@@ -170,6 +170,10 @@ input:checked+.slider:before {
   background-color: #CDC497;
 }
 
+.trc-content {
+  background-color: #97cdbf;
+}
+
 .my-content {
   background-color: #447EA9;
   color: #fff;
@@ -250,6 +254,7 @@ input:checked+.slider:before {
   margin-top: 12px;
   border-radius: 14px;
   width: 110px;
+  color: #97cdbf;
 }
 
 #addBtn {

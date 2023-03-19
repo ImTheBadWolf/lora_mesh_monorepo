@@ -155,7 +155,7 @@ class NodeProcess():
       if message_queue_itm.get_state() == MessageState.NEW or message_queue_itm.get_state() == MessageState.SENT:
         if message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000) or message_queue_itm.get_priority == Priority.HIGH:
           if (message_queue_itm.get_message_type() != MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0) \
-          or (message_queue_itm.get_message_type() == MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0 and message_queue_itm.get_ttl() > 0): #TODO this is horrible, refactor later
+          or (message_queue_itm.get_message_type() == MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0 and message_queue_itm.get_ttl() > 0):
             if message_queue_itm.get_message_type() == MessageType.SENSOR_DATA:
               message_queue_itm.decrement_ttl(round(time.monotonic() * 1000) - message_queue_itm.get_last_millis())
 

@@ -11,16 +11,18 @@
 * Checksum - CRC-16/CCITT-FALSE, checksum of destination, sender and message ID. Used to identify messages belonging to this protocol
 * Priority - overrides the order in `message queue`
 * Message type
-  * 0 - text message
-  * 1 - text message with ACK, reffered to as `W_ACK`
-  * 2 - sensor data
-  * 255 - ACK confirmation message
+  * 0 - ACK confirmation message
+  * 1 - text message
+  * 2 - text message with ACK, reffered to as `W_ACK`
+  * 3 - sensor data
+  * 4 - traceroute request
+  * 5 - traceroute
 
 ---
 
 ## Payload packets
 
-### Text message /Text message with ACK confirmation
+### Text message/Text message with ACK confirmation
 
 | 1B | 1B | 0 - 240B |
 |----|----|----|
@@ -31,6 +33,18 @@
 | 2B | 0 - 240B |
 |----|----|
 |TTL|data|
+
+### Traceroute request packet
+
+| 1B | 1B |
+|----|----|
+|Max hop|Initial Max hop|
+
+### Traceroute packet
+
+| 1B | 0 - 240B |
+|----|----|
+|Max hop|Route path|
 
 ### ACK message packet
 

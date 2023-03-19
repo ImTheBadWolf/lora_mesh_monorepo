@@ -31,6 +31,6 @@ class Enum():
   def __getattr__(self, item):
     return self.tupleItems.index(item)
 
-MessageType = Enum(('ACK', 'TEXT_MSG', 'TEXT_MSG_W_ACK', 'SENSOR_DATA'))
+MessageType = Enum(('ACK', 'TEXT_MSG', 'TEXT_MSG_W_ACK', 'SENSOR_DATA', 'TRACEROUTE_REQUEST', 'TRACEROUTE'))
 Priority = Enum(('NORMAL', 'HIGH'))
 MessageState = Enum(('NEW', 'SENT', 'REBROADCASTED', 'ACK', 'NAK', 'DONE', 'FAILED'))

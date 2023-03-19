@@ -74,7 +74,9 @@ def handle_key_press(pressed_key):
   global message_to_send
   if pressed_key == "alt":
     node_process.new_sensor_message(protocol_config.CONTACT, f"Sensor value: {random.randint(0, 100)}")
-  if pressed_key == "bsp":
+  elif pressed_key == "z":
+    node_process.new_traceroute_request(protocol_config.CONTACT)
+  elif pressed_key == "bsp":
     message_to_send = message_to_send[:-1]
   elif pressed_key == "ent":
     node_process.new_text_message(protocol_config.CONTACT, message_to_send, w_ack = True)
@@ -153,6 +155,14 @@ while True:
         screen[7].text = f'From: 0x{msg_instance.get_sender():04x}, ttl: {msg_instance.get_ttl()}'
         screen[8].text = f'{msg_instance.get_sensor_data().decode("utf-8")}'
         screen[9].text = f'This was sensor message'
+      elif msg_instance.get_message_type() == MessageType.TRACEROUTE_REQUEST:
+        screen[7].text = f'From: 0x{msg_instance.get_sender():04x}, maxhop: {msg_instance.get_maxHop()}'
+        screen[8].text = "Traceroute request received"
+        screen[9].text = f'Initial maxhop:{msg_instance.get_initialMaxHop()}'
+      elif msg_instance.get_message_type() == MessageType.TRACEROUTE:
+        screen[7].text = f'From: 0x{msg_instance.get_sender():04x}, maxhop: {msg_instance.get_maxHop()}'
+        screen[8].text = f'{msg_instance.get_text_message().decode("utf-8")}'
+        screen[9].text = f'Traceroute'
       else:
         screen[7].text = f'From: 0x{msg_instance.get_sender():04x}, maxhop: {msg_instance.get_maxHop()}'
         screen[8].text = f'{msg_instance.get_text_message().decode("utf-8")}'

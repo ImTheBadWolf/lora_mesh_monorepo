@@ -53,7 +53,9 @@
 
         if (scrollToEnd) {
           const sendButton = document.getElementById('sendBtn');
+          const traceRouteButton = document.getElementById('tracerouteBtn');
           sendButton.disabled = false;
+          traceRouteButton.disabled = false;
           messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' });
           scrollToEnd = false;
         }
@@ -142,6 +144,34 @@
         messageInput.value = '';
         scrollToEnd = true;
       }
+      function traceRoute() {
+        const addressInput = document.getElementById('addressInput');
+        const maxHopInput = document.getElementById('maxHopInput');
+        const prioritySelect = document.getElementById('prioritySelect');
+        const sendButton = document.getElementById('sendBtn');
+        const traceRouteButton = document.getElementById('tracerouteBtn');
+
+         if (!addressInput.value.match(/^0x[0-9a-fA-F]{4}$/)) {
+          alert('Invalid address');
+          return;
+        }
+
+        if(!maxHopInput.value.match(/^[0-9]+$/) || maxHopInput.value < 1 || maxHopInput.value > 255) {
+          alert('Invalid max hop value');
+          return;
+        }
+
+        const message = {
+          'destination': addressInput.value,
+          'max_hop': maxHopInput.value,
+          'priority': prioritySelect.value,
+        }
+
+        sendButton.disabled = true;
+        traceRouteButton.disabled = true;
+        $.post("/traceroute", JSON.stringify(message));
+        scrollToEnd = true;
+      }
       function resendMessage(messageId){
         //TODO resend message with the same id
         //TODO post to /resend_message, for testing purposes server will just set state to ACK for that message (or REBROADCASTED and it will wait for ACK)
@@ -199,6 +229,7 @@
             <button id="sendBtn" class="btn" onclick="sendMessage()">SEND</button>
           </div>
         </div>
+        <button id="tracerouteBtn" class="btn" onclick="traceRoute()">TRACEROUTE</button>
       </div>
     </div>
   </body>

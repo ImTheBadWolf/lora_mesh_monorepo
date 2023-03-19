@@ -13,9 +13,7 @@ class NodeProcess():
     if message_id not in self.message_queue:
       message_queue_item = MessageQueueItem(message_instance, timeout)
       if decrement:
-        if message_instance.get_message_type() == MessageType.SENSOR_DATA:
-          pass#message_queue_item.decrement_ttl(decrement_amount=1) #TODO decrement ttl amount? Probably none when the message arrives at first
-        else:
+        if message_instance.get_message_type() != MessageType.SENSOR_DATA:
           message_queue_item.decrement_maxhop()
 
       if state is not None:
@@ -39,8 +37,15 @@ class NodeProcess():
 
     self.add_message(message_instance)
 
+  def new_traceroute_request(self, destination_address, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
+    #This method is used only for user created traceroute request messages
+    message_instance = Message()
+    message_instance.new_traceroute_request(destination_address, protocol_config.MY_ADDRESS, max_hop, priority)
+
+    self.add_message(message_instance)
+
   def receive_message(self):
-    received_packet = self.rfm9x.receive(timeout=0.2) #TODO this timeout is slowing down the main process loop
+    received_packet = self.rfm9x.receive(timeout=0.1) #TODO this timeout is slowing down the main process loop
     if received_packet is not None and len(received_packet) >= protocol_config.HEADER_LENGTH:
       checksum = calculate_checksum(received_packet)
       checksum_bytes = checksum.to_bytes(2, 'big')
@@ -82,8 +87,15 @@ class NodeProcess():
               self.add_message(ack_message_instance, 1500)
 
             #Add message to queue with state DONE so that it wont be "received" again
-            #This can be later replaced by userMessagesMap
             self.add_message(message, 0, True, state=MessageState.DONE)
+
+            if message.get_header().get_message_type() == MessageType.TRACEROUTE_REQUEST:
+              #Received traceroute request, send back traceroute response
+              traceroute_response_message_instance = Message()
+              traceroute_response_message_instance.new_traceroute_message(message.get_sender(), protocol_config.MY_ADDRESS, max_hop=message.get_initialMaxHop(), priority=message.get_header().get_priority())
+
+              self.add_message(traceroute_response_message_instance, 1500)
+
             return (message, self.rfm9x.last_snr, self.rfm9x.last_rssi) #TODO return used only for testing on armachat devices, returns message which can be displayed on display
         else:
           #Received ACK message
@@ -92,7 +104,7 @@ class NodeProcess():
             if self.message_queue[ack_message_id].get_state() != MessageState.ACK:
               self.notification_callback(f"Received ACK for message {ack_message_id}")
               self.message_queue[ack_message_id].update_message_state(MessageState.ACK)
-          return None
+          return
 
       else:
         #Received message is not for current node, add it to queue and rebroadcast it or update state
@@ -156,11 +168,13 @@ class NodeProcess():
             if message_queue_itm.get_state() == MessageState.NEW:
               message_queue_itm.update_message_state(MessageState.SENT)
               self.notification_callback("Sent, messageId: " + str(message_queue_itm.get_message_id()))
+            else:
+              self.notification_callback("Resent, messageId: " + str(message_queue_itm.get_message_id()))
           else:
             #Message failed due to exceeded number of resent attempts
             if message_queue_itm.get_sender() == protocol_config.MY_ADDRESS:
               #Message was created by me, update state to failed or delete, if its ACK message
-              if message_queue_itm.get_message_type() == MessageType.ACK:
+              if message_queue_itm.get_message_type() == MessageType.ACK or message_queue_itm.get_message_type() == MessageType.TRACEROUTE_REQUEST:
                 del self.message_queue[message_queue_itm.get_message_id()]
                 return
               else:

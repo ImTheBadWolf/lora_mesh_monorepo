@@ -1,6 +1,6 @@
 AES_KEY = "SuperTajne heslo"
 
-MY_ADDRESS = 0x0005
+MY_ADDRESS = 0x0002
 CONTACT = 0x0001
 
 RESEND_COUNT = 3

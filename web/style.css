@@ -246,6 +246,12 @@ input:checked+.slider:before {
   border-radius: 0px 0 18px 0px;
 }
 
+#tracerouteBtn {
+  margin-top: 12px;
+  border-radius: 14px;
+  width: 110px;
+}
+
 #addBtn {
   height: 33px;
   width: 60px;

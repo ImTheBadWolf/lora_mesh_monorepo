@@ -89,22 +89,22 @@ void loop()
         {
           Message* receivedMessage = messageHandler.processNewMessage(data, packetLength, radio.getRSSI(), radio.getSNR());
           if (!receivedMessage->isValid()){
-            delete receivedMessage;
-            return;
+            //delete receivedMessage;
+            //return;
           }
           if (DEBUG){
-            Serial.println("Received message:");
+            /* Serial.println("Received message:");
             Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");
             Serial.println("##########################################################################################################");
-            Serial.println(receivedMessage->toString());
+            Serial.println(receivedMessage->toString()); */
           }
           if (receivedMessage->getSenderAddress() == 0x0004){
             //TODO just for testing
-            uint32_t byteArraySize;
+            /* uint32_t byteArraySize;
             byte *bytes = messageHandler.createTextMessage(0x0004, byteArraySize, "Hello from TTGO t-beam");
 
             transmissionState = radio.startTransmit(bytes, byteArraySize);
-            transmitFlag = true;
+            transmitFlag = true; */
           }
 
           delete receivedMessage;

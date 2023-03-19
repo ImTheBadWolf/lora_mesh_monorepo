@@ -94,7 +94,7 @@ class NodeProcess():
               traceroute_response_message_instance = Message()
               traceroute_response_message_instance.new_traceroute_message(message.get_sender(), protocol_config.MY_ADDRESS, max_hop=message.get_initialMaxHop(), priority=message.get_header().get_priority())
 
-              self.add_message(traceroute_response_message_instance, 1500)
+              self.add_message(traceroute_response_message_instance, 2500)
 
             return (message, self.rfm9x.last_snr, self.rfm9x.last_rssi) #TODO return used only for testing on armachat devices, returns message which can be displayed on display
         else:

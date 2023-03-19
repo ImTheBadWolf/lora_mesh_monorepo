@@ -132,7 +132,10 @@ Message *MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
       {
         Serial.print(message[i], HEX);
         data[i] = message[i];
-        Serial.print(" ");
+        if (i == HEADER_LENGTH - 1)
+          Serial.print(" | ");
+        else
+          Serial.print(" ");
       }
       Serial.println();
     }
@@ -152,13 +155,15 @@ Message *MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
         uint8_t messagePrefixLength;
         switch (data[10])
         {
-        case 0:
-          messagePrefixLength = 1; //ACK message
+        case 0://ACK message
+        case 5: //traceroute response
+          messagePrefixLength = 1;
           break;
-        case 1:
-        case 2:
-        case 3:
-          messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
+        case 1: //txt msg
+        case 2: //txt wack msg
+        case 3: //sensor data
+        case 4: //traceroute request
+          messagePrefixLength = 2;
           break;
         default:
           messagePrefixLength = TEXTMESSAGE_PREFIX_LENGTH;
@@ -184,21 +189,39 @@ Message *MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
         messageId.Bytes[0] = header[7];
 
         byte messageDecrypted[messageLength];
-        this->ctraes128.setKey(this->key, 16);
-        this->ctraes128.setIV(this->key, 16);
-        this->ctraes128.decrypt(messageDecrypted, message, messageLength);
 
-        Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[10], header[11], messagePrefix[0], messageDecrypted, messageLength, rssi, snr);
+        if (data[10] == 1 || data[10] == 2 || data[10] == 3)
+        { // TODO temporary workaround
+          this->ctraes128.setKey(this->key, 16);
+          this->ctraes128.setIV(this->key, 16);
+          this->ctraes128.decrypt(messageDecrypted, message, messageLength);
+        }
+        else {
+          memcpy(messageDecrypted, message, messageLength);
+        }
+
+        //Message *receivedMessage = new Message(destination.value, sender.value, messageId.value, header[10], header[11], messagePrefix[0], messageDecrypted, messageLength, rssi, snr);
 
         if (DEBUG)
         {
-          Serial.print("Decrypted: ");
+          String msg = "";
+          for (int i = 0; i < messageLength; i++)
+          {
+            msg += (char)messageDecrypted[i];
+          }
+
+          Serial.println("Received message SNR: " + String(snr) + " RSSI: " + String(rssi));
+          Serial.println("| DESTINATION\t| SENDER\t| MESSAGE ID\t| Checksum\t| Message Type\t| Priority\t|");
+          Serial.println("#################################################################################################");
+          Serial.println("| " + String(destination.value, HEX) + "\t\t| " + String(sender.value, HEX) + "\t\t| " + String(messageId.value) + "\t| " + String(checksum, HEX) + "\t\t| " + String(header[10]) + "\t\t| " + String(header[11]) + "\t\t|");
+          Serial.println("Payload: " + msg);
+          /* Serial.print("Decrypted: ");
           for (int i = 0; i < messageLength; i++)
           {
             Serial.print(messageDecrypted[i], HEX);
             Serial.print(" ");
           }
-          Serial.println();
+          Serial.println(); */
           /*
           Serial.println("Received message:");
           Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");
@@ -208,7 +231,7 @@ Message *MessageHandler::processNewMessage(byte *message, uint32_t newPacketSize
         /*TODO if msg type = 1, send ACK of received message
         sendConfirmation(data[8], data[9], data[10], data[11]);*/
 
-        return receivedMessage;
+        //return receivedMessage;
       }
       else
       {

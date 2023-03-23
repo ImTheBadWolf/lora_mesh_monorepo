@@ -7,43 +7,52 @@
     <link rel="stylesheet" href="web/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
-      const MAX_MESSAGE_LENGTH = 240; //TODO this will be dependent on the length of header and other bytes added to message
+      const MAX_MESSAGE_LENGTH = 238;
       let WACK = false;
+      let SENSOR_MESSAGES = true;
       let scrollToEnd = true;
-      //TODO vytvorit new Map na spravy, tam sa budu ukladat, v urcitych intervaloch sa budu pullovat data zo servera a do mapy sa budu pridavat iba nove spravy, tym zamedzim prepisovaniu timestampu spravy.
-      //Tato mapa sa bude musiet ukladat do local storage, aby sa pri refreshi stranky neztratili data, zaroven sa bude musiet po refreshi alebo znovu nacitani stranky zvalidovat ci su v nej aktualne data
-      //mohlo by stacit nieco take ze v lokalstoragi mam mapu sprav, po nacitani stranky sa pullnu spravy zo serveru a porovnavam ich s tym co je v localstorage.
-      //Tie IDcka ktore prisli zo serveru a mam ich ja v lokalstorage si necham, zvysne spravy zmazem. Tie co ostanu mozem zaroven aj updatnut (stav spravy, ACK/NAK)
+      let shouldUpdate = true;
 
       let messageList = new Map();
+      let sentMessages = new Map();
+      let contactsMap = new Map();
+      let sensorsMap = new Map();
 
       function isFailed(messageState) {
         return messageState === 'FAILED' || messageState === 'NAK'
       }
-
       function showStatusIcons(message) {
-        return !!(message.my_msg && !isFailed(message.state) && message.msg_type === 'wack_text')
+        return !!(!!message.state && !isFailed(message.state) && message.msg_type === 'WACK_TEXT')
       }
-
-      function getTime(datetime) {
-        return `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
+      function addressTranslation(address, messageType){
+        if (messageType === 'SENSOR') {
+          return sensorsMap.get(address) || address;
+        }
+        return contactsMap.get(address) || address;
       }
 
       function updateMessageList() {
+        if (!shouldUpdate) {
+          return;
+        }
+
         let messagesElement = document.getElementsByClassName("messages")[0];
         messagesElement.innerHTML = '';
 
         messageList.forEach((message)=>{
-           messagesElement.innerHTML = messagesElement.innerHTML + `
-            <div class="message ${message.msg_type === 'sensor' ? 'sns-message' : ''}">
-              ${(message.my_msg && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
+          if (message.msg_type === 'SENSOR' && !SENSOR_MESSAGES) {
+            return;
+          }
+          messagesElement.innerHTML = messagesElement.innerHTML + `
+            <div class="message ${message.msg_type === 'SENSOR' ? 'sns-message' : ''}">
+              ${(message.state && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
                 <img class="fail-icon" src="web/icons/refresh-arrow.png" >
                 <span>Message failed</span>
               </button>` : ''}
-              <span class="message__header ${message.my_msg ? 'my-header':''}">
-                ${message.from} ⟶ ${message.to}&nbsp;&nbsp;${getTime(message.receivedTime)}
+              <span class="message__header ${message.state ? 'my-header':''}">
+                ${addressTranslation(message.from, message.msg_type)} ⟶ ${addressTranslation(message.to, message.msg_type)}
               </span>
-              <div class="message__content ${message.msg_type === 'sensor' ? 'sns-content':''} ${message.msg_type === 'traceroute' ? 'trc-content':''} ${message.my_msg ? 'my-content':''} ${message.my_msg && isFailed(message.state) ? 'failed':''}">
+              <div class="message__content ${message.msg_type === 'SENSOR' ? 'sns-content':''} ${message.msg_type === 'TRACEROUTE' ? 'trc-content':''} ${message.state ? 'my-content':''} ${message.state && isFailed(message.state) ? 'failed':''}">
                 ${message.payload}
               </div>
               ${showStatusIcons(message) ? (message.state === 'ACK' ? '<img class="icon" src="web/icons/check.png">' :'<img class="icon" src="web/icons/check_empty.png">') : ''}
@@ -59,43 +68,85 @@
           messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' });
           scrollToEnd = false;
         }
+        shouldUpdate = false;
       }
 
-      function pullNewMessages() {
-        $.get("/api/messages", function(data, status){
-          if (status !== 'success') {
-            return null;
+      function fillContactsSelect(){
+        let contactsSelect = document.getElementById('contactsSelect');
+        contactsMap.forEach((name, address)=>{
+          if (name === 'YOU') {
+            return;
           }
-          const jsonData = JSON.parse(data);
-          jsonData.messages.forEach((message)=>{
-            if (!messageList.has(message.id)) {
-              messageList.set(message.id, {...message, receivedTime: new Date()})
+          contactsSelect.innerHTML += `<option value="${address}">${name}</option>`
+        })
+      }
+
+      async function pullAddressBook() {
+        return new Promise(function(resolve, reject) {
+          let counter = 2;
+          $.get("/api/contacts", function(data, status){
+            if (status !== 'success') {
+              reject();
             }
-            else {
-              const oldMessage = messageList.get(message.id);
-              if (oldMessage.state !== message.state) {
-                messageList.set(message.id, {...oldMessage, state:message.state})
+            const jsonData = JSON.parse(data);
+            jsonData.contacts.forEach((contact)=>{
+              if (!contactsMap.has(contact.address)) {
+                contactsMap.set(contact.address, contact.name)
               }
+            })
+          });
+          $.get("/api/sensors", function(data, status){
+            if (status !== 'success') {
+              reject();
             }
-          })
-          updateMessageList();
+            const jsonData = JSON.parse(data);
+            jsonData.sensors.forEach((sensor)=>{
+              if (!sensorsMap.has(sensor.address)) {
+                sensorsMap.set(sensor.address, sensor.name)
+              }
+            })
+          });
+          resolve();
         });
       }
 
-      $(document).ready(function(){
-        pullNewMessages();
-        setInterval(pullNewMessages, 5000);
-      });
+      async function pullNewMessages() {
+        return new Promise(function(resolve, reject) {
+          $.get("/api/messages", function(data, status){
+            if (status !== 'success') {
+              reject();
+            }
+            const jsonData = JSON.parse(data);
+            jsonData.messages.forEach((message)=>{
+              if (!messageList.has(message.id)) {
+                messageList.set(message.id, message)
+                shouldUpdate = true;
+              }
+              else {
+                //Update message state
+                const oldMessage = messageList.get(message.id);
+                if (oldMessage.state !== message.state) {
+                  messageList.set(message.id, {...oldMessage, state:message.state})
+                  shouldUpdate = true;
+                }
+              }
+            })
+            updateMessageList();
+            resolve();
+          });
+        })
+      }
 
       function handleToggleChange(e) {
-          const snsMessages = document.querySelectorAll('.sns-message');
-          snsMessages.forEach((message) => {
-            if (e.target.checked) {
-              message.style.display = 'flex';
-            } else {
-              message.style.display = 'none';
-            }
-          })
+        SENSOR_MESSAGES = e.target.checked;
+        const snsMessages = document.querySelectorAll('.sns-message');
+        snsMessages.forEach((message) => {
+          if (e.target.checked) {
+            message.style.display = 'flex';
+          } else {
+            message.style.display = 'none';
+          }
+        })
       }
       function handleSelectChange(e) {
           const addressInput = document.getElementById('addressInput');
@@ -110,12 +161,14 @@
       function toggleWACK(e) {
         WACK = e.target.checked
       }
+
       function sendMessage() {
         const addressInput = document.getElementById('addressInput');
         const messageInput = document.getElementById('textArea');
         const maxHopInput = document.getElementById('maxHopInput');
         const prioritySelect = document.getElementById('prioritySelect');
         const sendButton = document.getElementById('sendBtn');
+        const traceRouteButton = document.getElementById('tracerouteBtn');
 
         if (!addressInput.value.match(/^0x[0-9a-fA-F]{4}$/)) {
           alert('Invalid address');
@@ -139,7 +192,9 @@
           'priority': prioritySelect.value,
           'wack': WACK
         }
+
         sendButton.disabled = true;
+        traceRouteButton.disabled = true;
         $.post("/api/send_text_message", JSON.stringify(message));
         messageInput.value = '';
         scrollToEnd = true;
@@ -175,8 +230,21 @@
       function resendMessage(messageId){
         //TODO resend message with the same id
         //TODO post to /resend_message, for testing purposes server will just set state to ACK for that message (or REBROADCASTED and it will wait for ACK)
-        console.log("Resending message with id: ", messageId);
+        const message = sentMessages.get(messageId);
+        const sendButton = document.getElementById('sendBtn');
+        const traceRouteButton = document.getElementById('tracerouteBtn');
+        sendButton.disabled = true;
+        traceRouteButton.disabled = true;
+        $.post("/api/resend_message", JSON.stringify({'message_id': messageId}));
+        scrollToEnd = true;
       }
+
+      $(document).ready(async function(){
+        await pullAddressBook();
+        await pullNewMessages();
+        fillContactsSelect();
+        setInterval(pullNewMessages, 5000);
+      });
     </script>
   </head>
   <body>
@@ -206,7 +274,7 @@
             <span class="slider round"></span>
           </label>
         </div>
-        <textarea id="textArea" maxlength="240"></textarea>
+        <textarea id="textArea" maxlength="238"></textarea>
         <div class="confirm">
           <div>
             <span class="info-label">Max Hop:</span>
@@ -219,11 +287,8 @@
           </div>
           <div>
             <span class="info-label">Destination:</span>
-            <select onchange="handleSelectChange(event)">
+            <select id="contactsSelect" onchange="handleSelectChange(event)">
               <option value="custom">Custom</option>
-              <option value="0xFFFF">All</option>
-              <option value="0xA2DF">John Doe</option>
-              <option value="0x0CA7">Frederic</option>
             </select>
             <input id="addressInput" type="text" maxlength="6">
             <button id="sendBtn" class="btn" onclick="sendMessage()">SEND</button>

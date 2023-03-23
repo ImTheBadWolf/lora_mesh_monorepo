@@ -2,7 +2,7 @@
 
 
 ## Message header
-| 2B | 2B | 4B | 2B | 1B | 1B | 0 - 242B |
+| 2B | 2B | 4B | 2B | 1B | 1B | 0 - 240B |
 |----|----|----|----|----|----|----|
 |Destination address|Sender address|Message ID|Checksum|Message Type|Priority|Payload|
 
@@ -24,13 +24,13 @@
 
 ### Text message/Text message with ACK confirmation
 
-| 1B | 1B | 0 - 240B |
+| 1B | 1B | 0 - 238B |
 |----|----|----|
 |Max hop|Initial Max hop|Message|
 
 ### Sensor data packet
 
-| 2B | 0 - 240B |
+| 2B | 0 - 238B |
 |----|----|
 |TTL|data|
 
@@ -42,7 +42,7 @@
 
 ### Traceroute packet
 
-| 1B | 0 - 240B |
+| 1B | 0 - 239B |
 |----|----|
 |Max hop|Route path|
 
@@ -86,13 +86,12 @@ MESSAGE_ENTITY = {
   'to': String, //Destination, hex address is translated (on FE) to contact name if it exists
   'payload': String
   'msg_type': OneOf('TEXT', 'WACK_TEXT', 'SENSOR', 'TRACEROUTE'),
-  'my_msg': Bool, //Optional, set only for users own messages
-  'state': OneOf('DONE', 'REBROADCASTED', 'ACK', 'NAK', 'FAILED',), //Set only on received messages
+  'state': OneOf('DONE', 'REBROADCASTED', 'ACK', 'NAK', 'FAILED',)//Optional, set only for messages sent by "me"
 }
 ```
 ```
 NEW_MESSAGE_ENTITY = {
-  'destination': Number, //Hex address
+  'destination': String, //Hex address
   'message': String, //Max 240B
   'max_hop': Number, //0-255
   'priority': Number, //0(Normal priority) or 1(High priority)
@@ -121,7 +120,7 @@ Traceroute response will arrive later and be loaded with `/api/messages`
 Input:
 ```
 TRACEROUTE_REQUEST = {
-  'destination': Number, //Hex address
+  'destination': String, //Hex address
   'max_hop': Number, //0-255
   'priority': Number, //0(Normal priority) or 1(High priority)
 }
@@ -132,7 +131,7 @@ TRACEROUTE_REQUEST = {
 Returns list of contacts
 ```
 CONTACT_ENTITY = {
-  'addres': Number, //Hex address
+  'address': String, //Hex address
   'name': String, //Contact name, max 25 chars
 }
 ```
@@ -145,7 +144,7 @@ Input: `CONTACT_ENTITY`
 ## /api/contact [DELETE]
 
 Delete contact  
-Input: contact addres
+Input: contact address
 
 ## /api/sensors [GET]
 
@@ -153,7 +152,7 @@ Returns list of sensors
 
 ```
 SENSOR_ENTITY = {
-  'addres': Number, //Hex address
+  'address': String, //Hex address
   'name': String, //Sensor name, max 25 chars
 }
 ```
@@ -166,7 +165,7 @@ Input: `SENSOR_ENTITY`
 ## /api/sensor [DELETE]
 
 Delete sensor  
-Input: sensor addres
+Input: sensor address
 
 ## TODO config api
 

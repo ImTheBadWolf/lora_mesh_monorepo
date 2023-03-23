@@ -28,8 +28,6 @@ import digitalio
 import board
 import busio
 #TODO sort imports, remove unused
-#TODO circuit python doesnt support interrupts...
-#https://github.com/adafruit/circuitpython/issues/1380
 
 sys.path.append("custom_protocol_lib")
 import protocol_config

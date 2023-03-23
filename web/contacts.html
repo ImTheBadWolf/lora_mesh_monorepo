@@ -7,20 +7,40 @@
     <link rel="stylesheet" href="web/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
-      let selectedIds = [];
+      let selectedId;
+      function pullContacts() {
+        $.get("/api/contacts", function(data, status){
+          if (status !== 'success') {
+            return null;
+          }
+          let contactsElm = document.getElementsByClassName("contacts")[0];
+          contactsElm.innerHTML = '';
+          const jsonData = JSON.parse(data);
+          jsonData.contacts.forEach((contact)=>{
+            let newContact = `<button onclick="selectContact('${contact.address}')" id="${contact.address}" class="contact">
+              <span class="contact-name">${contact.name}</span>
+              <span class="contact-address">${contact.address}</span>
+            </button>`;
+            contactsElm.innerHTML += newContact;
+          })
+        });
+      }
       function selectContact(id) {
+        if (selectedId) {
+          document.getElementById(selectedId).classList.remove("selected");
+        }
         let elm = document.getElementById(id);
         if (elm) {
           if (elm.classList.contains("selected")) {
             elm.classList.remove("selected");
-            selectedIds = selectedIds.filter((item) => item !== id);
+            selectedId = null;
           }
           else {
             elm.classList.add("selected");
-            selectedIds.push(id);
+            selectedId = id;
           }
         }
-        if (selectedIds.length > 0) {
+        if (selectedId) {
           document.getElementById("removeBtn").disabled = false;
         }
         else {
@@ -28,15 +48,16 @@
         }
       }
       function removeSelected() {
-        for (let i = 0; i < selectedIds.length; i++) {
-          let elm = document.getElementById(selectedIds[i]);
-          if (elm) {
-            elm.remove();
+        $.ajax({
+          url: '/api/contact',
+          type: 'DELETE',
+          data: JSON.stringify({'address': selectedId}),
+          success: function(response) {
+            selectedId = null;
+            document.getElementById("removeBtn").disabled = true;
+            pullContacts();
           }
-        }
-        console.log('Remove Ids :>> ', selectedIds);
-        selectedIds = [];
-        document.getElementById("removeBtn").disabled = true;
+        });
       }
       function addContact(){
         let name = document.getElementById("contactNameInput").value;
@@ -46,19 +67,29 @@
             alert('Invalid address');
             return;
           }
-          if (name.length > 25) {
-            alert('Name too long');
+          if (name.length > 25 || name.length < 1) {
+            alert('Incorrect name length (Min 1, Max 25 chars)');
             return;
           }
-
-          let contactsElm = document.getElementsByClassName("contacts")[0];
-          let newContact = `<button onclick="selectContact('${address}')" id="${address}" class="contact">
-            <span class="contact-name">${name}</span>
-            <span class="contact-address">${address}</span>
-          </button>`;
-          contactsElm.innerHTML += newContact;
+          $.ajax({
+          url: '/api/contact',
+          type: 'PUT',
+          data: JSON.stringify({
+            'address': address,
+            'name': name,
+          }),
+          success: function(response) {
+            pullContacts();
+            document.getElementById("contactNameInput").value = "";
+            document.getElementById("contactAddInput").value = "";
+          }
+        });
         }
       }
+
+      $(document).ready(function(){
+        pullContacts();
+      });
     </script>
   </head>
   <body>
@@ -73,27 +104,6 @@
     <div class="content">
       <div class="contacts-container">
         <div class="contacts">
-
-          <button onclick="selectContact('0xABCD')" id="0xABCD" class="contact">
-            <span class="contact-name">Johny VeryLongBigName Doe</span>
-            <span class="contact-address">0xABCD</span>
-          </button>
-          <button onclick="selectContact('0x0001')" id="0x0001" class="contact">
-            <span class="contact-name">John Doe</span>
-            <span class="contact-address">0x0001</span>
-          </button>
-          <button onclick="selectContact('0x0002')" id="0x0002" class="contact">
-            <span class="contact-name">Frederic</span>
-            <span class="contact-address">0x0002</span>
-          </button>
-          <button onclick="selectContact('0xDCBA')" id="0xDCBA" class="contact">
-            <span class="contact-name">Kevin IDK</span>
-            <span class="contact-address">0xDCBA</span>
-          </button>
-          <button onclick="selectContact('0x0004')" id="0x0004" class="contact">
-            <span class="contact-name">Random name</span>
-            <span class="contact-address">0x0004</span>
-          </button>
         </div>
         <div class="new_contact">
           <p class="info-label">Add contact:</p>

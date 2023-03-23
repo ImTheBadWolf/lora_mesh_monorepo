@@ -18,7 +18,8 @@ class NodeProcess():
 
       if state is not None:
         message_queue_item.update_message_state(state)
-      self.notification_callback(f"Adding message {message_queue_item.get_message_id()} to queue")
+      if state != MessageState.DONE:
+        self.notification_callback(f"Adding message {message_queue_item.get_message_id()} to queue")
       self.message_queue[message_id] = message_queue_item
     #else:
     #TODO Message with same id already exists in queue, dont add it to queue again
@@ -44,8 +45,17 @@ class NodeProcess():
 
     self.add_message(message_instance)
 
+  def resend_text_message(self, message_id):
+    if message_id not in self.message_queue:
+      return
+    message_queue_item = self.message_queue[message_id]
+    message_instance = Message()
+    message_instance.new_text_message(message_queue_item.get_destination(), protocol_config.MY_ADDRESS, message_queue_item.get_message_instance().get_text_message().decode("utf-8"), message_queue_item.get_w_ack(), message_queue_item.get_maxhop(), message_queue_item.get_priority())
+
+    self.add_message(message_instance)
+
   def receive_message(self):
-    received_packet = self.rfm9x.receive(timeout=0.1) #TODO this timeout is slowing down the main process loop
+    received_packet = self.rfm9x.receive(timeout=0.05) #TODO this timeout is slowing down the main process loop
     if received_packet is not None and len(received_packet) >= protocol_config.HEADER_LENGTH:
       checksum = calculate_checksum(received_packet)
       checksum_bytes = checksum.to_bytes(2, 'big')
@@ -67,13 +77,13 @@ class NodeProcess():
         if message.get_header().get_message_type() != MessageType.ACK:
           if message.get_message_id() not in self.message_queue:
             #Success, message arrived to destination
-            self.notification_callback("You received new message")
+            self.notification_callback("You received new message, msgId: " + str(message.get_message_id()))
 
             if message.get_w_ack():
               #Received message requires to send back ACK
               ack_message_instance = Message()
               ack_message_instance.new_ack_message(message.get_sender(), protocol_config.MY_ADDRESS, message.get_message_id(), max_hop=message.get_initialMaxHop(), priority=message.get_header().get_priority())
-
+              self.notification_callback(f"Created ACK message(id: {ack_message_instance.get_message_id()}), confirming msgID: {message.get_message_id()}, maxHop={ack_message_instance.get_maxHop()}")
               #Hardcoded timeout for ACK message
               self.add_message(ack_message_instance, 1500)
             else:
@@ -82,7 +92,7 @@ class NodeProcess():
               #This ACK message will have maxHop set to 0 so that only neighbor node will receive it
               ack_message_instance = Message()
               ack_message_instance.new_ack_message(message.get_sender(), protocol_config.MY_ADDRESS, message.get_message_id(), max_hop=0)
-
+              self.notification_callback(f"Created ACK message(id: {ack_message_instance.get_message_id()}), confirming msgID: {message.get_message_id()}, maxHop={ack_message_instance.get_maxHop()}")
               #Hardcoded timeout for ACK message
               self.add_message(ack_message_instance, 1500)
 
@@ -155,14 +165,17 @@ class NodeProcess():
       if message_queue_itm.get_state() == MessageState.NEW or message_queue_itm.get_state() == MessageState.SENT:
         if message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000) or message_queue_itm.get_priority == Priority.HIGH:
           if (message_queue_itm.get_message_type() != MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0) \
-          or (message_queue_itm.get_message_type() == MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0 and message_queue_itm.get_ttl() > 0):
+          or (message_queue_itm.get_message_type() == MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0 and message_queue_itm.get_ttl() > 0): #TODO this is horrible, refactor later
             if message_queue_itm.get_message_type() == MessageType.SENSOR_DATA:
               message_queue_itm.decrement_ttl(round(time.monotonic() * 1000) - message_queue_itm.get_last_millis())
 
             message_queue_itm.decrement_counter()
             #TODO implemnet CSMA here. If channel is busy, wait for fixed time and try again.
             #Additioanl csmaTimeout variable may be needed, which will be used to skip tick process for some time
-            self.rfm9x.send(message_queue_itm.get_message_bytes())
+            try:
+              self.rfm9x.send(message_queue_itm.get_message_bytes())
+            except:
+              print("RFM9x send failed")
             message_queue_itm.update_last_millis()
             message_queue_itm.set_timeout(protocol_config.RESEND_TIMEOUT*1000) #After first send, the timeout can be 0 as it will not break the flooding. But timeout is set to RESEND_TIMEOUT to prevent rapid spamming of the same message
             if message_queue_itm.get_state() == MessageState.NEW:
@@ -188,3 +201,73 @@ class NodeProcess():
         if message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000):
           #Message was rebroadcasted, but ACK was not received in time
           message_queue_itm.update_message_state(MessageState.NAK)
+
+  def get_string_msg_type(self, msg_type):
+    if msg_type == MessageType.TEXT_MSG:
+      return "TEXT"
+    elif msg_type == MessageType.TEXT_MSG_W_ACK:
+      return "WACK_TEXT"
+    elif msg_type == MessageType.SENSOR_DATA:
+      return "SENSOR"
+    elif msg_type == MessageType.TRACEROUTE:
+      return "TRACEROUTE"
+    else:
+      return "TEXT"
+
+  def get_string_msg_state(self, msg_state):
+    if msg_state == MessageState.DONE:
+      return "DONE"
+    elif msg_state == MessageState.REBROADCASTED:
+      return "REBROADCASTED"
+    elif msg_state == MessageState.ACK:
+      return "ACK"
+    elif msg_state == MessageState.NAK:
+      return "NAK"
+    elif msg_state == MessageState.FAILED:
+      return "FAILED"
+    else:
+      return "DONE"
+
+  def get_user_messages(self):
+    messages = []
+    for message_queue_itm in self.message_queue.values():
+      # add only messages with type that are not ACK or TRACEROUTE_REQUEST and sender or destination is me
+      if message_queue_itm.get_message_type() != MessageType.ACK and message_queue_itm.get_message_type() != MessageType.TRACEROUTE_REQUEST:
+        if message_queue_itm.get_sender() == protocol_config.MY_ADDRESS and message_queue_itm.get_message_type() != MessageType.TRACEROUTE:
+          messages.append(message_queue_itm)
+        elif message_queue_itm.get_destination() == protocol_config.MY_ADDRESS:
+          messages.append(message_queue_itm)
+    return messages
+
+  def parse_messages(self, messageList):
+    """
+    Parse messages from messageList into list of MESSAGE_ENTITY
+    MESSAGE_ENTITY = {
+      'id': Number, //Message ID
+      'from': String, //Sender, hex address is translated (on FE) to contact name if it exists
+      'to': String, //Destination, hex address is translated (on FE) to contact name if it exists
+      'payload': String
+      'msg_type': OneOf('TEXT', 'WACK_TEXT', 'SENSOR', 'TRACEROUTE'),
+      'state': OneOf('DONE', 'REBROADCASTED', 'ACK', 'NAK', 'FAILED',) //Optional, set only for messages sent by "me"
+    }
+    """
+    message_entity_list = []
+    for message_queue_item in messageList:
+      message_entity = {}
+      message_entity['id'] = message_queue_item.get_message_id()
+      message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
+      message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
+
+      msg_type = message_queue_item.get_message_type()
+      msg_instance = message_queue_item.get_message_instance()
+      message_entity['msg_type'] = self.get_string_msg_type(msg_type)
+      if msg_type == MessageType.SENSOR_DATA:
+        message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
+      else:
+        message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
+
+      if message_queue_item.get_sender() == protocol_config.MY_ADDRESS:
+        message_entity['state'] = self.get_string_msg_state(message_queue_item.get_state())
+
+      message_entity_list.append(message_entity)
+    return message_entity_list

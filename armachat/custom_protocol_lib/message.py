@@ -15,7 +15,7 @@ class Message():
     self.header = Header()
     self.header.new_header(destination_address, sender_address, message_type, priority)
 
-    self.text_message = message
+    self.text_message = bytes(message[:238], "utf-8")
     self.maxHop = max_hop
     self.initialMaxHop = max_hop
     self.payload = self.__construct_message_payload(message, message_type)
@@ -35,7 +35,7 @@ class Message():
     self.header = Header()
     self.header.new_header(destination_address, sender_address, MessageType.SENSOR_DATA, priority)
 
-    self.sensor_data = sensor_data
+    self.sensor_data = sensor_data[:238]
     self.ttl = ttl
     self.message_id = self.header.get_message_id()
     self.payload = self.__construct_message_payload(str(sensor_data), MessageType.SENSOR_DATA)

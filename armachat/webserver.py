@@ -1,7 +1,3 @@
-# SPDX-FileCopyrightText: 2022 Dan Halbert for Adafruit Industries
-#
-# SPDX-License-Identifier: Unlicense
-
 import secrets  # pylint: disable=no-name-in-module
 
 import socketpool
@@ -16,6 +12,44 @@ from adafruit_httpserver.response import HTTPResponse
 from adafruit_httpserver.server import HTTPServer
 from adafruit_httpserver.server import HTTPMethod
 
+import os
+from adafruit_bitmap_font import bitmap_font
+from time import sleep
+import microcontroller
+from adafruit_simple_text_display import SimpleTextDisplay
+from adafruit_display_text import label
+from config import config
+import adafruit_matrixkeypad
+import displayio
+from digitalio import DigitalInOut
+import pwmio
+from adafruit_display_text import label
+from adafruit_st7789 import ST7789
+from digitalio import DigitalInOut, Pull
+import board
+import busio
+import terminalio
+import ulora
+import analogio
+from binascii import hexlify
+import digitalio
+import gc
+import aesio
+import random
+import sys
+import time
+import digitalio
+import board
+import busio
+
+sys.path.append("custom_protocol_lib")
+import protocol_config
+from base_utils import *
+from message import Message
+from node_process import *
+from address_book import AddressBook
+import rfm9x_lora
+
 ssid, password = secrets.SSID, secrets.PASSWORD  # pylint: disable=no-member
 lastMillis = 0; #TODO just for testing
 
@@ -26,96 +60,34 @@ print("Connected to", ssid)
 pool = socketpool.SocketPool(wifi.radio)
 server = HTTPServer(pool)
 
-MOCK_MESSAGE_LIST = [
-  {
-    'id': 1,
-    'from': 'John Doe',
-    'to': 'YOU',
-    'payload': 'Prijata sprava od hocikoho, ma byt siva, ziadne ikonky<br>Id sit adipisicing culpa cupidatat fugiat veniam proident voluptate. Ullamco nisi aliquip magna eu elit deserunt sint ea amet deserunt ex minim amet aliquip. Enim duis quis minim fugiat quis dolor aliqua Lorem elit aliquip anim. Est ex cupidatat irure et enim mollit proident. Aliqua pariatur non magna labore laboris occaecat nostrud minim aliqua.',
-    'msg_type': 'TEXT',
-  },
-  {
-    'id': 2,
-    'from': 'YOU',
-    'to': 'ALL',
-    'payload': 'Sprava ktoru som poslal ale neocakavam ACK, ma byt modra, v pravo dole nemaju byt ziadne ikonky<br>Commodo culpa sit culpa in minim commodo incididunt in pariatur minim fugiat. Commodo tempor elit ut nisi ex occaecat',
-    'msg_type': 'TEXT',
-    'my_msg': 'true',
-    'state': 'DONE'
-  },
-  {
-    'id': 11,
-    'from': 'Felix',
-    'to': 'ALL',
-    'payload': 'Prijata sprava od hocikoho, ma byt siva, ziadne ikonky<br>Id sit adipisicing culpa cupidatat fugiat veniam proident voluptate. Ullamco nisi aliquip magna eu elit deserunt sint ea amet deserunt ex minim amet aliquip. Enim duis quis minim fugiat quis dolor aliqua Lorem elit aliquip anim. Est ex cupidatat irure et enim mollit proident. Aliqua pariatur non magna labore laboris occaecat nostrud minim aliqua.',
-    'msg_type': 'TEXT',
-  },
-  {
-    'id': 23,
-    'from': 'YOU',
-    'to': 'Felix',
-    'payload': 'Sprava ktoru som poslal a ku ktorej som ZATIAL neprijal ACK (este bezi timeout tej sprave), ma byt modra, v pravo dole ikonka s prazdnym checkom<br>esse mollit sit anim minim voluptate. Laboris deserunt exercitation exercitation commodo cupidatat ad eiusmod minim. Aute elit do dolor proident tempor cupidatat officia reprehenderit.',
-    'msg_type': 'WACK_TEXT',
-    'my_msg': 'true',
-    'state': 'REBROADCASTED'
-  },
-  {
-    'id': 3,
-    'from': 'YOU',
-    'to': 'Felix',
-    'payload': 'Sprava ktoru som poslal a ku ktorej som prijal ACK, ma byt modra, v pravo dole ikonka s vyfarbenym checkom<br>In eu ea esse irure aliqua culpa et aute esse laboris incididunt. Dolor laboris aliqua consectetur sint Lorem quis eu eu magna deserunt voluptate aliquip magna reprehenderit. Sit labore ipsum voluptate incididunt culpa. Labore minim irure dolor occaecat deserunt in Lorem anim nulla quis laboris labore do. Consectetur pariatur sint officia Lorem quis aute minim dolor duis occaecat.Nisi ea cillum non sit adipisicing velit sit aliquip mollit id occaecat duis et commodo. Eu officia exercitation consectetur aliquip minim cupidatat id sunt laboris occaecat consequat exercitation deserunt irure. Officia laboris consectetur consequat reprehenderit exercitation do id. Est do nostrud in irure sint. Irure sit consectetur sint enim labore incididunt sit laboris ipsum. Aliqua pariatur non in cupidatat aliquip ea quis dolore ullamco duis qui in. Exercitation occaecat cillum irure eiusmod ut ex tempor officia dolor aliqua irure velit ea.',
-    'msg_type': 'WACK_TEXT',
-    'my_msg': 'true',
-    'state': 'ACK'
-  },
-  {
-    'id': 111,
-    'from': 'Frederick',
-    'to': 'YOU',
-    'payload': 'Prijata sprava od hocikoho, ma byt siva, ziadne ikonky<br>Id sit adipisicing culpa cupidatat fugiat veniam proident voluptate. Ullamco nisi aliquip magna eu elit deserunt sint ea amet deserunt ex minim amet aliquip. Enim duis quis minim fugiat quis dolor aliqua Lorem elit aliquip anim. Est ex cupidatat irure et enim mollit proident. Aliqua pariatur non magna labore laboris occaecat nostrud minim aliqua.',
-    'msg_type': 'TEXT',
-  },
-  {
-    'id': 4,
-    'from': 'YOU',
-    'to': '0xABCD',
-    'payload': 'WACK sprava ktoru som poslal a ku ktorej som po timeoute NEprijal ACK, ma byt modra ale s opacity, vpravo dole niesu ikonky ale bublina s informaciou o tom ze je failed, bublina sa da klikat a znovu posielat spravu<br>Culpa veniam voluptate fugiat ad consectetur sit irure non ips',
-    'msg_type': 'WACK_TEXT',
-    'my_msg': 'true',
-    'state': 'NAK'
-  },
-  {
-    'id': 66,
-    'from': 'Enviroment sensor',
-    'to': 'ALL',
-    'payload': ' Temperature: 25°C Humidity: 50%<br>125 ppm CO2<br>sprava ma byt oranzova, ziadne ikonky v pravo dole',
-    'msg_type': 'SENSOR',
-  },
-  {
-    'id': 5,
-    'from': 'YOU',
-    'to': 'ALL',
-    'payload': 'obycajna sprava ktoru som poslal ale ziadna dalsia node ju nerebroadcastovala, modra, opacity, dole bublina s informaciou o tom ze je failed, bublina sa da klikat a znovu posielat spravu<br>pa veniam voluptate fugiat ad consectetur sit irure non pa veniam voluptate fugiat ad consectetur sit irure non ',
-    'msg_type': 'TEXT',
-    'my_msg': 'true',
-    'state': 'FAILED'
-  },
-  {
-    'id': 6,
-    'from': 'Enviroment sensor',
-    'to': 'ALL',
-    'payload': ' Temperature: 25°C Humidity: 50%<br>125 ppm CO2<br>sprava ma byt oranzova, ziadne ikonky v pravo dole',
-    'msg_type': 'SENSOR',
-  },
-  {
-    'id': 777,
-    'from': '0x0005',
-    'to': 'YOU',
-    'payload': '0x0005=>0xABCD=>0x0AC7=>YOU',
-    'msg_type': 'TRACEROUTE',
-  },
-]
+spi_lora = busio.SPI(board.GP10, MOSI=board.GP11, MISO=board.GP12)
+CS = digitalio.DigitalInOut(board.GP13)
+RESET = digitalio.DigitalInOut(board.GP17)
+# 1 => Bw500Cr45Sf128       Short/Fast --X
+# 2 => Bw125Cr45Sf128       Short/Slow
+# 3 => Bw250Cr47Sf1024      Medium/Fast
+# 4 => Bw250Cr46Sf2048      Medium/Slow
+# 5 => Bw31_25Cr48Sf512     Long/Fast
+# 6 => Bw125Cr48Sf4096      Long/Slow
+rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=500000)
+rfm9x.signal_bandwidth = 500000
+rfm9x.coding_rate = 5
+rfm9x.spreading_factor = 7
+rfm9x.tx_power = 23
+rfm9x.preamble_length = 8
 
+def show_info_notification(text):
+  print(text)
+
+node_process = NodeProcess(rfm9x, show_info_notification)
+address_book = AddressBook("data/contacts.json", "data/sensors.json")
+try:
+  address_book.add_contact("YOU", f"0x{protocol_config.MY_ADDRESS:04x}")
+  address_book.add_contact("ALL", f"0xFFFF") #TODO broadcast functionality not implemented yet
+  address_book.add_sensor("YOU", f"0x{protocol_config.MY_ADDRESS:04x}")
+  address_book.add_sensor("ALL", f"0xFFFF")
+except:
+  print("Cant save. Readonly filesystem")
 
 @server.route("/")
 def base(request: HTTPRequest):
@@ -141,35 +113,140 @@ def config_route(request: HTTPRequest):
     with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
         response.send("Under construction")
 
-
+#List messages
 @server.route("/api/messages")
 def api_messages(request: HTTPRequest):
+  messages = node_process.get_user_messages()
+  parsed_messages = node_process.parse_messages(messages)
+
   data = {
-     'messages': MOCK_MESSAGE_LIST
+     'messages': parsed_messages
   }
   with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
     response.send(json.dumps(data))
 
+#Create and send new text message
 @server.route("/api/send_text_message", method=HTTPMethod.POST)
 def api_send_message(request: HTTPRequest):
-  #TODO data.get('max_hop')
-  #TODO data.get('priority')
-  data = json.loads(request.body)
-  print(data)
-  MOCK_MESSAGE_LIST.append({
-    'id': random.randint(100,50000),
-    'from': 'YOU',
-    'to': data.get('destination'),
-    'payload': data.get('message'),
-    'msg_type': 'wack_text' if data.get('wack') else 'text',
-    'my_msg': 'true',
-    'state': 'REBROADCASTED'
-  })
-  if data.get('wack'):
-    global lastMillis
-    lastMillis = int(time.time() * 1000)
+  try:
+    data = json.loads(request.body)
+    destination = int(data.get('destination'), 16)
+    message = data.get('message')
+    message = message[:238] #Limit message length to 238 characters
+    max_hop = int(data.get('max_hop'))
+    priority = int(data.get('priority'))
+    w_ack = data.get('wack')
+    node_process.new_text_message(destination, message, w_ack, max_hop, priority)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except:
+    print("Could not parse data")
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("Could not parse data")
+
+#Resend message
+@server.route("/api/resend_message", method=HTTPMethod.POST)
+def api_resend_message(request: HTTPRequest):
+  try:
+    data = json.loads(request.body)
+    message_id = int(data.get('message_id'))
+    node_process.resend_text_message(message_id)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except:
+    print("Could not parse data")
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("Could not parse data")
+
+#Create and send new traceroute request
+@server.route("/api/traceroute", method=HTTPMethod.POST)
+def api_send_traceroute(request: HTTPRequest):
+  try:
+    data = json.loads(request.body)
+    destination = int(data.get('destination'), 16)
+    max_hop = int(data.get('max_hop'))
+    priority = int(data.get('priority'))
+    node_process.new_traceroute_request(destination, max_hop, priority)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except:
+    print("Could not parse data")
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("Could not parse data")
+
+@server.route("/api/contacts")
+def api_contacts(request: HTTPRequest):
+  contacts = address_book.get_contacts()
+
+  data = {
+     'contacts': contacts
+  }
   with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-    response.send("OK")
+    response.send(json.dumps(data))
+
+@server.route("/api/contact", method=HTTPMethod.PUT)
+def api_add_contact(request: HTTPRequest):
+  try:
+    data = json.loads(request.body)
+    address = data.get('address')
+    name = data.get('name')
+    address_book.add_contact(name, address)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except:
+    print("Could not parse data")
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("Could not parse data")
+
+@server.route("/api/contact", method=HTTPMethod.DELETE)
+def api_del_contact(request: HTTPRequest):
+  try:
+    data = json.loads(request.body)
+    address = data.get('address')
+    address_book.del_contact(address)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except:
+    print("Could not parse data")
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("Could not parse data")
+
+@server.route("/api/sensors")
+def api_sensors(request: HTTPRequest):
+  sensors = address_book.get_sensors()
+
+  data = {
+     'sensors': sensors
+  }
+  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+    response.send(json.dumps(data))
+
+@server.route("/api/sensor", method=HTTPMethod.PUT)
+def api_add_sensor(request: HTTPRequest):
+  try:
+    data = json.loads(request.body)
+    address = data.get('address')
+    name = data.get('name')
+    address_book.add_sensor(name, address)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except:
+    print("Could not parse data")
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("Could not parse data")
+
+@server.route("/api/sensor", method=HTTPMethod.DELETE)
+def api_del_sensor(request: HTTPRequest):
+  try:
+    data = json.loads(request.body)
+    address = data.get('address')
+    address_book.del_sensor(address)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except:
+    print("Could not parse data")
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("Could not parse data")
 
 
 print(f"Listening on http://{wifi.radio.ipv4_address}:80")
@@ -178,13 +255,15 @@ print(f"Listening on http://{wifi.radio.ipv4_address}:80")
 #Start the server.
 server.start(str(wifi.radio.ipv4_address))
 while True:
+  node_process.receive_message() #Adds 100ms delay...
+  node_process.tick()
+
   try:
-    if lastMillis != 0 and int(time.time() * 1000) - lastMillis > 5000:
+    """ if lastMillis != 0 and int(time.time() * 1000) - lastMillis > 5000:
       lastMillis = 0
       newState = 'ACK' if random.randint(0,1) == 1 else 'NAK'
       print("Updating message state to: " + newState)
-      MOCK_MESSAGE_LIST[-1]['state'] = newState
-
+      MOCK_MESSAGE_LIST[-1]['state'] = newState """
     server.poll()
   except OSError as error:
     print(error)

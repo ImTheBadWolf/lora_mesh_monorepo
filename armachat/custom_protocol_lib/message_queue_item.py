@@ -91,3 +91,6 @@ class MessageQueueItem():
 
   def get_w_ack(self):
     return self.message_instance.get_w_ack()
+
+  def get_message_instance(self):
+    return self.message_instance

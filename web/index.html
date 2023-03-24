@@ -18,6 +18,11 @@
       let contactsMap = new Map();
       let sensorsMap = new Map();
 
+      function scrolledEnd() {
+        const messagesElement = document.getElementsByClassName("messages")[0];
+        return Math.ceil(messagesElement.scrollTop + messagesElement.clientHeight) === messagesElement.scrollHeight
+      }
+
       function isFailed(messageState) {
         return messageState === 'FAILED' || messageState === 'NAK'
       }
@@ -40,6 +45,7 @@
         if (!shouldUpdate) {
           return;
         }
+        scrollToEnd = scrollToEnd || scrolledEnd();
 
         let messagesElement = document.getElementsByClassName("messages")[0];
         messagesElement.innerHTML = '';
@@ -114,12 +120,14 @@
       }
 
       async function pullNewMessages() {
-        return new Promise(function(resolve, reject) {
-          $.get("/api/messages", function(data, status){
+        let pages;
+        return new Promise(async function(resolve, reject) {
+          await $.get("/api/messages", function(data, status){
             if (status !== 'success') {
               reject();
             }
             const jsonData = JSON.parse(data);
+            pages = jsonData.pages;
             jsonData.messages.forEach((message)=>{
               if (!messagesMap.has(message.id)) {
                 messagesMap.set(message.id, message)
@@ -134,9 +142,31 @@
                 }
               }
             })
-            updateMessageList();
-            resolve();
           });
+          for (let i = 1; i <= pages; i++) {
+            await $.get(`/api/messages?page=${i}`, function(data, status){
+              if (status !== 'success') {
+                reject();
+              }
+              const jsonData = JSON.parse(data);
+              jsonData.messages.forEach((message)=>{
+                if (!messagesMap.has(message.id)) {
+                  messagesMap.set(message.id, message)
+                  shouldUpdate = true;
+                }
+                else {
+                  //Update message state
+                  const oldMessage = messagesMap.get(message.id);
+                  if (oldMessage.state !== message.state) {
+                    messagesMap.set(message.id, {...oldMessage, state:message.state})
+                    shouldUpdate = true;
+                  }
+                }
+              })
+            });
+          }
+          updateMessageList();
+          resolve();
         })
       }
 

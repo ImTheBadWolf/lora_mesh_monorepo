@@ -46,7 +46,7 @@ sys.path.append("custom_protocol_lib")
 import protocol_config
 from base_utils import *
 from message import Message
-from node_process import *
+from node_process import NodeProcess
 from address_book import AddressBook
 import rfm9x_lora
 
@@ -79,178 +79,219 @@ rfm9x.preamble_length = 8
 def show_info_notification(text):
   print(text)
 
-node_process = NodeProcess(rfm9x, show_info_notification)
-address_book = AddressBook("data/contacts.json", "data/sensors.json")
-try:
-  address_book.add_contact("YOU", f"0x{protocol_config.MY_ADDRESS:04x}")
-  address_book.add_contact("ALL", f"0xFFFF") #TODO broadcast functionality not implemented yet
-  address_book.add_sensor("YOU", f"0x{protocol_config.MY_ADDRESS:04x}")
-  address_book.add_sensor("ALL", f"0xFFFF")
-except:
-  print("Cant save. Readonly filesystem")
+config = protocol_config.ProtocolConfig('data/settings.json')
+initialised = config.is_initialised()
+
+if initialised:
+  node_process = NodeProcess(rfm9x, show_info_notification, config)
+  address_book = AddressBook("data/contacts.json", "data/sensors.json")
+  try:
+    #address_book.add_contact("YOU", f"0x{config.MY_ADDRESS:04x}") #TODO this has to be done only after my address is set
+    address_book.add_contact("ALL", f"0xFFFF") #TODO broadcast functionality not implemented yet, repalce hardcoded string with constant from baseutils
+    #address_book.add_sensor("YOU", f"0x{config.MY_ADDRESS:04x}") #TODO this has to be done only after my address is set
+    address_book.add_sensor("ALL", f"0xFFFF")
+  except:
+    print("Cant save. Readonly filesystem")
+
+else:
+  print("Not initialised, set your address first. Then restart the device.")
 
 @server.route("/")
 def base(request: HTTPRequest):
-
+  if not initialised:
     with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
-        response.send_file("web/index.html")
+      response.send_file("web/config.html")
+  else:
+    with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
+      response.send_file("web/index.html")
 
 @server.route("/sensors")
 def sensors_route(request: HTTPRequest):
-
+  if not initialised:
     with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
-        response.send_file("web/sensors.html")
+      response.send_file("web/config.html")
+  else:
+    with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
+      response.send_file("web/sensors.html")
 
 @server.route("/contacts")
 def contacts_route(request: HTTPRequest):
-
+  if not initialised:
     with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
-        response.send_file("web/contacts.html")
+      response.send_file("web/config.html")
+  else:
+    with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
+      response.send_file("web/contacts.html")
 
 @server.route("/config")
 def config_route(request: HTTPRequest):
-
-    with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
-        response.send("Under construction")
+  with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
+    response.send_file("web/config.html")
 
 #List messages
 @server.route("/api/messages")
 def api_messages(request: HTTPRequest):
-  messages = node_process.get_user_messages()
-  parsed_messages = node_process.parse_messages(messages)
-  gc.collect()
+  if initialised:
+    messages = node_process.get_user_messages()
+    parsed_messages = node_process.parse_messages(messages)
+    gc.collect()
 
-  data = {
-     'messages': parsed_messages
-  }
-  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-    response.send(json.dumps(data))
+    page = request.query_params.get("page")
+    if page is None:
+      page = 0
+    else:
+      page = int(page)
+
+    page_size = 5
+    num_pages = len(parsed_messages) // page_size
+
+    data = {
+      'messages': parsed_messages[page*page_size:(page+1)*page_size],
+      'pages': num_pages,
+      'total': len(parsed_messages),
+    }
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      try:
+        response.send(json.dumps(data))
+      except MemoryError as e:
+        print(e) #TODO not enough memory to json dump messages.... implement paging
+        print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
+        print(f"Allocated memory: {gc.mem_alloc()}")
 
 #Create and send new text message
 @server.route("/api/send_text_message", method=HTTPMethod.POST)
 def api_send_message(request: HTTPRequest):
-  try:
-    data = json.loads(request.body)
-    destination = int(data.get('destination'), 16)
-    message = data.get('message')
-    message = message[:238] #Limit message length to 238 characters
-    max_hop = int(data.get('max_hop'))
-    priority = int(data.get('priority'))
-    w_ack = data.get('wack')
-    node_process.new_text_message(destination, message, w_ack, max_hop, priority)
-    gc.collect()
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("OK")
-  except:
-    print("Could not parse data")
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("Could not parse data")
+  if initialised:
+    try:
+      data = json.loads(request.body)
+      destination = int(data.get('destination'), 16)
+      message = data.get('message')
+      message = message[:238] #Limit message length to 238 characters
+      max_hop = int(data.get('max_hop'))
+      priority = int(data.get('priority'))
+      w_ack = data.get('wack')
+      node_process.new_text_message(destination, message, w_ack, max_hop, priority)
+      gc.collect()
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("OK")
+    except:
+      print("Could not parse data")
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("Could not parse data")
 
 #Resend message
 @server.route("/api/resend_message", method=HTTPMethod.POST)
 def api_resend_message(request: HTTPRequest):
-  try:
-    data = json.loads(request.body)
-    message_id = int(data.get('message_id'))
-    node_process.resend_text_message(message_id)
-    gc.collect()
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("OK")
-  except:
-    print("Could not parse data")
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("Could not parse data")
+  if initialised:
+    try:
+      data = json.loads(request.body)
+      message_id = int(data.get('message_id'))
+      node_process.resend_text_message(message_id)
+      gc.collect()
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("OK")
+    except:
+      print("Could not parse data")
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("Could not parse data")
 
 #Create and send new traceroute request
 @server.route("/api/traceroute", method=HTTPMethod.POST)
 def api_send_traceroute(request: HTTPRequest):
-  try:
-    data = json.loads(request.body)
-    destination = int(data.get('destination'), 16)
-    max_hop = int(data.get('max_hop'))
-    priority = int(data.get('priority'))
-    node_process.new_traceroute_request(destination, max_hop, priority)
-    gc.collect()
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("OK")
-  except:
-    print("Could not parse data")
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("Could not parse data")
+  if initialised:
+    try:
+      data = json.loads(request.body)
+      destination = int(data.get('destination'), 16)
+      max_hop = int(data.get('max_hop'))
+      priority = int(data.get('priority'))
+      node_process.new_traceroute_request(destination, max_hop, priority)
+      gc.collect()
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("OK")
+    except:
+      print("Could not parse data")
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("Could not parse data")
 
 @server.route("/api/contacts")
 def api_contacts(request: HTTPRequest):
-  contacts = address_book.get_contacts()
+  if initialised:
+    contacts = address_book.get_contacts()
 
-  data = {
-     'contacts': contacts
-  }
-  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-    response.send(json.dumps(data))
+    data = {
+      'contacts': contacts
+    }
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send(json.dumps(data))
 
 @server.route("/api/contact", method=HTTPMethod.PUT)
 def api_add_contact(request: HTTPRequest):
-  try:
-    data = json.loads(request.body)
-    address = data.get('address')
-    name = data.get('name')
-    address_book.add_contact(name, address)
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("OK")
-  except:
-    print("Could not parse data")
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("Could not parse data")
+  if initialised:
+    try:
+      data = json.loads(request.body)
+      address = data.get('address')
+      name = data.get('name')
+      address_book.add_contact(name, address)
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("OK")
+    except:
+      print("Could not parse data")
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("Could not parse data")
 
 @server.route("/api/contact", method=HTTPMethod.DELETE)
 def api_del_contact(request: HTTPRequest):
-  try:
-    data = json.loads(request.body)
-    address = data.get('address')
-    address_book.del_contact(address)
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("OK")
-  except:
-    print("Could not parse data")
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("Could not parse data")
+  if initialised:
+    try:
+      data = json.loads(request.body)
+      address = data.get('address')
+      address_book.del_contact(address)
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("OK")
+    except:
+      print("Could not parse data")
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("Could not parse data")
 
 @server.route("/api/sensors")
 def api_sensors(request: HTTPRequest):
-  sensors = address_book.get_sensors()
+  if initialised:
+    sensors = address_book.get_sensors()
 
-  data = {
-     'sensors': sensors
-  }
-  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-    response.send(json.dumps(data))
+    data = {
+      'sensors': sensors
+    }
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send(json.dumps(data))
 
 @server.route("/api/sensor", method=HTTPMethod.PUT)
 def api_add_sensor(request: HTTPRequest):
-  try:
-    data = json.loads(request.body)
-    address = data.get('address')
-    name = data.get('name')
-    address_book.add_sensor(name, address)
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("OK")
-  except:
-    print("Could not parse data")
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("Could not parse data")
+  if initialised:
+    try:
+      data = json.loads(request.body)
+      address = data.get('address')
+      name = data.get('name')
+      address_book.add_sensor(name, address)
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("OK")
+    except:
+      print("Could not parse data")
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("Could not parse data")
 
 @server.route("/api/sensor", method=HTTPMethod.DELETE)
 def api_del_sensor(request: HTTPRequest):
-  try:
-    data = json.loads(request.body)
-    address = data.get('address')
-    address_book.del_sensor(address)
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("OK")
-  except:
-    print("Could not parse data")
-    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-      response.send("Could not parse data")
+  if initialised:
+    try:
+      data = json.loads(request.body)
+      address = data.get('address')
+      address_book.del_sensor(address)
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("OK")
+    except:
+      print("Could not parse data")
+      with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+        response.send("Could not parse data")
 
 
 print(f"Listening on http://{wifi.radio.ipv4_address}:80")
@@ -258,17 +299,19 @@ print(f"Listening on http://{wifi.radio.ipv4_address}:80")
 
 #Start the server.
 server.start(str(wifi.radio.ipv4_address))
+loop_times = []
 while True:
-  node_process.receive_message() #Adds 100ms delay...
-  node_process.tick()
-
+  #start_ms = int(time.time() * 1000)
+  if initialised:
+    node_process.receive_message()
+    node_process.tick()
   try:
-    """ if lastMillis != 0 and int(time.time() * 1000) - lastMillis > 5000:
-      lastMillis = 0
-      newState = 'ACK' if random.randint(0,1) == 1 else 'NAK'
-      print("Updating message state to: " + newState)
-      MOCK_MESSAGE_LIST[-1]['state'] = newState """
     server.poll()
   except OSError as error:
     print(error)
     continue
+  """ end_ms = int(time.time() * 1000)
+  loop_times.append(end_ms - start_ms)
+  if len(loop_times) > 50:
+    print("Average loop time: " + str(sum(loop_times) / len(loop_times)))
+    loop_times = [] """

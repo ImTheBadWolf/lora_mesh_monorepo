@@ -1,11 +1,13 @@
 import gc
 from message import *
 from message_queue_item import *
+from base_utils import *
 
 class NodeProcess():
-  def __init__(self, rfm9x, notification_callback):
+  def __init__(self, rfm9x, notification_callback, config):
     self.message_queue = {}
     self.message_counter = 0
+    self.config = config
     self.rfm9x = rfm9x
     self.notification_callback = notification_callback #TODO used just for testing on armachat devices
 
@@ -13,7 +15,16 @@ class NodeProcess():
     message_id = message_instance.get_message_id()
 
     if message_id not in self.message_queue:
-      message_queue_item = MessageQueueItem(message_instance, self.message_counter, timeout)
+      #Check if messagequeue doesnt exceed MESSAGE_QUEUE_SIZE.
+      # If it does, remove the oldest message from queue based on message_counter
+      if len(self.message_queue) >= MESSAGE_QUEUE_SIZE:
+        #filter messageid of the oldest message from queue based on message_counter get_message_counter()
+        oldest_message_id = min(self.message_queue, key=lambda x: self.message_queue[x].get_message_counter())
+        self.notification_callback(f"Removing oldset message id:{oldest_message_id} from queue")
+        del self.message_queue[oldest_message_id]
+        gc.collect()
+
+      message_queue_item = MessageQueueItem(message_instance, self.message_counter, self.config, timeout)
       self.message_counter += 1
       if decrement:
         if message_instance.get_message_type() != MessageType.SENSOR_DATA:
@@ -27,26 +38,32 @@ class NodeProcess():
     #else:
     #TODO Message with same id already exists in queue, dont add it to queue again
 
-  def new_text_message(self, destination_address, string_message, w_ack = False, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
+  def new_text_message(self, destination_address, string_message, w_ack = False, max_hop=None, priority=Priority.NORMAL):
     #This method is used only for user created new text messages
-    message_instance = Message()
-    message_instance.new_text_message(destination_address, protocol_config.MY_ADDRESS, string_message, w_ack, max_hop, priority)
+    if max_hop is None:
+      max_hop = self.config.DEFAULT_MAX_HOP
+    message_instance = Message(self.config)
+    message_instance.new_text_message(destination_address, self.config.MY_ADDRESS, string_message, w_ack, max_hop, priority)
 
     self.add_message(message_instance)
     gc.collect()
 
-  def new_sensor_message(self, destination_address, sensor_data, ttl=protocol_config.DEFAULT_TTL, priority=Priority.NORMAL):
+  def new_sensor_message(self, destination_address, sensor_data, ttl=None, priority=Priority.NORMAL):
     #This method is used only for user created sensor data messages
-    message_instance = Message()
-    message_instance.new_sensor_message(destination_address, protocol_config.MY_ADDRESS, sensor_data, ttl, priority)
+    if ttl is None:
+      ttl = self.config.DEFAULT_TTL
+    message_instance = Message(self.config)
+    message_instance.new_sensor_message(destination_address, self.config.MY_ADDRESS, sensor_data, ttl, priority)
 
     self.add_message(message_instance)
     gc.collect()
 
-  def new_traceroute_request(self, destination_address, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
+  def new_traceroute_request(self, destination_address, max_hop=None, priority=Priority.NORMAL):
     #This method is used only for user created traceroute request messages
-    message_instance = Message()
-    message_instance.new_traceroute_request(destination_address, protocol_config.MY_ADDRESS, max_hop, priority)
+    if max_hop is None:
+      max_hop = self.config.DEFAULT_MAX_HOP
+    message_instance = Message(self.config)
+    message_instance.new_traceroute_request(destination_address, self.config.MY_ADDRESS, max_hop, priority)
 
     self.add_message(message_instance)
     gc.collect()
@@ -55,15 +72,15 @@ class NodeProcess():
     if message_id not in self.message_queue:
       return
     message_queue_item = self.message_queue[message_id]
-    message_instance = Message()
-    message_instance.new_text_message(message_queue_item.get_destination(), protocol_config.MY_ADDRESS, message_queue_item.get_message_instance().get_text_message().decode("utf-8"), message_queue_item.get_w_ack(), message_queue_item.get_maxhop(), message_queue_item.get_priority())
+    message_instance = Message(self.config)
+    message_instance.new_text_message(message_queue_item.get_destination(), self.config.MY_ADDRESS, message_queue_item.get_message_instance().get_text_message().decode("utf-8"), message_queue_item.get_w_ack(), message_queue_item.get_maxhop(), message_queue_item.get_priority())
 
     self.add_message(message_instance)
     gc.collect()
 
   def receive_message(self):
-    received_packet = self.rfm9x.receive(timeout=0.05) #TODO this timeout is slowing down the main process loop
-    if received_packet is not None and len(received_packet) >= protocol_config.HEADER_LENGTH:
+    received_packet = self.rfm9x.receive(timeout=0.8)
+    if received_packet is not None and len(received_packet) >= HEADER_LENGTH:
       checksum = calculate_checksum(received_packet)
       checksum_bytes = checksum.to_bytes(2, 'big')
 
@@ -71,16 +88,10 @@ class NodeProcess():
         #Received packet does not belong to this protocol
         return
 
-      message = Message()
+      message = Message(self.config)
       message.construct_message_from_bytes(received_packet)
 
-      #TODO monitoring mode just for testing
-      if protocol_config.MONITORING:
-        self.notification_callback("Received, destination:" + str(message.get_destination()))
-
-      if message.get_destination() == protocol_config.MY_ADDRESS:
-        #TODO add message to userMessagesList(or Map 🤔?)
-
+      if message.get_destination() == self.config.MY_ADDRESS:
         if message.get_header().get_message_type() != MessageType.ACK:
           if message.get_message_id() not in self.message_queue:
             #Success, message arrived to destination
@@ -88,8 +99,8 @@ class NodeProcess():
 
             if message.get_w_ack():
               #Received message requires to send back ACK
-              ack_message_instance = Message()
-              ack_message_instance.new_ack_message(message.get_sender(), protocol_config.MY_ADDRESS, message.get_message_id(), max_hop=message.get_initialMaxHop(), priority=message.get_header().get_priority())
+              ack_message_instance = Message(self.config)
+              ack_message_instance.new_ack_message(message.get_sender(), self.config.MY_ADDRESS, message.get_message_id(), max_hop=message.get_initialMaxHop(), priority=message.get_header().get_priority())
               self.notification_callback(f"Created ACK message(id: {ack_message_instance.get_message_id()}), confirming msgID: {message.get_message_id()}, maxHop={ack_message_instance.get_maxHop()}")
               #Hardcoded timeout for ACK message
               self.add_message(ack_message_instance, 1500)
@@ -97,8 +108,8 @@ class NodeProcess():
               #Received message does not require to send back ACK
               #But we have to send ACK anyway, so that neighbor node can remove this message from queue and stop rebroadcasting it
               #This ACK message will have maxHop set to 0 so that only neighbor node will receive it
-              ack_message_instance = Message()
-              ack_message_instance.new_ack_message(message.get_sender(), protocol_config.MY_ADDRESS, message.get_message_id(), max_hop=0)
+              ack_message_instance = Message(self.config)
+              ack_message_instance.new_ack_message(message.get_sender(), self.config.MY_ADDRESS, message.get_message_id(), max_hop=0)
               self.notification_callback(f"Created ACK message(id: {ack_message_instance.get_message_id()}), confirming msgID: {message.get_message_id()}, maxHop={ack_message_instance.get_maxHop()}")
               #Hardcoded timeout for ACK message
               self.add_message(ack_message_instance, 1500)
@@ -108,8 +119,8 @@ class NodeProcess():
 
             if message.get_header().get_message_type() == MessageType.TRACEROUTE_REQUEST:
               #Received traceroute request, send back traceroute response
-              traceroute_response_message_instance = Message()
-              traceroute_response_message_instance.new_traceroute_message(message.get_sender(), protocol_config.MY_ADDRESS, max_hop=message.get_initialMaxHop(), priority=message.get_header().get_priority())
+              traceroute_response_message_instance = Message(self.config)
+              traceroute_response_message_instance.new_traceroute_message(message.get_sender(), self.config.MY_ADDRESS, max_hop=message.get_initialMaxHop(), priority=message.get_header().get_priority())
 
               self.add_message(traceroute_response_message_instance, 2500)
 
@@ -128,20 +139,20 @@ class NodeProcess():
         if message.get_message_id() in self.message_queue:
           message_queue_item = self.message_queue[message.get_message_id()]
           #Received message is already in queue, update state
-          if message_queue_item.get_sender() == protocol_config.MY_ADDRESS:
+          if message_queue_item.get_sender() == self.config.MY_ADDRESS:
             #Received rebroadcast of message which was created by me. Either update state to rebroadcasted or done based on w_ack
             self.notification_callback(f"Message {message_queue_item.get_message_id()} was rebroadcasted")
             if message_queue_item.get_w_ack():
               message_queue_item.update_message_state(MessageState.REBROADCASTED)
               message_queue_item.update_last_millis()
-              message_queue_item.set_timeout(protocol_config.ACK_WAIT_TIME*1000)
+              message_queue_item.set_timeout(self.config.ACK_WAIT_TIME*1000)
             else:
               message_queue_item.update_message_state(MessageState.DONE)
           else:
             #Received rebroadcast of message which was created by someone else. Delete this message from queue so that it wont be rebroadcasted by me again
             message_queue_item.update_message_state(MessageState.DELETED)
             message_queue_item.update_last_millis()
-            message_queue_item.set_timeout(protocol_config.DELETE_WAIT_TIME*1000)
+            message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
         else:
           #Received message is not in queue, check if its ACK message
           if message.get_message_type() == MessageType.ACK:
@@ -151,7 +162,7 @@ class NodeProcess():
               message_queue_item = self.message_queue[ack_message_id]
               message_queue_item.update_message_state(MessageState.DELETED)
               message_queue_item.update_last_millis()
-              message_queue_item.set_timeout(protocol_config.DELETE_WAIT_TIME*1000)
+              message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
               return
           #Received message is not in queue, decrement maxHop/TTL and add it to queue
           if (message.get_message_type() != MessageType.SENSOR_DATA and message.get_maxHop() > 0) or (message.get_message_type() == MessageType.SENSOR_DATA and message.get_ttl() > 0):
@@ -189,7 +200,7 @@ class NodeProcess():
             except:
               print("RFM9x send failed")
             message_queue_itm.update_last_millis()
-            message_queue_itm.set_timeout(protocol_config.RESEND_TIMEOUT*1000) #After first send, the timeout can be 0 as it will not break the flooding. But timeout is set to RESEND_TIMEOUT to prevent rapid spamming of the same message
+            message_queue_itm.set_timeout(self.config.RESEND_TIMEOUT*1000 + random.randint(0, 500)) #After first send, the timeout can be 0 as it will not break the flooding. But timeout is set to RESEND_TIMEOUT to prevent rapid spamming of the same message
             if message_queue_itm.get_state() == MessageState.NEW:
               message_queue_itm.update_message_state(MessageState.SENT)
               self.notification_callback("Sent, messageId: " + str(message_queue_itm.get_message_id()))
@@ -197,12 +208,12 @@ class NodeProcess():
               self.notification_callback("Resent, messageId: " + str(message_queue_itm.get_message_id()))
           else:
             #Message failed due to exceeded number of resent attempts
-            if message_queue_itm.get_sender() == protocol_config.MY_ADDRESS:
+            if message_queue_itm.get_sender() == self.config.MY_ADDRESS:
               #Message was created by me, update state to failed or delete, if its ACK message
               if message_queue_itm.get_message_type() == MessageType.ACK or message_queue_itm.get_message_type() == MessageType.TRACEROUTE_REQUEST:
                 message_queue_itm.update_message_state(MessageState.DELETED)
                 message_queue_itm.update_last_millis()
-                message_queue_itm.set_timeout(protocol_config.DELETE_WAIT_TIME*1000)
+                message_queue_itm.set_timeout(self.config.DELETE_WAIT_TIME*1000)
                 return
               else:
                 message_queue_itm.update_message_state(MessageState.FAILED)
@@ -211,7 +222,7 @@ class NodeProcess():
               #Message was created by someone else, delete it from queue
               message_queue_itm.update_message_state(MessageState.DELETED)
               message_queue_itm.update_last_millis()
-              message_queue_itm.set_timeout(protocol_config.DELETE_WAIT_TIME*1000)
+              message_queue_itm.set_timeout(self.config.DELETE_WAIT_TIME*1000)
       elif message_queue_itm.get_state() == MessageState.REBROADCASTED:
         if message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000):
           #Message was rebroadcasted, but ACK was not received in time
@@ -224,6 +235,7 @@ class NodeProcess():
           gc.collect()
 
   def get_string_msg_type(self, msg_type):
+    #TODO this could be moved to base utils
     if msg_type == MessageType.TEXT_MSG:
       return "TEXT"
     elif msg_type == MessageType.TEXT_MSG_W_ACK:
@@ -236,6 +248,7 @@ class NodeProcess():
       return "TEXT"
 
   def get_string_msg_state(self, msg_state):
+    #TODO this could be moved to base utils
     if msg_state == MessageState.DONE:
       return "DONE"
     elif msg_state == MessageState.REBROADCASTED:
@@ -253,13 +266,14 @@ class NodeProcess():
     messages = []
     for message_queue_itm in self.message_queue.values():
       if message_queue_itm.get_message_type() != MessageType.ACK and message_queue_itm.get_message_type() != MessageType.TRACEROUTE_REQUEST and message_queue_itm.get_state() != MessageState.DELETED:
-        if message_queue_itm.get_sender() == protocol_config.MY_ADDRESS and message_queue_itm.get_message_type() != MessageType.TRACEROUTE:
+        if message_queue_itm.get_sender() == self.config.MY_ADDRESS and message_queue_itm.get_message_type() != MessageType.TRACEROUTE:
           messages.append(message_queue_itm)
-        elif message_queue_itm.get_destination() == protocol_config.MY_ADDRESS:
+        elif message_queue_itm.get_destination() == self.config.MY_ADDRESS:
           messages.append(message_queue_itm)
     return messages
 
   def parse_messages(self, messageList):
+    #TODO this could be moved to base utils
     message_entity_list = []
     for message_queue_item in messageList:
       message_entity = {}
@@ -276,7 +290,7 @@ class NodeProcess():
       else:
         message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
 
-      if message_queue_item.get_sender() == protocol_config.MY_ADDRESS:
+      if message_queue_item.get_sender() == self.config.MY_ADDRESS:
         message_entity['state'] = self.get_string_msg_state(message_queue_item.get_state())
 
       message_entity_list.append(message_entity)

@@ -2,12 +2,15 @@ from base_utils import *
 from header import Header
 
 class Message():
-  def __init__(self):
+  def __init__(self, config):
     self.w_ack = False
     self.message_id = None
+    self.config = config
 
-  def new_text_message(self, destination_address, sender_address, message, w_ack = False, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
+  def new_text_message(self, destination_address, sender_address, message, w_ack = False, max_hop=None, priority=Priority.NORMAL):
     #This method is used only for user-created new text messages
+    if max_hop is None:
+      max_hop = self.config.DEFAULT_MAX_HOP
     message_type = MessageType.TEXT_MSG
     if w_ack:
       message_type = MessageType.TEXT_MSG_W_ACK
@@ -22,7 +25,9 @@ class Message():
     self.w_ack = w_ack
     self.message_id = self.header.get_message_id()
 
-  def new_ack_message(self, destination_address, sender_address, message_id, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
+  def new_ack_message(self, destination_address, sender_address, message_id, max_hop=None, priority=Priority.NORMAL):
+    if max_hop is None:
+      max_hop = self.config.DEFAULT_MAX_HOP
     self.header = Header()
     self.header.new_header(destination_address, sender_address, MessageType.ACK, priority)
 
@@ -31,7 +36,9 @@ class Message():
     self.payload = self.__construct_message_payload(str(message_id), MessageType.ACK)
     self.ack_message_id = message_id
 
-  def new_sensor_message(self, destination_address, sender_address, sensor_data, ttl=protocol_config.DEFAULT_TTL, priority=Priority.NORMAL):
+  def new_sensor_message(self, destination_address, sender_address, sensor_data, ttl=None, priority=Priority.NORMAL):
+    if ttl is None:
+      ttl = self.config.DEFAULT_TTL
     self.header = Header()
     self.header.new_header(destination_address, sender_address, MessageType.SENSOR_DATA, priority)
 
@@ -40,7 +47,9 @@ class Message():
     self.message_id = self.header.get_message_id()
     self.payload = self.__construct_message_payload(str(sensor_data), MessageType.SENSOR_DATA)
 
-  def new_traceroute_request(self, destination_address, sender_address, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
+  def new_traceroute_request(self, destination_address, sender_address, max_hop=None, priority=Priority.NORMAL):
+    if max_hop is None:
+      max_hop = self.config.DEFAULT_MAX_HOP
     self.header = Header()
     self.header.new_header(destination_address, sender_address, MessageType.TRACEROUTE_REQUEST, priority)
 
@@ -49,7 +58,9 @@ class Message():
     self.message_id = self.header.get_message_id()
     self.payload = self.__construct_message_payload("", MessageType.TRACEROUTE_REQUEST)
 
-  def new_traceroute_message(self, destination_address, sender_address, max_hop=protocol_config.DEFAULT_MAX_HOP, priority=Priority.NORMAL):
+  def new_traceroute_message(self, destination_address, sender_address, max_hop=None, priority=Priority.NORMAL):
+    if max_hop is None:
+      max_hop = self.config.DEFAULT_MAX_HOP
     self.header = Header()
     self.header.new_header(destination_address, sender_address, MessageType.TRACEROUTE, priority)
 
@@ -59,7 +70,7 @@ class Message():
 
   def __construct_message_payload(self, message, message_type):
     encrypted_message = bytearray(len(message))
-    cipher = aesio.AES(protocol_config.AES_KEY, aesio.MODE_CTR, protocol_config.AES_KEY)
+    cipher = aesio.AES(self.config.AES_KEY, aesio.MODE_CTR, self.config.AES_KEY)
     cipher.encrypt_into(bytes(message, "utf-8"), encrypted_message)
 
     if message_type == MessageType.ACK or message_type == MessageType.TRACEROUTE:
@@ -72,8 +83,8 @@ class Message():
 
   def construct_message_from_bytes(self, bytes_array):
     self.header = Header()
-    self.header.construct_header_from_bytes(bytes_array[:protocol_config.HEADER_LENGTH])
-    self.payload = bytes_array[protocol_config.HEADER_LENGTH:]
+    self.header.construct_header_from_bytes(bytes_array[:HEADER_LENGTH])
+    self.payload = bytes_array[HEADER_LENGTH:]
 
     self.message_id = self.header.get_message_id()
     self.w_ack = self.header.get_message_type() == MessageType.TEXT_MSG_W_ACK
@@ -81,7 +92,7 @@ class Message():
 
     if self.header.get_message_type() == MessageType.TRACEROUTE:
       #Adding my address to the traceroute message
-      strMyAddress = f'{self.text_message.decode("utf-8")}=>0x{protocol_config.MY_ADDRESS:04x}'
+      strMyAddress = f'{self.text_message.decode("utf-8")}=>0x{self.config.MY_ADDRESS:04x}'
       self.payload = list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(strMyAddress, "utf-8"))
       self.text_message = bytes(strMyAddress, "utf-8")
 
@@ -101,16 +112,27 @@ class Message():
       #ACK and TRACEROUTE messages are not encrypted
       self.text_message = self.payload[1:]
 
-    if self.get_destination() == protocol_config.MY_ADDRESS:
-      cipher = aesio.AES(protocol_config.AES_KEY, aesio.MODE_CTR, protocol_config.AES_KEY)
+    if self.get_destination() == self.config.MY_ADDRESS:
+      cipher = aesio.AES(self.config.AES_KEY, aesio.MODE_CTR, self.config.AES_KEY)
       input = bytes(self.payload[2:])
       decrypted_message = bytearray(len(input))
       cipher.encrypt_into(input, decrypted_message)
 
       if self.header.get_message_type() == MessageType.TEXT_MSG_W_ACK or self.header.get_message_type() == MessageType.TEXT_MSG or self.header.get_message_type() == MessageType.TRACEROUTE_REQUEST:
-        self.text_message = decrypted_message
+        try:
+          decrypted_message.decode("utf-8")
+          self.text_message = decrypted_message
+        except:
+          #Received message was encrypted using different aes key
+          self.text_message = bytes("&lt;ENCRYPTED&gt;", "utf-8")
+
       elif self.header.get_message_type() == MessageType.SENSOR_DATA:
-        self.sensor_data = decrypted_message
+        try:
+          decrypted_message.decode("utf-8")
+          self.sensor_data = decrypted_message
+        except:
+          #Received message was encrypted using different aes key
+          self.sensor_data = bytes("&lt;ENCRYPTED&gt;", "utf-8")
 
   def get_message_id(self):
     return self.message_id

@@ -1,6 +1,5 @@
 import random
 from binascii import hexlify
-import protocol_config
 import aesio
 
 def calculate_checksum(data):
@@ -34,3 +33,7 @@ class Enum():
 MessageType = Enum(('ACK', 'TEXT_MSG', 'TEXT_MSG_W_ACK', 'SENSOR_DATA', 'TRACEROUTE_REQUEST', 'TRACEROUTE'))
 Priority = Enum(('NORMAL', 'HIGH'))
 MessageState = Enum(('NEW', 'SENT', 'REBROADCASTED', 'ACK', 'NAK', 'DONE', 'FAILED', 'DELETED'))
+
+MESSAGE_QUEUE_SIZE = 10
+BROADCAST_ADDRESS = 0xFFFF
+HEADER_LENGTH = 12

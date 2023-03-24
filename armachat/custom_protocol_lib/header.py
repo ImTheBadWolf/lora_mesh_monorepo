@@ -18,7 +18,7 @@ class Header:
     self.sender_address = sender_address
     self.message_type = message_type
     self.priority = priority
-    self.header = bytearray(protocol_config.HEADER_LENGTH)
+    self.header = bytearray(HEADER_LENGTH)
     self.__construct_header()
     self.__fill_checksum()
 
@@ -64,7 +64,7 @@ class Header:
     return self.message_type
 
   def construct_header_from_bytes(self, bytes_array):
-    self.header = bytearray(protocol_config.HEADER_LENGTH)
+    self.header = bytearray(HEADER_LENGTH)
     self.destination_address = int.from_bytes(bytes_array[:2], 'big')
     self.sender_address = int.from_bytes(bytes_array[2:4], 'big')
     self.message_type = bytes_array[10]

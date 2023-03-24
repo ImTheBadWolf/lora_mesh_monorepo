@@ -336,7 +336,7 @@ class RFM9x:
         """The amount of time to poll for a received packet.
            If no packet is received, the returned packet will be None
         """
-        self.xmit_timeout = 2.0
+        self.xmit_timeout = 4.0
         """The amount of time to wait for the HW to transmit the packet.
            This is mainly used to prevent a hang due to a HW issue
         """
@@ -677,6 +677,10 @@ class RFM9x:
         """Receive status"""
         return (self._read_u8(_RH_RF95_REG_12_IRQ_FLAGS) & 0x40) >> 6
 
+    def rx_detected(self) -> bool:
+        """Radio is Receiving"""
+        return (self._read_u8(_RH_RF95_REG_18_MODEM_STAT) & 0x01)
+
     def crc_error(self) -> bool:
         """crc status"""
         return (self._read_u8(_RH_RF95_REG_12_IRQ_FLAGS) & 0x20) >> 5
@@ -684,13 +688,7 @@ class RFM9x:
     # pylint: disable=too-many-branches
     def send(
         self,
-        data: ReadableBuffer,
-        *,
-        keep_listening: bool = False,
-        destination: Optional[int] = None,
-        node: Optional[int] = None,
-        identifier: Optional[int] = None,
-        flags: Optional[int] = None
+        data: ReadableBuffer
     ) -> bool:
         """Send a string of data using the transmitter.
         You can only send 252 bytes at a time
@@ -738,58 +736,15 @@ class RFM9x:
                 if time.monotonic() - start >= self.xmit_timeout:
                     timed_out = True
         # Listen again if necessary and return the result packet.
-        if keep_listening:
-            self.listen()
-        else:
-            # Enter idle mode to stop receiving other packets.
-            self.idle()
+
+        self.idle()
         # Clear interrupt.
         self._write_u8(_RH_RF95_REG_12_IRQ_FLAGS, 0xFF)
         return not timed_out
 
-    def send_with_ack(self, data: ReadableBuffer) -> bool:
-        """Reliable Datagram mode:
-        Send a packet with data and wait for an ACK response.
-        The packet header is automatically generated.
-        If enabled, the packet transmission will be retried on failure
-        """
-        if self.ack_retries:
-            retries_remaining = self.ack_retries
-        else:
-            retries_remaining = 1
-        got_ack = False
-        self.sequence_number = (self.sequence_number + 1) & 0xFF
-        while not got_ack and retries_remaining:
-            self.identifier = self.sequence_number
-            self.send(data, keep_listening=True)
-            # Don't look for ACK from Broadcast message
-            if self.destination == _RH_BROADCAST_ADDRESS:
-                got_ack = True
-            else:
-                # wait for a packet from our destination
-                ack_packet = self.receive(timeout=self.ack_wait, with_header=True)
-                if ack_packet is not None:
-                    if ack_packet[3] & _RH_FLAGS_ACK:
-                        # check the ID
-                        if ack_packet[2] == self.identifier:
-                            got_ack = True
-                            break
-            # pause before next retry -- random delay
-            if not got_ack:
-                # delay by random amount before next try
-                time.sleep(self.ack_wait + self.ack_wait * random.random())
-            retries_remaining = retries_remaining - 1
-            # set retry flag in packet header
-            self.flags |= _RH_FLAGS_RETRY
-        self.flags = 0  # clear flags
-        return got_ack
-
     def receive(
         self,
-        *,
-        keep_listening: bool = True,
-        with_ack: bool = False,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> Optional[bytearray]:
         """Wait to receive a packet from the receiver. If a packet is found the payload bytes
         are returned, otherwise None is returned (which indicates the timeout elapsed with no
@@ -816,16 +771,22 @@ class RFM9x:
             # Make sure we are listening for packets.
             self.listen()
             timed_out = False
-            if HAS_SUPERVISOR:
-                start = supervisor.ticks_ms()
-                while not timed_out and not self.rx_done():
-                    if ticks_diff(supervisor.ticks_ms(), start) >= timeout * 1000:
-                        timed_out = True
+            if self.rx_detected():
+                if HAS_SUPERVISOR:
+                    start = supervisor.ticks_ms()
+                    while not timed_out and not self.rx_done():
+                        if ticks_diff(supervisor.ticks_ms(), start) >= timeout * 1000:
+                            timed_out = True
+                else:
+                    start = time.monotonic()
+                    while not timed_out and not self.rx_done():
+                        if time.monotonic() - start >= timeout:
+                            timed_out = True
+            elif self.rx_done():
+                timed_out = False
             else:
-                start = time.monotonic()
-                while not timed_out and not self.rx_done():
-                    if time.monotonic() - start >= timeout:
-                        timed_out = True
+                timed_out = True
+
         # Payload ready is set, a packet is in the FIFO.
         packet = None
         # save last RSSI reading
@@ -862,36 +823,7 @@ class RFM9x:
                         and packet[0] != self.node
                     ):
                         packet = None
-                    # send ACK unless this was an ACK or a broadcast
-                    elif (
-                        with_ack
-                        and ((packet[3] & _RH_FLAGS_ACK) == 0)
-                        and (packet[0] != _RH_BROADCAST_ADDRESS)
-                    ):
-                        # delay before sending Ack to give receiver a chance to get ready
-                        if self.ack_delay is not None:
-                            time.sleep(self.ack_delay)
-                        # send ACK packet to sender (data is b'!')
-                        self.send(
-                            b"!",
-                            destination=packet[1],
-                            node=packet[0],
-                            identifier=packet[2],
-                            flags=(packet[3] | _RH_FLAGS_ACK),
-                        )
-                        # reject Retries if we have seen this idetifier from this source before
-                        if (self.seen_ids[packet[1]] == packet[2]) and (
-                            packet[3] & _RH_FLAGS_RETRY
-                        ):
-                            packet = None
-                        else:  # save the packet identifier for this source
-                            self.seen_ids[packet[1]] = packet[2]
-        # Listen again if necessary and return the result packet.
-        if keep_listening:
-            self.listen()
-        else:
-            # Enter idle mode to stop receiving other packets.
-            self.idle()
+        self.listen()
         # Clear interrupt.
         self._write_u8(_RH_RF95_REG_12_IRQ_FLAGS, 0xFF)
         return packet

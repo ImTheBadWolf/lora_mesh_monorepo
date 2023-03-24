@@ -1,0 +1,9 @@
+{
+  "MY_ADDRESS": "0x0005",
+  "AES_KEY": "SuperTajne heslo",
+  "RESEND_COUNT": 5,
+  "RESEND_TIMEOUT": 3,
+  "ACK_WAIT_TIME": 60,
+  "DEFAULT_MAX_HOP": 5,
+  "RANDOMIZE_PATH": false
+}

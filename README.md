@@ -65,6 +65,7 @@
 * DONE - non `W_ACK` message has been rebroadcasted by at least one other node
 * NAK - `W_ACK` message has not been ACK-ed after timeout runs out
 * FAILED - message has been sent maximum amount of times(`RESEND_COUNT`) without any other node rebroadcasting it
+* DELETED - message is considered deleted, but to prevent repetetive flooding it will stay in the queue until `DELETE_WAIT_TIME` passes
 
 ---
 
@@ -74,6 +75,7 @@
 * RESEND_TIMEOUT - how long to wait before the message is resent (In seconds)
 * ACK_WAIT_TIME - how long to wait (In seconds) for ACK message until message is considered as failed(NAK)
 * RANDOMIZE_PATH - experimental setting, When enabled it will randomize rebroadcast timeouts (timeout wont be based on SNR). This can help deliver messages that could not be delivered because of not optimal network topology
+* DELETE_WAIT_TIME - how long to wait before messages with `DELETED` state are deleted
 
 ---
 
@@ -82,6 +84,7 @@
 ```
 MESSAGE_ENTITY = {
   'id': Number, //Message ID
+  'order': Number, //Messages will be ordered based on this number
   'from': String, //Sender, hex address is translated (on FE) to contact name if it exists
   'to': String, //Destination, hex address is translated (on FE) to contact name if it exists
   'payload': String

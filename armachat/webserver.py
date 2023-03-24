@@ -118,6 +118,7 @@ def config_route(request: HTTPRequest):
 def api_messages(request: HTTPRequest):
   messages = node_process.get_user_messages()
   parsed_messages = node_process.parse_messages(messages)
+  gc.collect()
 
   data = {
      'messages': parsed_messages
@@ -137,6 +138,7 @@ def api_send_message(request: HTTPRequest):
     priority = int(data.get('priority'))
     w_ack = data.get('wack')
     node_process.new_text_message(destination, message, w_ack, max_hop, priority)
+    gc.collect()
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send("OK")
   except:
@@ -151,6 +153,7 @@ def api_resend_message(request: HTTPRequest):
     data = json.loads(request.body)
     message_id = int(data.get('message_id'))
     node_process.resend_text_message(message_id)
+    gc.collect()
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send("OK")
   except:
@@ -167,6 +170,7 @@ def api_send_traceroute(request: HTTPRequest):
     max_hop = int(data.get('max_hop'))
     priority = int(data.get('priority'))
     node_process.new_traceroute_request(destination, max_hop, priority)
+    gc.collect()
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send("OK")
   except:

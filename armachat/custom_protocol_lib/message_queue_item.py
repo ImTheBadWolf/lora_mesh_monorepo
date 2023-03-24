@@ -3,7 +3,7 @@ from message import Message
 from base_utils import *
 
 class MessageQueueItem():
-  def __init__(self, message_instance:Message, timeout=0):
+  def __init__(self, message_instance:Message, message_counter, timeout=0):
     #If timeout == 0 -> message is newly created and sent from the same node,
     # so no wait timeout (unless csma ? #TODO not implemented yet) before broadcasting it
     self.message_instance = message_instance
@@ -20,6 +20,7 @@ class MessageQueueItem():
     self.setMHTTL()
     self.sender = message_instance.get_sender()
     self.destination = message_instance.get_destination()
+    self.message_counter = message_counter
 
   def setMHTTL(self):
     #Set maxhop or ttl depending on message type
@@ -94,3 +95,6 @@ class MessageQueueItem():
 
   def get_message_instance(self):
     return self.message_instance
+
+  def get_message_counter(self):
+    return self.message_counter

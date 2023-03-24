@@ -33,4 +33,4 @@ class Enum():
 
 MessageType = Enum(('ACK', 'TEXT_MSG', 'TEXT_MSG_W_ACK', 'SENSOR_DATA', 'TRACEROUTE_REQUEST', 'TRACEROUTE'))
 Priority = Enum(('NORMAL', 'HIGH'))
-MessageState = Enum(('NEW', 'SENT', 'REBROADCASTED', 'ACK', 'NAK', 'DONE', 'FAILED'))
+MessageState = Enum(('NEW', 'SENT', 'REBROADCASTED', 'ACK', 'NAK', 'DONE', 'FAILED', 'DELETED'))

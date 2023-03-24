@@ -13,7 +13,7 @@
       let scrollToEnd = true;
       let shouldUpdate = true;
 
-      let messageList = new Map();
+      let messagesMap = new Map();
       let sentMessages = new Map();
       let contactsMap = new Map();
       let sensorsMap = new Map();
@@ -32,6 +32,11 @@
       }
 
       function updateMessageList() {
+        const sendButton = document.getElementById('sendBtn');
+        const traceRouteButton = document.getElementById('tracerouteBtn');
+        sendButton.disabled = false;
+        traceRouteButton.disabled = false;
+
         if (!shouldUpdate) {
           return;
         }
@@ -39,7 +44,9 @@
         let messagesElement = document.getElementsByClassName("messages")[0];
         messagesElement.innerHTML = '';
 
-        messageList.forEach((message)=>{
+        messagesMap = new Map([...messagesMap.entries()].sort((a, b) => a[1].order - b[1].order));
+
+        messagesMap.forEach((message)=>{
           if (message.msg_type === 'SENSOR' && !SENSOR_MESSAGES) {
             return;
           }
@@ -61,10 +68,6 @@
           })
 
         if (scrollToEnd) {
-          const sendButton = document.getElementById('sendBtn');
-          const traceRouteButton = document.getElementById('tracerouteBtn');
-          sendButton.disabled = false;
-          traceRouteButton.disabled = false;
           messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' });
           scrollToEnd = false;
         }
@@ -118,15 +121,15 @@
             }
             const jsonData = JSON.parse(data);
             jsonData.messages.forEach((message)=>{
-              if (!messageList.has(message.id)) {
-                messageList.set(message.id, message)
+              if (!messagesMap.has(message.id)) {
+                messagesMap.set(message.id, message)
                 shouldUpdate = true;
               }
               else {
                 //Update message state
-                const oldMessage = messageList.get(message.id);
+                const oldMessage = messagesMap.get(message.id);
                 if (oldMessage.state !== message.state) {
-                  messageList.set(message.id, {...oldMessage, state:message.state})
+                  messagesMap.set(message.id, {...oldMessage, state:message.state})
                   shouldUpdate = true;
                 }
               }

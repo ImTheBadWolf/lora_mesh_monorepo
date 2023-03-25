@@ -143,7 +143,7 @@
               }
             })
           });
-          for (let i = 1; i <= pages; i++) {
+          for (let i = 1; i < pages; i++) {
             await $.get(`/api/messages?page=${i}`, function(data, status){
               if (status !== 'success') {
                 reject();

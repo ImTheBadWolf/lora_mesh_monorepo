@@ -133,17 +133,20 @@ def config_route(request: HTTPRequest):
 def api_messages(request: HTTPRequest):
   if initialised:
     messages = node_process.get_user_messages()
-    parsed_messages = node_process.parse_messages(messages)
+    parsed_messages = parse_messages(messages, config)
     gc.collect()
 
-    page = request.query_params.get("page")
+    try:
+      page = request.query_params.get("page")
+    except:
+      page = None
     if page is None:
       page = 0
     else:
       page = int(page)
 
     page_size = 5
-    num_pages = len(parsed_messages) // page_size
+    num_pages = (len(parsed_messages)-1) // page_size + 1
 
     data = {
       'messages': parsed_messages[page*page_size:(page+1)*page_size],
@@ -154,7 +157,7 @@ def api_messages(request: HTTPRequest):
       try:
         response.send(json.dumps(data))
       except MemoryError as e:
-        print(e) #TODO not enough memory to json dump messages.... implement paging
+        print(e)
         print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
         print(f"Allocated memory: {gc.mem_alloc()}")
 
@@ -292,6 +295,39 @@ def api_del_sensor(request: HTTPRequest):
       print("Could not parse data")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("Could not parse data")
+
+#Dump message queue
+@server.route("/api/dump")
+def api_dump(request: HTTPRequest):
+  if initialised:
+    message_queue = node_process.get_message_queue()
+    parsed_message_queue = parse_message_queue(message_queue)
+    gc.collect()
+
+    try:
+      page = request.query_params.get("page")
+    except:
+      page = None
+    if page is None:
+      page = 0
+    else:
+      page = int(page)
+
+    page_size = 1
+    num_pages = (len(parsed_message_queue)-1) // page_size + 1
+
+    data = {
+      'messages': parsed_message_queue[page*page_size:(page+1)*page_size],
+      'pages': num_pages,
+      'total': len(parsed_message_queue),
+    }
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      try:
+        response.send(json.dumps(data))
+      except MemoryError as e:
+        print(e)
+        print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
+        print(f"Allocated memory: {gc.mem_alloc()}")
 
 
 print(f"Listening on http://{wifi.radio.ipv4_address}:80")

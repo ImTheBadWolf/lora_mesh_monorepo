@@ -102,9 +102,9 @@ NEW_MESSAGE_ENTITY = {
 }
 ```
 
-## /api/messages [GET]
+## /api/messages?page=0 [GET]
 
-Returns list of messages.
+Returns list of messages. Messages are split into pages of 5 messages.
 ```
 data = {
   'messages': [MESSAGE_ENTITY...]
@@ -170,6 +170,12 @@ Input: `SENSOR_ENTITY`
 Delete sensor  
 Input: sensor address
 
+## /api/dump?page=0 [GET]
+
+Returns all messages that are currently in the message_queue.  
+Messages are split into pages, each page contains one message.  
+Returned message extends `MESSAGE_ENTITY` by other usefull fields.
+
 ## TODO config api
 
 * list all config variables
@@ -182,9 +188,6 @@ Input: sensor address
 ## TODO other processing apis
 This APIs wont be used in webGUI but can be usefull for further development and debugging/testing
 * create sensor message api
-* dump messageQueue - this will return all the messages that are currently in messageQueue, with all the usefull information about each message like timeouts, maxhop/ttl etc...
-
-
 
 ---
 

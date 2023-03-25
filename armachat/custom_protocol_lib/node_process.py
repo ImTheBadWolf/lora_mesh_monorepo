@@ -15,14 +15,15 @@ class NodeProcess():
     message_id = message_instance.get_message_id()
 
     if message_id not in self.message_queue:
-      #Check if messagequeue doesnt exceed MESSAGE_QUEUE_SIZE.
-      # If it does, remove the oldest message from queue based on message_counter
-      if len(self.message_queue) >= MESSAGE_QUEUE_SIZE:
+      #Check if the queue doesnt have too many messages, if yes delete the oldest one
+      #Check only messages that the user can see (text messages, sensor data, traceroute)
+      filtered_messages = [(msgId, msg) for msgId, msg in self.message_queue.items() if (self.message_queue[msgId].get_message_type() >= 1 and self.message_queue[msgId].get_message_type() <= 3) or self.message_queue[msgId].get_message_type() == MessageType.TRACEROUTE]
+      if len(filtered_messages) >= MESSAGE_QUEUE_SIZE:
         #filter messageid of the oldest message from queue based on message_counter get_message_counter()
-        oldest_message_id = min(self.message_queue, key=lambda x: self.message_queue[x].get_message_counter())
+        oldest_message_id, oldest_message = min(filtered_messages, key=lambda x: x[1].get_message_counter())
         self.notification_callback(f"Removing oldset message id:{oldest_message_id} from queue")
         del self.message_queue[oldest_message_id]
-        gc.collect()
+      gc.collect()
 
       message_queue_item = MessageQueueItem(message_instance, self.message_counter, self.config, timeout)
       self.message_counter += 1
@@ -234,34 +235,6 @@ class NodeProcess():
           del self.message_queue[message_queue_itm.get_message_id()]
           gc.collect()
 
-  def get_string_msg_type(self, msg_type):
-    #TODO this could be moved to base utils
-    if msg_type == MessageType.TEXT_MSG:
-      return "TEXT"
-    elif msg_type == MessageType.TEXT_MSG_W_ACK:
-      return "WACK_TEXT"
-    elif msg_type == MessageType.SENSOR_DATA:
-      return "SENSOR"
-    elif msg_type == MessageType.TRACEROUTE:
-      return "TRACEROUTE"
-    else:
-      return "TEXT"
-
-  def get_string_msg_state(self, msg_state):
-    #TODO this could be moved to base utils
-    if msg_state == MessageState.DONE:
-      return "DONE"
-    elif msg_state == MessageState.REBROADCASTED:
-      return "REBROADCASTED"
-    elif msg_state == MessageState.ACK:
-      return "ACK"
-    elif msg_state == MessageState.NAK:
-      return "NAK"
-    elif msg_state == MessageState.FAILED:
-      return "FAILED"
-    else:
-      return "DONE"
-
   def get_user_messages(self):
     messages = []
     for message_queue_itm in self.message_queue.values():
@@ -272,26 +245,5 @@ class NodeProcess():
           messages.append(message_queue_itm)
     return messages
 
-  def parse_messages(self, messageList):
-    #TODO this could be moved to base utils
-    message_entity_list = []
-    for message_queue_item in messageList:
-      message_entity = {}
-      message_entity['id'] = message_queue_item.get_message_id()
-      message_entity['order'] = message_queue_item.get_message_counter()
-      message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
-      message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
-
-      msg_type = message_queue_item.get_message_type()
-      msg_instance = message_queue_item.get_message_instance()
-      message_entity['msg_type'] = self.get_string_msg_type(msg_type)
-      if msg_type == MessageType.SENSOR_DATA:
-        message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
-      else:
-        message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
-
-      if message_queue_item.get_sender() == self.config.MY_ADDRESS:
-        message_entity['state'] = self.get_string_msg_state(message_queue_item.get_state())
-
-      message_entity_list.append(message_entity)
-    return message_entity_list
+  def get_message_queue(self):
+    return self.message_queue

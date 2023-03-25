@@ -6,6 +6,9 @@ class Message():
     self.w_ack = False
     self.message_id = None
     self.config = config
+    self.text_message = None
+    self.sensor_data = None
+    self.initialMaxHop = None
 
   def new_text_message(self, destination_address, sender_address, message, w_ack = False, max_hop=None, priority=Priority.NORMAL):
     #This method is used only for user-created new text messages
@@ -150,6 +153,8 @@ class Message():
     return self.maxHop
 
   def get_initialMaxHop(self):
+    if self.text_message is None:
+      return 0
     return self.initialMaxHop
 
   def get_ttl(self):
@@ -157,12 +162,12 @@ class Message():
 
   def get_text_message(self):
     if self.text_message is None:
-      return ""
+      return bytes("", "utf-8")
     return self.text_message
 
   def get_sensor_data(self):
     if self.sensor_data is None:
-      return ""
+      return bytes("", "utf-8")
     return self.sensor_data
 
   def get_message_type(self):

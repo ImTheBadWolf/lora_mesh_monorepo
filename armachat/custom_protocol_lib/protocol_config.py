@@ -114,3 +114,5 @@ class ProtocolConfig():
   @property
   def DEFAULT_TTL(self):
     return 50 #DEFAULT value (in seconds, max 2B - 65536)
+
+#TODO parse lora config and export each parameter separately. But set them all at once with string "Bw500Cr45Sf128"

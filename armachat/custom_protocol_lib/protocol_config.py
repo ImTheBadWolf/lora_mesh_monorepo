@@ -115,4 +115,17 @@ class ProtocolConfig():
   def DEFAULT_TTL(self):
     return 50 #DEFAULT value (in seconds, max 2B - 65536)
 
+  def get_config(self):
+    return {
+      'my_address': f"0x{self.MY_ADDRESS:04x}",
+      'aes_key': self.AES_KEY,
+      'resend_count': self.RESEND_COUNT,
+      'resend_timeout': self.RESEND_TIMEOUT,
+      'ack_wait': self.ACK_WAIT_TIME,
+      'randomize_path': self.RANDOMIZE_PATH,
+      'lora_config': "Bw500Cr45Sf128" #TODO
+    }
+  def get_networks(self):
+    return self.get_item_from_config("WIFI_NETWORKS")
+
 #TODO parse lora config and export each parameter separately. But set them all at once with string "Bw500Cr45Sf128"

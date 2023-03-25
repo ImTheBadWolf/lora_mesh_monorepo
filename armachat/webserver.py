@@ -238,9 +238,9 @@ def api_add_contact(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data")
+      print("Could not parse data, or save file")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-        response.send("Could not parse data")
+        response.send("Could not parse data, or save file")
 
 @server.route("/api/contact", method=HTTPMethod.DELETE)
 def api_del_contact(request: HTTPRequest):
@@ -252,9 +252,9 @@ def api_del_contact(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data")
+      print("Could not parse data, or save file")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-        response.send("Could not parse data")
+        response.send("Could not parse data, or save file")
 
 @server.route("/api/sensors")
 def api_sensors(request: HTTPRequest):
@@ -278,9 +278,9 @@ def api_add_sensor(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data")
+      print("Could not parse data, or save file")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-        response.send("Could not parse data")
+        response.send("Could not parse data, or save file")
 
 @server.route("/api/sensor", method=HTTPMethod.DELETE)
 def api_del_sensor(request: HTTPRequest):
@@ -292,9 +292,9 @@ def api_del_sensor(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data")
+      print("Could not parse data, or save file")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-        response.send("Could not parse data")
+        response.send("Could not parse data, or save file")
 
 #Dump message queue
 @server.route("/api/dump")
@@ -329,6 +329,42 @@ def api_dump(request: HTTPRequest):
         print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
         print(f"Allocated memory: {gc.mem_alloc()}")
 
+@server.route("/api/config")
+def api_config(request: HTTPRequest):
+  data = {
+    'config': config.get_config(),
+  }
+  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+    response.send(json.dumps(data))
+
+@server.route("/api/config", method=HTTPMethod.PUT)
+def api_update_config(request: HTTPRequest):
+  data = json.loads(request.body)
+  #config = data.get('config')
+  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+    response.send("Not implemented")
+
+@server.route("/api/networks")
+def api_networks(request: HTTPRequest):
+  data = {
+    'networks': config.get_networks(),
+  }
+  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+    response.send(json.dumps(data))
+
+@server.route("/api/network", method=HTTPMethod.PUT)
+def api_add_network(request: HTTPRequest):
+  data = json.loads(request.body)
+  #network = data.get('network')
+  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+    response.send("Not implemented")
+
+@server.route("/api/network", method=HTTPMethod.DELETE)
+def api_remove_network(request: HTTPRequest):
+  data = json.loads(request.body)
+  #ssid = data.get('ssid')
+  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+    response.send("Not implemented")
 
 print(f"Listening on http://{wifi.radio.ipv4_address}:80")
 #server.serve_forever(str(wifi.radio.ipv4_address))

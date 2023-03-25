@@ -30,15 +30,12 @@
           document.getElementById(selectedId).classList.remove("selected");
         }
         let elm = document.getElementById(id);
-        if (elm) {
-          if (elm.classList.contains("selected")) {
-            elm.classList.remove("selected");
-            selectedId = null;
-          }
-          else {
-            elm.classList.add("selected");
-            selectedId = id;
-          }
+        if (elm && selectedId !== id) {
+          elm.classList.add("selected");
+          selectedId = id;
+        }
+        else {
+          selectedId = null;
         }
         if (selectedId) {
           document.getElementById("removeBtn").disabled = false;

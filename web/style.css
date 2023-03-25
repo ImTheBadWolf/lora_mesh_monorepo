@@ -66,7 +66,8 @@ body {
 }
 
 .info-label,
-.info-label-small {
+.info-label-small,
+.info-label-big {
   color: #000;
   font-size: 14px;
   margin: 8px 0;
@@ -132,8 +133,14 @@ input:checked+.slider:before {
   margin: 0;
 }
 
+.info-label-big {
+  font-size: 20px;
+  margin: 10px 0;
+}
+
 .messages,
-.contacts {
+.contacts,
+.saved-networks {
   padding: 8px;
   padding-bottom: 26px;
   background: #fff;
@@ -339,7 +346,7 @@ input:checked+.slider:before {
   border: none;
 }
 
-#sendBtn:disabled {
+.btn:disabled {
   background: #9ca4ab;
   box-shadow: none;
 }
@@ -348,7 +355,7 @@ input:checked+.slider:before {
   box-shadow: none;
 }
 
-#removeBtn:disabled {
+#removeBtn:disabled, #removeWifiBtn:disabled {
   background: #ab9c9c;
   box-shadow: none;
 }
@@ -404,7 +411,7 @@ input:checked+.slider:before {
   margin-right: 3px;
 }
 
-.contact {
+.contact, .network {
   border-radius: 13px;
   display: flex;
   flex-direction: row;
@@ -428,6 +435,126 @@ input:checked+.slider:before {
 
 .selected {
   background: #D9D9D9;
+}
+
+.content {
+  padding-bottom: 20px;
+}
+
+.config-container {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.config-item {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.config-item .info-label{
+  width: 135px;
+  display: inline-block;
+}
+
+.config-item input, .config-item select, .add-wifi input {
+  border: none;
+  background: #fff;
+  padding: 0 4px;
+  height: 31px;
+  text-align: center;
+}
+
+#myAddressInput {
+  width: 65px;
+}
+
+#aesKey {
+  width: 120px;
+}
+
+#resendCount, #resendTimeout, #ackWait {
+  width: 40px;
+}
+
+.config-info {
+  background: white;
+  height: 100%;
+  padding: 8px;
+}
+
+.config-info ul {
+  padding-left: 20px;
+}
+
+.config-info li {
+  margin-bottom: 4px;
+}
+
+.warning {
+  font-size: 20px;
+}
+
+.red {
+  color: #f06363;
+}
+
+.blue {
+  color: #447EA9;
+  font-weight: bold;
+}
+
+#randomizeBtn {
+  height: 31px;
+  border-radius: 0 10px 10px 0;
+}
+
+.disabled-item {
+  opacity: 0.4;
+}
+
+.ap-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-wifi div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.add-wifi input{
+  width: 198px;
+}
+
+.saved-networks {
+  height: 98px;
+  width: 270px;
+}
+
+#saveCfgBtn, #addWifiBtn, #removeWifiBtn {
+  border-radius: 10px;
+}
+
+#addWifiBtn, #removeWifiBtn {
+  margin-top: 12px;
+}
+
+#removeWifiBtn {
+  background-color: #f06363;
+}
+
+.wifi-cfg {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: center;
 }
 
 @media only screen and (max-width: 650px) {
@@ -474,6 +601,11 @@ input:checked+.slider:before {
   .contact-address {
     font-size: 14px;
   }
+
+  .config-container {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 @media only screen and (max-width: 460px) {
@@ -502,8 +634,4 @@ input:checked+.slider:before {
     margin-left: 0;
     margin-top: 3px;
   }
-}
-
-.content {
-  padding-bottom: 20px;
 }

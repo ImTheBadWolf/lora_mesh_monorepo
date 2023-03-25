@@ -176,6 +176,53 @@ Returns all messages that are currently in the message_queue.
 Messages are split into pages, each page contains one message.  
 Returned message extends `MESSAGE_ENTITY` by other usefull fields.
 
+## /api/config [GET]
+
+Returns config.
+```
+CONFIG_ENTITY = {
+  'my_address': String, //Hex address
+  'aes_key': String,
+  'resend_count': Number,
+  'resend_timeout': Number,
+  'ack_wait': Number,
+  'randomize_path': Boolean,
+  'lora_config': String, oneOf(
+      "Bw500Cr45Sf128",
+      "Bw125Cr45Sf128",
+      "Bw250Cr47Sf1024",
+      "Bw250Cr46Sf2048",
+      "Bw125Cr48Sf4096"
+  )
+}
+```
+
+## /api/config [PUT]
+
+Updates config.  
+Input = `CONFIG_ENTITY`
+
+## /api/networks [GET]
+
+Returns list of saved WiFi networks.  
+```
+NETWORK_ENTITY = {
+  'ssid': String,
+  'password': String,
+  'ap': Boolean //Flag if this network is used as Access Point. Only one such network can exist.
+}
+```
+
+## /api/network [PUT]
+
+Creates new WiFi network.  
+Input: `NETWORK_ENTITY`
+
+## /api/network [DELETE]
+
+Deletes WiFi network based on provided ssid.  
+Input: ssid
+
 ## TODO config api
 
 * list all config variables

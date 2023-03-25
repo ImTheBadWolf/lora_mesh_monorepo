@@ -6,18 +6,204 @@
     <title>SCF protocol</title>
     <link rel="stylesheet" href="web/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script>
+      let selectedSsid;
+      let hasApDefined = false;
+
+      function randomAddress() {
+        let address = Math.floor(Math.random() * 65536);
+        address = address.toString(16).padStart(4, '0');
+        address = "0x" + address.toUpperCase();
+        $('#myAddressInput').val(address);
+      }
+      function selectWifi(ssid) {
+        if (selectedSsid) {
+          document.getElementById(selectedSsid).classList.remove("selected");
+        }
+        let elm = document.getElementById(ssid);
+        if (elm && selectedSsid !== ssid) {
+          elm.classList.add("selected");
+          selectedSsid = ssid;
+        }
+        else {
+          selectedSsid = null;
+        }
+        if (selectedSsid) {
+          document.getElementById("removeWifiBtn").disabled = false;
+        }
+        else {
+          document.getElementById("removeWifiBtn").disabled = true;
+        }
+      }
+      function removeSelected() {
+        /* $.ajax({
+          url: '/api/contact',
+          type: 'DELETE',
+          data: JSON.stringify({'address': selectedId}),
+          success: function(response) {
+            selectedId = null;
+            document.getElementById("removeBtn").disabled = true;
+            pullContacts();
+          }
+        }); */
+      }
+      function addNetwork(){
+        let ssid = document.getElementById("wifiSsid").value;
+        let password = document.getElementById("wifiPswd").value;
+        let apSelected = document.getElementById("apMode").checked;
+        if (ssid && password) {
+          /* $.ajax({
+            url: '/api/contact',
+            type: 'PUT',
+            data: JSON.stringify({
+              'address': address,
+              'name': name,
+            }),
+            success: function(response) {
+              pullContacts();
+              document.getElementById("contactNameInput").value = "";
+              document.getElementById("contactAddInput").value = "";
+            }
+          }); */
+        }
+      }
+
+      async function pullNetworks(){
+        return new Promise(async function(resolve, reject) {
+          //TODO ajax pull networks
+          //TODO update networks list
+          //hasApDefined = true; //TODO set to true if networks have AP defined
+          if (hasApDefined) {
+            document.getElementById("apMode").disabled = true;
+            document.getElementsByClassName("ap-selector")[0].classList.add("disabled-item");
+          }
+          else {
+            document.getElementById("apMode").disabled = false;
+            document.getElementsByClassName("ap-selector")[0].classList.remove("disabled-item");
+          }
+          resolve();
+        });
+      }
+
+      $(document).ready(async function(){
+        //await pullConfig;
+        await pullNetworks();
+      });
+    </script>
   </head>
   <body>
     <div class="menu">
       <ul>
-        <li><a href="#" class="underlined">HOME</a></li>
+        <li><a href="/">HOME</a></li>
         <li><a href="/sensors">SENSORS</a></li>
         <li><a href="/contacts">CONTACTS</a></li>
-        <li><a href="/config">CONFIG</a></li>
+        <li><a href="#" class="underlined">CONFIG</a></li>
       </ul>
     </div>
     <div class="content">
-      este tu nic nieje
+      <div class="config-container">
+        <div class="config-left">
+          <div class="config-item">
+            <span class="info-label">My Address:</span>
+            <input id="myAddressInput" type="text" maxlength="6">
+            <button class="btn" id="randomizeBtn" onclick="randomAddress()">RANDOM</button>
+          </div>
+          <div class="config-item disabled-item">
+            <span class="info-label">My Address:</span>
+            <input id="myAddressInput" type="text" maxlength="6" disabled>
+            <button class="btn" id="randomizeBtn" disabled>RANDOM</button>
+          </div>
+          <div class="config-item">
+            <span class="info-label">AES Key:</span>
+            <input id="aesKey" type="text" maxlength="16">
+          </div>
+          <div class="config-item">
+            <span class="info-label">Resend count:</span>
+            <input id="resendCount" type="number" min=1 max=20>
+          </div>
+          <div class="config-item">
+            <span class="info-label">Resend timeout(S):</span>
+            <input id="resendTimeout" type="number" min=1 max=20>
+          </div>
+          <div class="config-item">
+            <span class="info-label">ACK wait timeout(S):</span>
+            <input id="ackWait" type="number" min=1 max=300>
+          </div>
+          <div class="config-item">
+            <span class="info-label">Randomize path:</span>
+            <label class="switch">
+              <input type="checkbox" onchange="toggleRandomize(event)">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="config-item">
+            <span class="info-label">LoRa config:</span>
+            <select id="contactsSelect" onchange="handleSelectChange(event)">
+              <option value="Bw500Cr45Sf128">Bw500Cr45Sf128 - Short/Fast</option>
+              <option value="Bw125Cr45Sf128">Bw125Cr45Sf128 - Short/Slow</option>
+              <option value="Bw250Cr47Sf1024">Bw250Cr47Sf1024 - Medium/Fast</option>
+              <option value="Bw250Cr46Sf2048">Bw250Cr46Sf2048 - Medium/Slow</option>
+              <option value="Bw125Cr48Sf4096">Bw125Cr48Sf4096 - Long/Slow</option>
+            </select>
+          </div>
+        </div>
+        <div class="config-right">
+          <div class="config-info">
+            <span class="warning red" >You need to set your address first</span>
+            <ul>
+              <li>My Address - Can be set only once</li>
+              <li>Resend count - How many times should we try to re-send each message until it is considered failed</li>
+              <li>Resend timeout - How long to wait between each re-send</li>
+              <li>ACK wait timeout - How long to wait for ACK packet until the message is considered failed</li>
+              <li>Randomize path - Experimental setting. Will result in randomization of packets path. Only use if the messages cant be sucessfully delivered to the destination. This setting is not saved and will reset after next reboot.</li>
+              <li>LoRa config - LoRa configuration parameters. Configuration affects the usable range and reliability. <span class="red">Each node in the network has to use the same parameters</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="saveCfgBtn">SAVE CONFIG</button>
+      <div class="wifi-cfg">
+        <span class="info-label-big">WiFi configuration</span>
+        <span class="info-label-small">Connected to: Wifinka, IP:192.168.100.33</span>
+      </div>
+      <div class="config-container">
+        <div class="config-left">
+          <p class="info-label">Add new WiFi network</p>
+          <div class="add-wifi">
+            <div>
+              <span class="info-label-small">SSID</span>
+              <input id="wifiSsid" type="text">
+            </div>
+            <div>
+              <span class="info-label-small">PASSWORD</span>
+              <input id="wifiPswd" type="password">
+            </div>
+          </div>
+          <div class="ap-selector">
+            <span class="info-label">Use this network as AP:</span>
+            <label class="switch">
+              <input type="checkbox" id="apMode">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <button class="btn" id="addWifiBtn">ADD</button>
+        </div>
+        <div class="config-right">
+          <p class="info-label">Saved networks</p>
+          <div class="saved-networks">
+            <button onclick="selectWifi('ssid')" id="ssid" class="network">
+              <span class="network-ssid">Wifinka</span>
+            </button>
+            <button onclick="selectWifi('ssid2')" id="ssid2" class="network">
+              <span class="network-ssid">Wajfaj</span>
+            </button>
+            <button onclick="selectWifi('ssid3')" id="ssid3" class="network">
+              <span class="blue">AP</span><span class="network-ssid">Wifinka2</span>
+            </button>
+          </div>
+          <button class="btn" id="removeWifiBtn" disabled>DELETE</button>
+        </div>
+      </div>
     </div>
   </body>
 </html>

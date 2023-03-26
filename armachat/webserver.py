@@ -1,65 +1,35 @@
-import secrets  # pylint: disable=no-name-in-module
-import microcontroller
-import socketpool
-import wifi
-import time
-import random
-import json
-
 from adafruit_httpserver.mime_type import MIMEType
 from adafruit_httpserver.request import HTTPRequest
 from adafruit_httpserver.response import HTTPResponse
-from adafruit_httpserver.server import HTTPServer
 from adafruit_httpserver.server import HTTPMethod
-
-import os
-from adafruit_bitmap_font import bitmap_font
+from adafruit_httpserver.server import HTTPServer
+from binascii import hexlify
 from time import sleep
-import microcontroller
-from adafruit_simple_text_display import SimpleTextDisplay
-from adafruit_display_text import label
-from config import config
-import adafruit_matrixkeypad
-import displayio
-from digitalio import DigitalInOut
-import pwmio
-from adafruit_display_text import label
-from adafruit_st7789 import ST7789
-from digitalio import DigitalInOut, Pull
+import board
 import board
 import busio
-import terminalio
-import ulora
-import analogio
-from binascii import hexlify
+import busio
+import digitalio
 import digitalio
 import gc
-import aesio
-import random
+import json
+import microcontroller
+import microcontroller
+import socketpool
 import sys
-import time
-import digitalio
-import board
-import busio
+import wifi
 
 sys.path.append("custom_protocol_lib")
 import protocol_config
 from base_utils import *
-from message import Message
 from node_process import NodeProcess
 from address_book import AddressBook
 import rfm9x_lora
 
-ssid, password = secrets.SSID, secrets.PASSWORD  # pylint: disable=no-member
 lastMillis = 0; #TODO just for testing
-
-print("Connecting to", ssid)
-wifi.radio.connect(ssid, password)
-print("Connected to", ssid)
-#wifi.radio.set_ipv4_address(*, ipv4: ipaddress.IPv4Address, netmask: ipaddress.IPv4Address, gateway: ipaddress.IPv4Address, ipv4_dns: ipaddress.IPv4Address | None)→ None
-
-pool = socketpool.SocketPool(wifi.radio)
-server = HTTPServer(pool)
+ssid = None
+wifi_connected = False
+my_ip = None
 
 spi_lora = busio.SPI(board.GP10, MOSI=board.GP11, MISO=board.GP12)
 CS = digitalio.DigitalInOut(board.GP13)
@@ -82,6 +52,38 @@ def show_info_notification(text):
 
 config = protocol_config.ProtocolConfig('data/settings.json')
 initialised = config.is_initialised()
+
+networks = config.get_networks()
+for network in networks:
+  if network['AP'] != True:
+    try:
+      ssid = network['SSID']
+      wifi.radio.connect(ssid, network['PASSWORD'])
+      print("Connected to:", ssid)
+      my_ip = wifi.radio.ipv4_address
+      wifi_connected = True
+      break
+    except:
+      print("Failed to connect to:", ssid)
+
+if not wifi_connected:
+  print("No networks found, starting AP mode")
+  #find network which hash ["AP"] = true in networks
+  for network in networks:
+    if network['AP'] == True:
+      try:
+        ssid = network['SSID']
+        wifi.radio.start_ap(ssid, network['PASSWORD'])
+        print(f"Started AP: {ssid} password: {network['PASSWORD']}")
+        my_ip = wifi.radio.ipv4_address_ap
+        wifi_connected = True
+        break
+      except Exception as e:
+        print("Failed to start AP:", ssid)
+        print(e)
+
+pool = socketpool.SocketPool(wifi.radio)
+server = HTTPServer(pool)
 
 if initialised:
   node_process = NodeProcess(rfm9x, show_info_notification, config)
@@ -396,12 +398,12 @@ def api_remove_network(request: HTTPRequest):
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send(f"Could not parse data, or save file\n{str(e)}")
 
-print(f"Listening on http://{wifi.radio.ipv4_address}:80")
-#server.serve_forever(str(wifi.radio.ipv4_address))
+if wifi_connected and my_ip != None:
+  #Start the server.
+  print(f"Listening on http://{my_ip}:80")
+  server.start(str(my_ip))
 
-#Start the server.
-server.start(str(wifi.radio.ipv4_address))
-loop_times = []
+loop_times = [] #TODO just for testing
 while True:
   #start_ms = int(time.time() * 1000)
   if initialised:

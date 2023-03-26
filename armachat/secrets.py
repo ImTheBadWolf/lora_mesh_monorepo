@@ -1,2 +1,0 @@
-SSID = "ssid"
-PASSWORD = "password"

@@ -263,7 +263,7 @@
             <ul>
               <li>My Address - Can be set only once. <span class="red">Device will reboot after updating the address.</span></li>
               <li>Resend count - How many times should we try to re-send each message until it is considered failed</li>
-              <li>Resend timeout - How long to wait between each re-send (In seconds)</li>
+              <li>Resend timeout - How long to wait between each re-send (In seconds). Short timeout may result in undelivered messages.</li>
               <li>ACK wait timeout - How long to wait for ACK packet until the message is considered failed (In seconds)</li>
               <li>Randomize path - Experimental setting. Will result in randomization of packets path. Only use if the messages cant be sucessfully delivered to the destination. This setting is not saved and will reset after next reboot.</li>
               <li>LoRa config - LoRa configuration parameters. Configuration affects the usable range and reliability.<br><span class="red">Each node in the network has to use the same parameters. Device will reboot after updating the LoRa config.</span></li>

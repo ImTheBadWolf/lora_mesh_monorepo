@@ -35,6 +35,15 @@
         }
         return contactsMap.get(address) || address;
       }
+      function translateTraceroute(message) {
+        let addresses = message.split("=>");
+        let translated = '';
+        addresses.forEach((address)=>{
+          contact = contactsMap.get(address) || sensorsMap.get(address) || address;
+          message = message.replace(address, contact);
+        })
+        return message;
+      }
 
       function updateMessageList() {
         const sendButton = document.getElementById('sendBtn');
@@ -66,7 +75,7 @@
                 ${addressTranslation(message.from, message.msg_type)} ⟶ ${addressTranslation(message.to, message.msg_type)}
               </span>
               <div class="message__content ${message.msg_type === 'SENSOR' ? 'sns-content':''} ${message.msg_type === 'TRACEROUTE' ? 'trc-content':''} ${message.state ? 'my-content':''} ${message.state && isFailed(message.state) ? 'failed':''}">
-                ${message.payload}
+                ${message.msg_type === 'TRACEROUTE' ? translateTraceroute(message.payload):message.payload}
               </div>
               ${showStatusIcons(message) ? (message.state === 'ACK' ? '<img class="icon" src="web/icons/check.png">' :'<img class="icon" src="web/icons/check_empty.png">') : ''}
             </div>

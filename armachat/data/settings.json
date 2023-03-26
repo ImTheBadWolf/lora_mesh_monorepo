@@ -15,13 +15,13 @@
     },
     {
       "SSID": "ARMACHAT",
-      "PASSWORD": "huhuhu",
+      "PASSWORD": "huhuhuhuhu",
       "AP": true
     },
     {
       "SSID": "ssid2",
       "PASSWORD": "password2",
       "AP": false
-    },
+    }
   ]
 }

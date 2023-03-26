@@ -30,6 +30,8 @@ class NodeProcess():
       if decrement:
         if message_instance.get_message_type() != MessageType.SENSOR_DATA:
           message_queue_item.decrement_maxhop()
+        else:
+          message_queue_item.decrement_ttl(200)
 
       if state is not None:
         message_queue_item.update_message_state(state)
@@ -116,7 +118,14 @@ class NodeProcess():
               self.add_message(ack_message_instance, 1500)
 
             #Add message to queue with state DONE so that it wont be "received" again
-            self.add_message(message, 0, True, state=MessageState.DONE)
+            #State DONE is needed only for messages visible to user, so messages of type TRACE_ROUTE_REQUEST wont have state DONE, they can be deleted
+            if message.get_header().get_message_type() == MessageType.TRACEROUTE_REQUEST:
+              self.add_message(message, 0, True, state=MessageState.DELETED)
+              message_queue_item = self.message_queue[message.get_message_id()]
+              message_queue_item.update_last_millis()
+              message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
+            else:
+              self.add_message(message, 0, True, state=MessageState.DONE)
 
             if message.get_header().get_message_type() == MessageType.TRACEROUTE_REQUEST:
               #Received traceroute request, send back traceroute response
@@ -130,9 +139,17 @@ class NodeProcess():
           #Received ACK message
           ack_message_id = message.get_ack_message_id()
           if ack_message_id in self.message_queue:
-            if self.message_queue[ack_message_id].get_state() != MessageState.ACK:
+            message_queue_item = self.message_queue[ack_message_id]
+            if message_queue_item.get_state() != MessageState.ACK:
               self.notification_callback(f"Received ACK for message {ack_message_id}")
-              self.message_queue[ack_message_id].update_message_state(MessageState.ACK)
+
+              #If its traceroute message, set state to deleted. Sensor messages could be also deleted, as sensors dont care if they receive ACK or not
+              if message_queue_item.get_message_type() == MessageType.TRACEROUTE or message_queue_item.get_message_type() == MessageType.SENSOR_DATA:
+                message_queue_item.update_message_state(MessageState.DELETED)
+                message_queue_item.update_last_millis()
+                message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
+              else:
+                message_queue_item.update_message_state(MessageState.ACK)
           return
 
       else:
@@ -148,12 +165,28 @@ class NodeProcess():
               message_queue_item.update_last_millis()
               message_queue_item.set_timeout(self.config.ACK_WAIT_TIME*1000)
             else:
-              message_queue_item.update_message_state(MessageState.DONE)
+              #Only update state to DONE for user visible messages (TEXT), other messages can be deleted
+              if message_queue_item.get_message_type() == MessageType.TEXT_MSG or message_queue_item.get_message_type() == MessageType.TEXT_MSG_W_ACK:
+                message_queue_item.update_message_state(MessageState.DONE)
+              else:
+                message_queue_item.update_message_state(MessageState.DELETED)
+                message_queue_item.update_last_millis()
+                message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
           else:
             #Received rebroadcast of message which was created by someone else. Delete this message from queue so that it wont be rebroadcasted by me again
-            message_queue_item.update_message_state(MessageState.DELETED)
-            message_queue_item.update_last_millis()
-            message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
+            #Only delete if the maxhop/ttl is less or equal to current node's maxhop/ttl
+            should_delete = False
+            if message_queue_item.get_message_type() == MessageType.SENSOR_DATA:
+              if message.get_ttl() <= message_queue_item.get_ttl:
+                should_delete = True
+            else:
+              if message.get_maxHop() <= message_queue_item.get_maxHop():
+                should_delete = True
+
+            if should_delete:
+              message_queue_item.update_message_state(MessageState.DELETED)
+              message_queue_item.update_last_millis()
+              message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
         else:
           #Received message is not in queue, check if its ACK message
           if message.get_message_type() == MessageType.ACK:
@@ -210,11 +243,12 @@ class NodeProcess():
           else:
             #Message failed due to exceeded number of resent attempts
             if message_queue_itm.get_sender() == self.config.MY_ADDRESS:
-              #Message was created by me, update state to failed or delete, if its ACK message
-              if message_queue_itm.get_message_type() == MessageType.ACK or message_queue_itm.get_message_type() == MessageType.TRACEROUTE_REQUEST:
+              #Message was created by me, update state to failed or delete, if its ACK message, traceroute request or traceroute response
+              if message_queue_itm.get_message_type() == MessageType.ACK or message_queue_itm.get_message_type() == MessageType.TRACEROUTE_REQUEST or message_queue_itm.get_message_type() == MessageType.TRACEROUTE:
                 message_queue_itm.update_message_state(MessageState.DELETED)
                 message_queue_itm.update_last_millis()
                 message_queue_itm.set_timeout(self.config.DELETE_WAIT_TIME*1000)
+                gc.collect()
                 return
               else:
                 message_queue_itm.update_message_state(MessageState.FAILED)
@@ -233,7 +267,7 @@ class NodeProcess():
           #Message delete timeout passed, delete message for real
           self.notification_callback(f"Deleting message {message_queue_itm.get_message_id()}")
           del self.message_queue[message_queue_itm.get_message_id()]
-          gc.collect()
+    gc.collect()
 
   def get_user_messages(self):
     messages = []

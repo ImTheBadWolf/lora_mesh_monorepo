@@ -189,7 +189,7 @@ class NodeProcess():
       if message_queue_itm.get_state() == MessageState.NEW or message_queue_itm.get_state() == MessageState.SENT:
         if message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000) or message_queue_itm.get_priority == Priority.HIGH:
           if (message_queue_itm.get_message_type() != MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0) \
-          or (message_queue_itm.get_message_type() == MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0 and message_queue_itm.get_ttl() > 0): #TODO this is horrible, refactor later
+          or (message_queue_itm.get_message_type() == MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0 and message_queue_itm.get_ttl() > 0):
             if message_queue_itm.get_message_type() == MessageType.SENSOR_DATA:
               message_queue_itm.decrement_ttl(round(time.monotonic() * 1000) - message_queue_itm.get_last_millis())
 
@@ -201,7 +201,7 @@ class NodeProcess():
             except:
               print("RFM9x send failed")
             message_queue_itm.update_last_millis()
-            message_queue_itm.set_timeout(self.config.RESEND_TIMEOUT*1000 + random.randint(0, 500)) #After first send, the timeout can be 0 as it will not break the flooding. But timeout is set to RESEND_TIMEOUT to prevent rapid spamming of the same message
+            message_queue_itm.set_timeout(self.config.RESEND_TIMEOUT*1000 + random.randint(0, 1000)) #After first send, the timeout can be 0 as it will not break the flooding. But timeout is set to RESEND_TIMEOUT to prevent rapid spamming of the same message
             if message_queue_itm.get_state() == MessageState.NEW:
               message_queue_itm.update_message_state(MessageState.SENT)
               self.notification_callback("Sent, messageId: " + str(message_queue_itm.get_message_id()))

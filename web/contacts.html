@@ -69,18 +69,18 @@
             return;
           }
           $.ajax({
-          url: '/api/contact',
-          type: 'PUT',
-          data: JSON.stringify({
-            'address': address,
-            'name': name,
-          }),
-          success: function(response) {
-            pullContacts();
-            document.getElementById("contactNameInput").value = "";
-            document.getElementById("contactAddInput").value = "";
-          }
-        });
+            url: '/api/contact',
+            type: 'PUT',
+            data: JSON.stringify({
+              'address': address,
+              'name': name,
+            }),
+            success: function(response) {
+              pullContacts();
+              document.getElementById("contactNameInput").value = "";
+              document.getElementById("contactAddInput").value = "";
+            }
+          });
         }
       }
 

@@ -1,5 +1,5 @@
 import secrets  # pylint: disable=no-name-in-module
-
+import microcontroller
 import socketpool
 import wifi
 import time
@@ -56,6 +56,7 @@ lastMillis = 0; #TODO just for testing
 print("Connecting to", ssid)
 wifi.radio.connect(ssid, password)
 print("Connected to", ssid)
+#wifi.radio.set_ipv4_address(*, ipv4: ipaddress.IPv4Address, netmask: ipaddress.IPv4Address, gateway: ipaddress.IPv4Address, ipv4_dns: ipaddress.IPv4Address | None)→ None
 
 pool = socketpool.SocketPool(wifi.radio)
 server = HTTPServer(pool)
@@ -86,10 +87,10 @@ if initialised:
   node_process = NodeProcess(rfm9x, show_info_notification, config)
   address_book = AddressBook("data/contacts.json", "data/sensors.json")
   try:
-    #address_book.add_contact("YOU", f"0x{config.MY_ADDRESS:04x}") #TODO this has to be done only after my address is set
-    address_book.add_contact("ALL", f"0xFFFF") #TODO broadcast functionality not implemented yet, repalce hardcoded string with constant from baseutils
-    #address_book.add_sensor("YOU", f"0x{config.MY_ADDRESS:04x}") #TODO this has to be done only after my address is set
-    address_book.add_sensor("ALL", f"0xFFFF")
+    address_book.add_contact("YOU", f"0x{config.MY_ADDRESS:04x}")
+    address_book.add_contact("ALL", f"0x{config.BROADCAST_ADDRESS:04x}")
+    address_book.add_sensor("YOU", f"0x{config.MY_ADDRESS:04x}")
+    address_book.add_sensor("ALL", f"0x{config.BROADCAST_ADDRESS:04x}")
   except:
     print("Cant save. Readonly filesystem")
 
@@ -340,14 +341,29 @@ def api_config(request: HTTPRequest):
 @server.route("/api/config", method=HTTPMethod.PUT)
 def api_update_config(request: HTTPRequest):
   data = json.loads(request.body)
-  #config = data.get('config')
-  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-    response.send("Not implemented")
+  try:
+    new_config = data.get('config')
+    config.update_config(new_config)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+    if config.is_reboot_required():
+      print("Rebooting")
+      sleep(1)
+      microcontroller.reset()
+  except Exception as e:
+    print("Could not parse data, or save file ")
+    print(e)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send(f"Could not parse data, or save file\n{str(e)}")
 
 @server.route("/api/networks")
 def api_networks(request: HTTPRequest):
   data = {
     'networks': config.get_networks(),
+    'current': {
+      'ssid': ssid,
+      'ipv4': str(wifi.radio.ipv4_address)
+    }
   }
   with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
     response.send(json.dumps(data))
@@ -355,16 +371,30 @@ def api_networks(request: HTTPRequest):
 @server.route("/api/network", method=HTTPMethod.PUT)
 def api_add_network(request: HTTPRequest):
   data = json.loads(request.body)
-  #network = data.get('network')
-  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-    response.send("Not implemented")
+  try:
+    network = data.get('network')
+    config.add_network(network)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except Exception as e:
+    print("Could not parse data, or save file ")
+    print(e)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send(f"Could not parse data, or save file\n{str(e)}")
 
 @server.route("/api/network", method=HTTPMethod.DELETE)
 def api_remove_network(request: HTTPRequest):
   data = json.loads(request.body)
-  #ssid = data.get('ssid')
-  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-    response.send("Not implemented")
+  try:
+    ssid = data.get('SSID')
+    config.remove_network(ssid)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send("OK")
+  except Exception as e:
+    print("Could not parse data, or save file ")
+    print(e)
+    with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+      response.send(f"Could not parse data, or save file\n{str(e)}")
 
 print(f"Listening on http://{wifi.radio.ipv4_address}:80")
 #server.serve_forever(str(wifi.radio.ipv4_address))

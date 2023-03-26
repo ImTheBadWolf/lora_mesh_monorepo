@@ -8,7 +8,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
       let selectedSsid;
-      let hasApDefined = false;
 
       function randomAddress() {
         let address = Math.floor(Math.random() * 65536);
@@ -35,58 +34,174 @@
           document.getElementById("removeWifiBtn").disabled = true;
         }
       }
-      function removeSelected() {
-        /* $.ajax({
-          url: '/api/contact',
-          type: 'DELETE',
-          data: JSON.stringify({'address': selectedId}),
-          success: function(response) {
-            selectedId = null;
-            document.getElementById("removeBtn").disabled = true;
-            pullContacts();
-          }
-        }); */
-      }
       function addNetwork(){
         let ssid = document.getElementById("wifiSsid").value;
         let password = document.getElementById("wifiPswd").value;
         let apSelected = document.getElementById("apMode").checked;
         if (ssid && password) {
-          /* $.ajax({
-            url: '/api/contact',
+          $.ajax({
+            url: '/api/network',
             type: 'PUT',
             data: JSON.stringify({
-              'address': address,
-              'name': name,
+              "network": {
+                'SSID': ssid,
+                'PASSWORD': password,
+                'AP': apSelected
+              }
             }),
             success: function(response) {
-              pullContacts();
-              document.getElementById("contactNameInput").value = "";
-              document.getElementById("contactAddInput").value = "";
+              pullNetworks();
             }
-          }); */
+          });
         }
+      }
+      function removeNetwork(){
+        if (selectedSsid) {
+          $.ajax({
+            url: '/api/network',
+            type: 'DELETE',
+            data: JSON.stringify({'SSID': selectedSsid}),
+            success: function(response) {
+              selectedSsid = null;
+              document.getElementById("removeWifiBtn").disabled = true;
+              pullNetworks();
+            }
+          });
+        }
+      }
+
+      async function pullConfig(){
+        return new Promise(async function(resolve, reject) {
+          $.get("/api/config", function(data, status){
+            if (status !== 'success') {
+              $("#saveCfgBtn").prop('disabled', false);
+              reject();
+            }
+            const {config} = JSON.parse(data);
+            if (config) {
+              if (config.my_address){
+                $("#myAddressInput").val(config.my_address);
+                $("#address-config-item").addClass("disabled-item");
+                $("#myAddressInput").prop('disabled', true);
+                $("#randomizeBtn").prop('disabled', true);
+                $("#address-warn").remove()
+              }
+
+              $("#aesKey").val(config.aes_key);
+              $("#resendCount").val(config.resend_count);
+              $("#resendTimeout").val(config.resend_timeout);
+              $("#ackWait").val(config.ack_wait);
+              $('#randomizePath').prop('checked', config.randomize_path);
+              //TODO lora config
+              $("#saveCfgBtn").prop('disabled', false);
+              resolve();
+            }
+            else {
+              $("#saveCfgBtn").prop('disabled', false);
+              reject();
+            }
+          });
+        });
+      }
+
+      function updateConfig() {
+        $("#saveCfgBtn").prop('disabled', true);
+
+        const addressValue = $("#myAddressInput").val();
+        const aesKey = $("#aesKey").val();
+        const resendCount = $("#resendCount").val();
+        const resendTimeout = $("#resendTimeout").val();
+        const ackWait = $("#ackWait").val();
+        const randomize = $('#randomizePath').prop('checked');
+        //TODO lora config
+
+        if (!addressValue.match(/^0x[0-9a-fA-F]{4}$/)) {
+          alert('Invalid address');
+          $("#saveCfgBtn").prop('disabled', false);
+          return;
+        }
+        if (aesKey.length !== 16) {
+          alert('AES key has to have 16 characters');
+          $("#saveCfgBtn").prop('disabled', false);
+          return;
+        }
+        if (resendCount < 1 || resendCount > 20) {
+          alert('Resend count has to be between 1 and 20');
+          $("#saveCfgBtn").prop('disabled', false);
+          return;
+        }
+        if (resendTimeout < 1 || resendTimeout > 20) {
+          alert('Resend timeout has to be between 1 and 20');
+          $("#saveCfgBtn").prop('disabled', false);
+          return;
+        }
+        if (ackWait < 1 || ackWait > 300) {
+          alert('Ack wait has to be between 1 and 300');
+          $("#saveCfgBtn").prop('disabled', false);
+          return;
+        }
+
+        //TODO "lora_config": "Bw500Cr45Sf128",
+        $.ajax({
+          url: '/api/config',
+          type: 'PUT',
+          data: JSON.stringify({
+              "config":{
+              "randomize_path": randomize,
+              "aes_key": aesKey,
+              "resend_count": resendCount,
+              "resend_timeout": resendTimeout,
+              "ack_wait": ackWait,
+              "my_address": addressValue
+            }
+          }),
+          success: function(response) {
+            pullContacts();
+            document.getElementById("contactNameInput").value = "";
+            document.getElementById("contactAddInput").value = "";
+          }
+        });
+
+        pullConfig();
       }
 
       async function pullNetworks(){
         return new Promise(async function(resolve, reject) {
-          //TODO ajax pull networks
-          //TODO update networks list
-          //hasApDefined = true; //TODO set to true if networks have AP defined
-          if (hasApDefined) {
-            document.getElementById("apMode").disabled = true;
-            document.getElementsByClassName("ap-selector")[0].classList.add("disabled-item");
-          }
-          else {
-            document.getElementById("apMode").disabled = false;
-            document.getElementsByClassName("ap-selector")[0].classList.remove("disabled-item");
-          }
-          resolve();
+          let hasApDefined = false;
+          $.get("/api/networks", function(data, status){
+            if (status !== 'success') {
+              reject();
+            }
+            const {networks, current} = JSON.parse(data);
+            let networkList = document.getElementsByClassName("saved-networks")[0];
+            networkList.innerHTML = '';
+            networks.forEach(network => {
+              if (network.AP) {
+                hasApDefined = true;
+              }
+              networkList.innerHTML += `
+              <button onclick="selectWifi('${network.SSID}')" id='${network.SSID}' class="network">
+                 ${ network.AP ? '<span class="blue">AP</span>':''}<span class="network-ssid">${network.SSID}</span>
+              </button>`;
+
+            })
+            $("#current-wifi").text(`Connected to: ${current.ssid}, IP:${current.ipv4}`);
+
+            if (hasApDefined) {
+              document.getElementById("apMode").disabled = true;
+              document.getElementsByClassName("ap-selector")[0].classList.add("disabled-item");
+            }
+            else {
+              document.getElementById("apMode").disabled = false;
+              document.getElementsByClassName("ap-selector")[0].classList.remove("disabled-item");
+            }
+            resolve();
+          });
         });
       }
 
       $(document).ready(async function(){
-        //await pullConfig;
+        await pullConfig();
         await pullNetworks();
       });
     </script>
@@ -103,15 +218,10 @@
     <div class="content">
       <div class="config-container">
         <div class="config-left">
-          <div class="config-item">
+          <div class="config-item" id="address-config-item">
             <span class="info-label">My Address:</span>
             <input id="myAddressInput" type="text" maxlength="6">
             <button class="btn" id="randomizeBtn" onclick="randomAddress()">RANDOM</button>
-          </div>
-          <div class="config-item disabled-item">
-            <span class="info-label">My Address:</span>
-            <input id="myAddressInput" type="text" maxlength="6" disabled>
-            <button class="btn" id="randomizeBtn" disabled>RANDOM</button>
           </div>
           <div class="config-item">
             <span class="info-label">AES Key:</span>
@@ -132,7 +242,7 @@
           <div class="config-item">
             <span class="info-label">Randomize path:</span>
             <label class="switch">
-              <input type="checkbox" onchange="toggleRandomize(event)">
+              <input type="checkbox" id="randomizePath">
               <span class="slider round"></span>
             </label>
           </div>
@@ -149,23 +259,23 @@
         </div>
         <div class="config-right">
           <div class="config-info">
-            <span class="warning red" >You need to set your address first</span>
+            <span class="warning red" id="address-warn" >You need to set your address first</span>
             <ul>
-              <li>My Address - Can be set only once</li>
+              <li>My Address - Can be set only once. <span class="red">Device will reboot after updating the address.</span></li>
               <li>Resend count - How many times should we try to re-send each message until it is considered failed</li>
-              <li>Resend timeout - How long to wait between each re-send</li>
-              <li>ACK wait timeout - How long to wait for ACK packet until the message is considered failed</li>
+              <li>Resend timeout - How long to wait between each re-send (In seconds)</li>
+              <li>ACK wait timeout - How long to wait for ACK packet until the message is considered failed (In seconds)</li>
               <li>Randomize path - Experimental setting. Will result in randomization of packets path. Only use if the messages cant be sucessfully delivered to the destination. This setting is not saved and will reset after next reboot.</li>
-              <li>LoRa config - LoRa configuration parameters. Configuration affects the usable range and reliability. <span class="red">Each node in the network has to use the same parameters</span></li>
-              <span>Device reboot is needed for some settings to take effect. //TODO implement autorestart</span>
+              <li>LoRa config - LoRa configuration parameters. Configuration affects the usable range and reliability.<br><span class="red">Each node in the network has to use the same parameters. Device will reboot after updating the LoRa config.</span></li>
+              <br><br><span>Manual device reboot is needed after WiFi networks have changed.</span>
             </ul>
           </div>
         </div>
       </div>
-      <button class="btn" id="saveCfgBtn">SAVE CONFIG</button>
+      <button class="btn" id="saveCfgBtn" onclick="updateConfig()">SAVE CONFIG</button>
       <div class="wifi-cfg">
         <span class="info-label-big">WiFi configuration</span>
-        <span class="info-label-small">Connected to: Wifinka, IP:192.168.100.33</span>
+        <span class="info-label-small" id="current-wifi">Connected to: Wifinka, IP:192.168.100.33</span>
       </div>
       <div class="config-container">
         <div class="config-left">
@@ -187,22 +297,13 @@
               <span class="slider round"></span>
             </label>
           </div>
-          <button class="btn" id="addWifiBtn">ADD</button>
+          <button class="btn" id="addWifiBtn" onclick="addNetwork()">ADD</button>
         </div>
         <div class="config-right">
           <p class="info-label">Saved networks</p>
           <div class="saved-networks">
-            <button onclick="selectWifi('ssid')" id="ssid" class="network">
-              <span class="network-ssid">Wifinka</span>
-            </button>
-            <button onclick="selectWifi('ssid2')" id="ssid2" class="network">
-              <span class="network-ssid">Wajfaj</span>
-            </button>
-            <button onclick="selectWifi('ssid3')" id="ssid3" class="network">
-              <span class="blue">AP</span><span class="network-ssid">Wifinka2</span>
-            </button>
           </div>
-          <button class="btn" id="removeWifiBtn" disabled>DELETE</button>
+          <button class="btn" id="removeWifiBtn" disabled onclick="removeNetwork()">DELETE</button>
         </div>
       </div>
     </div>

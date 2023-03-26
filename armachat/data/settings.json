@@ -10,12 +10,18 @@
   "WIFI_NETWORKS": [
     {
       "SSID": "ssid",
-      "PASSWORD": "password"
+      "PASSWORD": "password",
+      "AP": false
+    },
+    {
+      "SSID": "ARMACHAT",
+      "PASSWORD": "huhuhu",
+      "AP": true
     },
     {
       "SSID": "ssid2",
       "PASSWORD": "password2",
-      "AP": true
-    }
+      "AP": false
+    },
   ]
 }

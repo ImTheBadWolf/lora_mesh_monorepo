@@ -407,7 +407,6 @@ loop_times = [] #TODO just for testing
 while True:
   #start_ms = int(time.time() * 1000)
   if initialised:
-    node_process.receive_message()
     node_process.tick()
   try:
     server.poll()

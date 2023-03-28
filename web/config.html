@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCF protocol</title>
     <link rel="stylesheet" href="web/style.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
       let selectedSsid;
 
@@ -13,7 +12,7 @@
         let address = Math.floor(Math.random() * 65536);
         address = address.toString(16).padStart(4, '0');
         address = "0x" + address.toUpperCase();
-        $('#myAddressInput').val(address);
+        document.getElementById('myAddressInput').value = address;
       }
       function selectWifi(ssid) {
         if (selectedSsid) {
@@ -39,20 +38,24 @@
         let password = document.getElementById("wifiPswd").value;
         let apSelected = document.getElementById("apMode").checked;
         if (ssid && password) {
-          $.ajax({
-            url: '/api/network',
-            type: 'PUT',
-            data: JSON.stringify({
+
+          const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
               "network": {
                 'SSID': ssid,
                 'PASSWORD': password,
                 'AP': apSelected
               }
-            }),
-            success: function(response) {
-              pullNetworks();
-            }
-          });
+            })
+          };
+          fetch('/api/network', requestOptions)
+            .then(response => {
+              if (response.ok) {
+                pullNetworks();
+              }
+            })
         }
       }
       function removeNetwork(){

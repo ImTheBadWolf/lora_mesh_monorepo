@@ -218,6 +218,8 @@ class NodeProcess():
     return int(((snr - SNR_min) / (SNR_max - SNR_min)) * 5000)+1000 #Output min: 1000, max: 6000 (with snr range of -20 to 20)
 
   def tick(self):
+    self.receive_message()
+
     for message_queue_itm in self.message_queue.values():
       if message_queue_itm.get_state() == MessageState.NEW or message_queue_itm.get_state() == MessageState.SENT:
         if message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000) or message_queue_itm.get_priority == Priority.HIGH:
@@ -229,17 +231,22 @@ class NodeProcess():
             message_queue_itm.decrement_counter()
             #TODO implemnet CSMA here. If channel is busy, wait for fixed time and try again.
             #Additioanl csmaTimeout variable may be needed, which will be used to skip tick process for some time
-            try:
-              self.rfm9x.send(message_queue_itm.get_message_bytes())
-            except:
-              print("RFM9x send failed")
-            message_queue_itm.update_last_millis()
-            message_queue_itm.set_timeout(self.config.RESEND_TIMEOUT*1000 + random.randint(0, 1000)) #After first send, the timeout can be 0 as it will not break the flooding. But timeout is set to RESEND_TIMEOUT to prevent rapid spamming of the same message
-            if message_queue_itm.get_state() == MessageState.NEW:
-              message_queue_itm.update_message_state(MessageState.SENT)
-              self.notification_callback("Sent, messageId: " + str(message_queue_itm.get_message_id()))
+            if not self.rfm9x.rx_detected:
+              try:
+                self.rfm9x.send(message_queue_itm.get_message_bytes())
+                message_queue_itm.update_last_millis()
+                message_queue_itm.set_timeout(self.config.RESEND_TIMEOUT*1000 + random.randint(0, 1000)) #After first send, the timeout can be 0 as it will not break the flooding. But timeout is set to RESEND_TIMEOUT to prevent rapid spamming of the same message
+                if message_queue_itm.get_state() == MessageState.NEW:
+                  message_queue_itm.update_message_state(MessageState.SENT)
+                  self.notification_callback("Sent, messageId: " + str(message_queue_itm.get_message_id()))
+                else:
+                  self.notification_callback("Resent, messageId: " + str(message_queue_itm.get_message_id()))
+              except:
+                print("RFM9x send failed")
             else:
-              self.notification_callback("Resent, messageId: " + str(message_queue_itm.get_message_id()))
+              #Channel is busy, wait for fixed time and try again
+              message_queue_itm.update_last_millis()
+              message_queue_itm.set_timeout(self.config.CSMA_TIMEOUT)
           else:
             #Message failed due to exceeded number of resent attempts
             if message_queue_itm.get_sender() == self.config.MY_ADDRESS:

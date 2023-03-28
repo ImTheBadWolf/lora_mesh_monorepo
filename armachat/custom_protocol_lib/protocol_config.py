@@ -133,6 +133,10 @@ class ProtocolConfig():
     return 120 #DEFAULT value (in seconds)
 
   @property
+  def CSMA_TIMEOUT(self):
+    return 150 #DEFAULT value (in ms)
+
+  @property
   def BROADCAST_ADDRESS(self):
     return 0xFFFF
 

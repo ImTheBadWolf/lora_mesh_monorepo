@@ -56,7 +56,8 @@ class MessageQueueItem():
     return self.counter
 
   def update_message_state(self, state:MessageState):
-    self.state = state
+    if self.state != MessageState.DELETED:
+      self.state = state
 
   def get_message_id(self):
     return self.message_id

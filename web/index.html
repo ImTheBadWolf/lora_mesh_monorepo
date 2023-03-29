@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCF protocol</title>
     <link rel="stylesheet" href="web/style.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
       const MAX_MESSAGE_LENGTH = 238;
       let WACK = false;
@@ -100,44 +99,53 @@
       }
 
       async function pullAddressBook() {
-        return new Promise(function(resolve, reject) {
-          let counter = 2;
-          $.get("/api/contacts", function(data, status){
-            if (status !== 'success') {
-              reject();
+        const response = await fetch('/api/contacts')
+        const { contacts } = await response.json()
+        if (contacts){
+          contacts.forEach((contact)=>{
+            if (!contactsMap.has(contact.address)) {
+              contactsMap.set(contact.address, contact.name)
             }
-            const jsonData = JSON.parse(data);
-            jsonData.contacts.forEach((contact)=>{
-              if (!contactsMap.has(contact.address)) {
-                contactsMap.set(contact.address, contact.name)
-              }
-            })
-          });
-          $.get("/api/sensors", function(data, status){
-            if (status !== 'success') {
-              reject();
+          })
+        }
+
+        const responseS = await fetch('/api/sensors')
+        const { sensors } = await responseS.json()
+        if (sensors){
+          sensors.forEach((sensor)=>{
+            if (!sensorsMap.has(sensor.address)) {
+              sensorsMap.set(sensor.address, sensor.name)
             }
-            const jsonData = JSON.parse(data);
-            jsonData.sensors.forEach((sensor)=>{
-              if (!sensorsMap.has(sensor.address)) {
-                sensorsMap.set(sensor.address, sensor.name)
-              }
-            })
-          });
-          resolve();
-        });
+          })
+        }
       }
 
       async function pullNewMessages() {
-        let pages;
-        return new Promise(async function(resolve, reject) {
-          await $.get("/api/messages", function(data, status){
-            if (status !== 'success') {
-              reject();
+        const response = await fetch('/api/messages')
+        const { pages, messages } = await response.json()
+
+        if (messages?.length) {
+          messages.forEach((message)=>{
+            if (!messagesMap.has(message.id)) {
+              messagesMap.set(message.id, message)
+              shouldUpdate = true;
             }
-            const jsonData = JSON.parse(data);
-            pages = jsonData.pages;
-            jsonData.messages.forEach((message)=>{
+            else {
+              //Update message state
+              const oldMessage = messagesMap.get(message.id);
+              if (oldMessage.state !== message.state) {
+                messagesMap.set(message.id, {...oldMessage, state:message.state})
+                shouldUpdate = true;
+              }
+            }
+          })
+        }
+        for (let i = 1; i < pages; i++) {
+          const responseP = await fetch(`/api/messages?page=${i}`);
+          const { messages } = await responseP.json();
+
+          if (messages?.length) {
+            messages.forEach((message)=>{
               if (!messagesMap.has(message.id)) {
                 messagesMap.set(message.id, message)
                 shouldUpdate = true;
@@ -151,32 +159,9 @@
                 }
               }
             })
-          });
-          for (let i = 1; i < pages; i++) {
-            await $.get(`/api/messages?page=${i}`, function(data, status){
-              if (status !== 'success') {
-                reject();
-              }
-              const jsonData = JSON.parse(data);
-              jsonData.messages.forEach((message)=>{
-                if (!messagesMap.has(message.id)) {
-                  messagesMap.set(message.id, message)
-                  shouldUpdate = true;
-                }
-                else {
-                  //Update message state
-                  const oldMessage = messagesMap.get(message.id);
-                  if (oldMessage.state !== message.state) {
-                    messagesMap.set(message.id, {...oldMessage, state:message.state})
-                    shouldUpdate = true;
-                  }
-                }
-              })
-            });
           }
-          updateMessageList();
-          resolve();
-        })
+        }
+        updateMessageList();
       }
 
       function handleToggleChange(e) {
@@ -237,7 +222,13 @@
 
         sendButton.disabled = true;
         traceRouteButton.disabled = true;
-        $.post("/api/send_text_message", JSON.stringify(message));
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(message)
+        };
+        fetch('/api/send_text_message', requestOptions)
+
         messageInput.value = '';
         scrollToEnd = true;
       }
@@ -266,7 +257,12 @@
 
         sendButton.disabled = true;
         traceRouteButton.disabled = true;
-        $.post("/api/traceroute", JSON.stringify(message));
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(message)
+        };
+        fetch('/api/traceroute', requestOptions)
         scrollToEnd = true;
       }
       function resendMessage(messageId){
@@ -277,15 +273,20 @@
         const traceRouteButton = document.getElementById('tracerouteBtn');
         sendButton.disabled = true;
         traceRouteButton.disabled = true;
-        $.post("/api/resend_message", JSON.stringify({'message_id': messageId}));
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({'message_id': messageId})
+        };
+        fetch('/api/resend_message', requestOptions)
         scrollToEnd = true;
       }
 
-      $(document).ready(async function(){
+      document.addEventListener("DOMContentLoaded", async function(event) {
         await pullAddressBook();
         await pullNewMessages();
         fillContactsSelect();
-        setInterval(pullNewMessages, 5000);
+        setInterval(pullNewMessages, 800);
       });
     </script>
   </head>

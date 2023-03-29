@@ -63,7 +63,7 @@ class ProtocolConfig():
   def MY_ADDRESS(self, value):
     if self.get_item_from_config("MY_ADDRESS") is not None:
       raise ValueError("MY_ADDRESS can be set only once")
-    self.update_item_in_config("MY_ADDRESS", value)
+    self.update_item_in_config("MY_ADDRESS", value.upper())
 
   @property
   def RESEND_COUNT(self):

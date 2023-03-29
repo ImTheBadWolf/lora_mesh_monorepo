@@ -89,10 +89,10 @@ if initialised:
   node_process = NodeProcess(rfm9x, show_info_notification, config)
   address_book = AddressBook("data/contacts.json", "data/sensors.json")
   try:
-    address_book.add_contact("YOU", f"0x{config.MY_ADDRESS:04x}")
-    address_book.add_contact("ALL", f"0x{config.BROADCAST_ADDRESS:04x}")
-    address_book.add_sensor("YOU", f"0x{config.MY_ADDRESS:04x}")
-    address_book.add_sensor("ALL", f"0x{config.BROADCAST_ADDRESS:04x}")
+    address_book.add_contact("YOU", f"0x{config.MY_ADDRESS:04X}")
+    address_book.add_contact("ALL", f"0x{config.BROADCAST_ADDRESS:04X}")
+    address_book.add_sensor("YOU", f"0x{config.MY_ADDRESS:04X}")
+    address_book.add_sensor("ALL", f"0x{config.BROADCAST_ADDRESS:04X}")
   except:
     print("Cant save. Readonly filesystem")
 

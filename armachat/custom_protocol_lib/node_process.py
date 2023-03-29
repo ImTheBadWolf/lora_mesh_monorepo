@@ -161,7 +161,8 @@ class NodeProcess():
             #Received rebroadcast of message which was created by me. Either update state to rebroadcasted or done based on w_ack
             self.notification_callback(f"Message {message_queue_item.get_message_id()} was rebroadcasted")
             if message_queue_item.get_w_ack():
-              message_queue_item.update_message_state(MessageState.REBROADCASTED)
+              if message_queue_item.get_state() != MessageState.ACK:
+                message_queue_item.update_message_state(MessageState.REBROADCASTED)
               message_queue_item.update_last_millis()
               message_queue_item.set_timeout(self.config.ACK_WAIT_TIME*1000)
             else:
@@ -228,14 +229,14 @@ class NodeProcess():
             if message_queue_itm.get_message_type() == MessageType.SENSOR_DATA:
               message_queue_itm.decrement_ttl(round(time.monotonic() * 1000) - message_queue_itm.get_last_millis())
 
-            message_queue_itm.decrement_counter()
             #TODO implemnet CSMA here. If channel is busy, wait for fixed time and try again.
             #Additioanl csmaTimeout variable may be needed, which will be used to skip tick process for some time
-            if not self.rfm9x.rx_detected:
+            if not self.rfm9x.rx_detected():
               try:
                 self.rfm9x.send(message_queue_itm.get_message_bytes())
                 message_queue_itm.update_last_millis()
                 message_queue_itm.set_timeout(self.config.RESEND_TIMEOUT*1000 + random.randint(0, 1000)) #After first send, the timeout can be 0 as it will not break the flooding. But timeout is set to RESEND_TIMEOUT to prevent rapid spamming of the same message
+                message_queue_itm.decrement_counter()
                 if message_queue_itm.get_state() == MessageState.NEW:
                   message_queue_itm.update_message_state(MessageState.SENT)
                   self.notification_callback("Sent, messageId: " + str(message_queue_itm.get_message_id()))

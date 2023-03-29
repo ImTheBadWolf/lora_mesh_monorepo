@@ -5,25 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCF protocol</title>
     <link rel="stylesheet" href="web/style.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
       let selectedId;
-      function pullSensors() {
-        $.get("/api/sensors", function(data, status){
-          if (status !== 'success') {
-            return null;
-          }
+      async function pullSensors() {
+        const response = await fetch('/api/sensors')
+        const { sensors } = await response.json()
+        if (sensors){
           let contactsElm = document.getElementsByClassName("contacts")[0];
           contactsElm.innerHTML = '';
-          const jsonData = JSON.parse(data);
-          jsonData.sensors.forEach((sensor)=>{
+          sensors.forEach((contact)=>{
             let newSensor = `<button onclick="selectContact('${sensor.address}')" id="${sensor.address}" class="contact">
               <span class="contact-name">${sensor.name}</span>
               <span class="contact-address">${sensor.address}</span>
             </button>`;
             contactsElm.innerHTML += newSensor;
           })
-        });
+        }
       }
       function selectContact(id) {
         if (selectedId) {
@@ -45,16 +42,21 @@
         }
       }
       function removeSelected() {
-        $.ajax({
-          url: '/api/sensor',
-          type: 'DELETE',
-          data: JSON.stringify({'address': selectedId}),
-          success: function(response) {
-            selectedId = null;
-            document.getElementById("removeBtn").disabled = true;
-            pullSensors();
-          }
-        });
+        if (selectedId) {
+          const requestOptions = {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({'address': selectedId}),
+          };
+          fetch('/api/sensor', requestOptions)
+            .then(response => {
+              if (response.ok) {
+                selectedId = null;
+                document.getElementById("removeBtn").disabled = true;
+                pullSensors();
+              }
+            })
+        }
       }
       function addContact(){
         let name = document.getElementById("contactNameInput").value;
@@ -68,23 +70,27 @@
             alert('Incorrect name length (Min 1, Max 25 chars)');
             return;
           }
-          $.ajax({
-          url: '/api/sensor',
-          type: 'PUT',
-          data: JSON.stringify({
-            'address': address,
-            'name': name,
-          }),
-          success: function(response) {
-            pullSensors();
-            document.getElementById("contactNameInput").value = "";
-            document.getElementById("contactAddInput").value = "";
-          }
-        });
+
+          const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              'address': address,
+              'name': name,
+            })
+          };
+          fetch('/api/sensor', requestOptions)
+            .then(response => {
+              if (response.ok) {
+                pullSensors();
+                document.getElementById("contactNameInput").value = "";
+                document.getElementById("contactAddInput").value = "";
+              }
+            })
         }
       }
 
-      $(document).ready(function(){
+      document.addEventListener("DOMContentLoaded", function(event) {
         pullSensors();
       });
     </script>

@@ -5,25 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCF protocol</title>
     <link rel="stylesheet" href="web/style.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <script>
       let selectedId;
-      function pullContacts() {
-        $.get("/api/contacts", function(data, status){
-          if (status !== 'success') {
-            return null;
-          }
+      async function pullContacts() {
+        const response = await fetch('/api/contacts')
+        const { contacts } = await response.json()
+        if (contacts){
           let contactsElm = document.getElementsByClassName("contacts")[0];
           contactsElm.innerHTML = '';
-          const jsonData = JSON.parse(data);
-          jsonData.contacts.forEach((contact)=>{
+          contacts.forEach((contact)=>{
             let newContact = `<button onclick="selectContact('${contact.address}')" id="${contact.address}" class="contact">
               <span class="contact-name">${contact.name}</span>
               <span class="contact-address">${contact.address}</span>
             </button>`;
             contactsElm.innerHTML += newContact;
           })
-        });
+        }
       }
       function selectContact(id) {
         if (selectedId) {
@@ -45,16 +42,21 @@
         }
       }
       function removeSelected() {
-        $.ajax({
-          url: '/api/contact',
-          type: 'DELETE',
-          data: JSON.stringify({'address': selectedId}),
-          success: function(response) {
-            selectedId = null;
-            document.getElementById("removeBtn").disabled = true;
-            pullContacts();
-          }
-        });
+        if (selectedId) {
+          const requestOptions = {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({'address': selectedId}),
+          };
+          fetch('/api/contact', requestOptions)
+            .then(response => {
+              if (response.ok) {
+                selectedId = null;
+                document.getElementById("removeBtn").disabled = true;
+                pullContacts();
+              }
+            })
+        }
       }
       function addContact(){
         let name = document.getElementById("contactNameInput").value;
@@ -68,23 +70,26 @@
             alert('Incorrect name length (Min 1, Max 25 chars)');
             return;
           }
-          $.ajax({
-            url: '/api/contact',
-            type: 'PUT',
-            data: JSON.stringify({
+          const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
               'address': address,
               'name': name,
-            }),
-            success: function(response) {
-              pullContacts();
-              document.getElementById("contactNameInput").value = "";
-              document.getElementById("contactAddInput").value = "";
-            }
-          });
+            })
+          };
+          fetch('/api/contact', requestOptions)
+            .then(response => {
+              if (response.ok) {
+                pullContacts();
+                document.getElementById("contactNameInput").value = "";
+                document.getElementById("contactAddInput").value = "";
+              }
+            })
         }
       }
 
-      $(document).ready(function(){
+      document.addEventListener("DOMContentLoaded", function(event) {
         pullContacts();
       });
     </script>

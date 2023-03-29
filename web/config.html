@@ -38,7 +38,6 @@
         let password = document.getElementById("wifiPswd").value;
         let apSelected = document.getElementById("apMode").checked;
         if (ssid && password) {
-
           const requestOptions = {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -60,150 +59,137 @@
       }
       function removeNetwork(){
         if (selectedSsid) {
-          $.ajax({
-            url: '/api/network',
-            type: 'DELETE',
-            data: JSON.stringify({'SSID': selectedSsid}),
-            success: function(response) {
-              selectedSsid = null;
-              document.getElementById("removeWifiBtn").disabled = true;
-              pullNetworks();
-            }
-          });
+          const requestOptions = {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({'SSID': selectedSsid}),
+          };
+          fetch('/api/network', requestOptions)
+            .then(response => {
+              if (response.ok) {
+                selectedSsid = null;
+                document.getElementById("removeWifiBtn").disabled = true;
+                pullNetworks();
+              }
+            })
         }
       }
 
       async function pullConfig(){
-        return new Promise(async function(resolve, reject) {
-          $.get("/api/config", function(data, status){
-            if (status !== 'success') {
-              $("#saveCfgBtn").prop('disabled', false);
-              reject();
-            }
-            const {config} = JSON.parse(data);
-            if (config) {
-              if (config.my_address){
-                $("#myAddressInput").val(config.my_address);
-                $("#address-config-item").addClass("disabled-item");
-                $("#myAddressInput").prop('disabled', true);
-                $("#randomizeBtn").prop('disabled', true);
-                $("#address-warn").remove()
-              }
+        const response = await fetch('/api/config');
+        const {config} = await response.json();
 
-              $("#aesKey").val(config.aes_key);
-              $("#resendCount").val(config.resend_count);
-              $("#resendTimeout").val(config.resend_timeout);
-              $("#ackWait").val(config.ack_wait);
-              $('#randomizePath').prop('checked', config.randomize_path);
-              //TODO lora config
-              $("#saveCfgBtn").prop('disabled', false);
-              resolve();
-            }
-            else {
-              $("#saveCfgBtn").prop('disabled', false);
-              reject();
-            }
-          });
-        });
+        if (config) {
+          if (config.my_address){
+            document.getElementById("myAddressInput").value = config.my_address;
+            document.getElementById("address-config-item").classList.add("disabled-item");
+            document.getElementById("myAddressInput").disabled = true;
+            document.getElementById("randomizeBtn").disabled = true;
+            document.getElementById("address-warn").remove()
+          }
+          document.getElementById("aesKey").value = config.aes_key
+          document.getElementById("resendCount").value = config.resend_count;
+          document.getElementById("resendTimeout").value = config.resend_timeout;
+          document.getElementById("ackWait").value = config.ack_wait;
+          document.getElementById("randomizePath").checked = config.randomize_path;
+          document.getElementById("saveCfgBtn").disabled = false;
+        }
+        else {
+          document.getElementById("saveCfgBtn").disabled = false;
+        }
       }
 
       function updateConfig() {
-        $("#saveCfgBtn").prop('disabled', true);
+        document.getElementById("saveCfgBtn").disabled = true;
 
-        const addressValue = $("#myAddressInput").val();
-        const aesKey = $("#aesKey").val();
-        const resendCount = $("#resendCount").val();
-        const resendTimeout = $("#resendTimeout").val();
-        const ackWait = $("#ackWait").val();
-        const randomize = $('#randomizePath').prop('checked');
+        const addressValue = document.getElementById("myAddressInput").value;
+        const aesKey = document.getElementById("aesKey").value;
+        const resendCount = document.getElementById("resendCount").value;
+        const resendTimeout = document.getElementById("resendTimeout").value;
+        const ackWait = document.getElementById("ackWait").value;
+        const randomize = document.getElementById("randomizePath").checked
         //TODO lora config
 
         if (!addressValue.match(/^0x[0-9a-fA-F]{4}$/)) {
           alert('Invalid address');
-          $("#saveCfgBtn").prop('disabled', false);
+          document.getElementById("saveCfgBtn").disabled = false;
           return;
         }
         if (aesKey.length !== 16) {
           alert('AES key has to have 16 characters');
-          $("#saveCfgBtn").prop('disabled', false);
+          document.getElementById("saveCfgBtn").disabled = false;
           return;
         }
         if (resendCount < 1 || resendCount > 20) {
           alert('Resend count has to be between 1 and 20');
-          $("#saveCfgBtn").prop('disabled', false);
+          document.getElementById("saveCfgBtn").disabled = false;
           return;
         }
         if (resendTimeout < 1 || resendTimeout > 20) {
           alert('Resend timeout has to be between 1 and 20');
-          $("#saveCfgBtn").prop('disabled', false);
+          document.getElementById("saveCfgBtn").disabled = false;
           return;
         }
         if (ackWait < 1 || ackWait > 300) {
           alert('Ack wait has to be between 1 and 300');
-          $("#saveCfgBtn").prop('disabled', false);
+          document.getElementById("saveCfgBtn").disabled = false;
           return;
         }
 
         //TODO "lora_config": "Bw500Cr45Sf128",
-        $.ajax({
-          url: '/api/config',
-          type: 'PUT',
-          data: JSON.stringify({
-              "config":{
-              "randomize_path": randomize,
-              "aes_key": aesKey,
-              "resend_count": resendCount,
-              "resend_timeout": resendTimeout,
-              "ack_wait": ackWait,
-              "my_address": addressValue
-            }
-          }),
-          success: function(response) {
-            pullContacts();
-            document.getElementById("contactNameInput").value = "";
-            document.getElementById("contactAddInput").value = "";
-          }
-        });
 
-        pullConfig();
+          const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              "config":{
+                "randomize_path": randomize,
+                "aes_key": aesKey,
+                "resend_count": resendCount,
+                "resend_timeout": resendTimeout,
+                "ack_wait": ackWait,
+                "my_address": addressValue
+              }
+            })
+          };
+          fetch('/api/config', requestOptions)
+            .then(response => {
+              if (response.ok) {
+                pullConfig();
+              }
+            })
       }
 
       async function pullNetworks(){
-        return new Promise(async function(resolve, reject) {
-          let hasApDefined = false;
-          $.get("/api/networks", function(data, status){
-            if (status !== 'success') {
-              reject();
-            }
-            const {networks, current} = JSON.parse(data);
-            let networkList = document.getElementsByClassName("saved-networks")[0];
-            networkList.innerHTML = '';
-            networks.forEach(network => {
-              if (network.AP) {
-                hasApDefined = true;
-              }
-              networkList.innerHTML += `
-              <button onclick="selectWifi('${network.SSID}')" id='${network.SSID}' class="network">
-                 ${ network.AP ? '<span class="blue">AP</span>':''}<span class="network-ssid">${network.SSID}</span>
-              </button>`;
+        let hasApDefined = false;
+        const response = await fetch('/api/networks')
+        const {networks, current} = await response.json()
 
-            })
-            $("#current-wifi").text(`Connected to: ${current.ssid}, IP:${current.ipv4}`);
+        let networkList = document.getElementsByClassName("saved-networks")[0];
+        networkList.innerHTML = '';
+        networks.forEach(network => {
+          if (network.AP) {
+            hasApDefined = true;
+          }
+          networkList.innerHTML += `
+          <button onclick="selectWifi('${network.SSID}')" id='${network.SSID}' class="network">
+            ${ network.AP ? '<span class="blue">AP</span>':''}<span class="network-ssid">${network.SSID}</span>
+          </button>`;
 
-            if (hasApDefined) {
-              document.getElementById("apMode").disabled = true;
-              document.getElementsByClassName("ap-selector")[0].classList.add("disabled-item");
-            }
-            else {
-              document.getElementById("apMode").disabled = false;
-              document.getElementsByClassName("ap-selector")[0].classList.remove("disabled-item");
-            }
-            resolve();
-          });
-        });
+        })
+        document.getElementById("current-wifi").innerText = `Connected to: ${current.ssid}, IP:${current.ipv4}`;
+
+        if (hasApDefined) {
+          document.getElementById("apMode").disabled = true;
+          document.getElementsByClassName("ap-selector")[0].classList.add("disabled-item");
+        }
+        else {
+          document.getElementById("apMode").disabled = false;
+          document.getElementsByClassName("ap-selector")[0].classList.remove("disabled-item");
+        }
       }
 
-      $(document).ready(async function(){
+      document.addEventListener("DOMContentLoaded", async function(event) {
         await pullConfig();
         await pullNetworks();
       });

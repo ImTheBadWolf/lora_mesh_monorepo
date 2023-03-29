@@ -10,6 +10,11 @@ class NodeProcess():
     self.config = config
     self.rfm9x = rfm9x
     self.notification_callback = notification_callback #TODO used just for testing on armachat devices
+    self.latest_message = None
+
+    #TODO just for testing
+    self.received_counter = 0
+    self.sent_counter = 0
 
   def add_message(self, message_instance: Message, timeout=0, decrement=False, state=None):
     message_id = message_instance.get_message_id()
@@ -49,6 +54,7 @@ class NodeProcess():
     message_instance.new_text_message(destination_address, self.config.MY_ADDRESS, string_message, w_ack, max_hop, priority)
 
     self.add_message(message_instance)
+    self.sent_counter += 1
     gc.collect()
 
   def new_sensor_message(self, destination_address, sensor_data, ttl=None, priority=Priority.NORMAL):
@@ -80,6 +86,9 @@ class NodeProcess():
 
     self.add_message(message_instance)
     gc.collect()
+
+  def get_latest_message(self):
+    return self.latest_message
 
   def receive_message(self):
     received_packet = self.rfm9x.receive(timeout=0.8)
@@ -125,6 +134,7 @@ class NodeProcess():
               message_queue_item.update_last_millis()
               message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
             else:
+              self.received_counter += 1
               self.add_message(message, 0, True, state=MessageState.DONE)
 
             if message.get_header().get_message_type() == MessageType.TRACEROUTE_REQUEST:
@@ -134,7 +144,7 @@ class NodeProcess():
 
               self.add_message(traceroute_response_message_instance, 2500)
 
-            return (message, self.rfm9x.last_snr, self.rfm9x.last_rssi) #TODO return used only for testing on armachat devices, returns message which can be displayed on display
+            self.latest_message = (message, self.rfm9x.last_snr, self.rfm9x.last_rssi)
         else:
           #Received ACK message
           ack_message_id = message.get_ack_message_id()
@@ -150,7 +160,6 @@ class NodeProcess():
                 message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
               else:
                 message_queue_item.update_message_state(MessageState.ACK)
-          return
 
       else:
         #Received message is not for current node, add it to queue and rebroadcast it or update state
@@ -181,7 +190,7 @@ class NodeProcess():
               if message.get_ttl() <= message_queue_item.get_ttl:
                 should_delete = True
             else:
-              if message.get_maxHop() <= message_queue_item.get_maxHop():
+              if message.get_maxHop() <= message_queue_item.get_maxhop():
                 should_delete = True
 
             if should_delete:
@@ -219,6 +228,7 @@ class NodeProcess():
     return int(((snr - SNR_min) / (SNR_max - SNR_min)) * 5000)+1000 #Output min: 1000, max: 6000 (with snr range of -20 to 20)
 
   def tick(self):
+    self.latest_message = None
     self.receive_message()
 
     for message_queue_itm in self.message_queue.values():
@@ -251,14 +261,15 @@ class NodeProcess():
           else:
             #Message failed due to exceeded number of resent attempts
             if message_queue_itm.get_sender() == self.config.MY_ADDRESS:
-              #Message was created by me, update state to failed or delete, if its ACK message, traceroute request or traceroute response
-              if message_queue_itm.get_message_type() == MessageType.ACK or message_queue_itm.get_message_type() == MessageType.TRACEROUTE_REQUEST or message_queue_itm.get_message_type() == MessageType.TRACEROUTE:
+              #Message was created by me, update state to failed or delete, if its W_ACK message set state to failed
+              if message_queue_itm.get_message_type() != MessageType.TEXT_MSG_W_ACK:
                 message_queue_itm.update_message_state(MessageState.DELETED)
                 message_queue_itm.update_last_millis()
                 message_queue_itm.set_timeout(self.config.DELETE_WAIT_TIME*1000)
                 gc.collect()
                 return
               else:
+                #This is only for TEXT_MSG_W_ACK message, this means that message failed to be rebroadcasted by any other node
                 message_queue_itm.update_message_state(MessageState.FAILED)
                 self.notification_callback(f"Message {message_queue_itm.get_message_id()} failed to be sent")
             else:
@@ -289,3 +300,6 @@ class NodeProcess():
 
   def get_message_queue(self):
     return self.message_queue
+
+  def get_stats(self):
+    return (self.received_counter, self.sent_counter)

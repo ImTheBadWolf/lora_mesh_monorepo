@@ -3,7 +3,6 @@ import json
 CONTACT = 0x0002 #TODO just for testing
 
 REBOOT_REQUIRED_KEYS = ['MY_ADDRESS', 'LORA_CONFIG']
-#TODO when changing networks, show alert on web that manual reboot is required
 class ProtocolConfig():
   def __init__(self, config_path):
     self.config_path = config_path

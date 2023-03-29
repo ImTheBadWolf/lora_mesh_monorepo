@@ -32,14 +32,23 @@ import busio
 sys.path.append("custom_protocol_lib")
 import protocol_config
 from base_utils import *
-from message import Message
 from node_process import *
 import rfm9x_lora
 
 key_set = 0
 keypad = adafruit_matrixkeypad.Matrix_Keypad(config.rows, config.cols, config.keys1)
-message_to_send = f'Hello world from 0x{protocol_config.MY_ADDRESS:04x}'
+TMP_CONTACT = 0x0005
+received_counter = 0
+sent_counter = 0
 
+config = protocol_config.ProtocolConfig('data/settings.json')
+initialised = config.is_initialised()
+
+if not initialised:
+  print("My address not set. Please edit data/settings.json and set MY_ADDRESS")
+  sys.exit()
+
+message_to_send = f'Hello world from 0x{config.MY_ADDRESS:04X}'
 
 def show_info_notification(text):
   global screen
@@ -47,37 +56,22 @@ def show_info_notification(text):
   global info_timeout
   info_timeout = round(time.monotonic() * 1000)
 
-def get_char_set_label():
-  if(key_set == 0):
-    return "abc"
-  elif(key_set == 1):
-    return "123"
-  elif(key_set == 2):
-    return "ABC"
-
-def increment_key_set():
-  global key_set
-  key_set += 1
-  if key_set == 3:
-    key_set = 0
-  global keypad
-  if(key_set == 0):
-    keypad = adafruit_matrixkeypad.Matrix_Keypad(config.rows, config.cols, config.keys1)
-  elif(key_set == 1):
-    keypad = adafruit_matrixkeypad.Matrix_Keypad(config.rows, config.cols, config.keys2)
-  elif(key_set == 2):
-    keypad = adafruit_matrixkeypad.Matrix_Keypad(config.rows, config.cols, config.keys3)
-
 def handle_key_press(pressed_key):
   global message_to_send
   if pressed_key == "alt":
-    node_process.new_sensor_message(protocol_config.CONTACT, f"Sensor value: {random.randint(0, 100)}")
+    node_process.new_sensor_message(TMP_CONTACT, f"Sensor value: {random.randint(0, 100)}")
+    global sent_counter
+    sent_counter += 1
+    screen[0].text = f"received:{received_counter} sent:{sent_counter}"
   elif pressed_key == "z":
-    node_process.new_traceroute_request(protocol_config.CONTACT)
+    node_process.new_traceroute_request(TMP_CONTACT)
   elif pressed_key == "bsp":
     message_to_send = message_to_send[:-1]
   elif pressed_key == "ent":
-    node_process.new_text_message(protocol_config.CONTACT, message_to_send, w_ack = True)
+    node_process.new_text_message(TMP_CONTACT, message_to_send, w_ack = True)
+    global sent_counter
+    sent_counter += 1
+    screen[0].text = f"received:{received_counter} sent:{sent_counter}"
   else:
     message_to_send += pressed_key
 
@@ -121,8 +115,8 @@ screen = SimpleTextDisplay(
     ),
 )
 screen[0].text = "Messenger 3000"
-screen[1].text = f'My address: 0x{protocol_config.MY_ADDRESS:04x}'
-screen[3].text = f'Message to send(to 0x{protocol_config.CONTACT:04x})'
+screen[1].text = f'My address: 0x{config.MY_ADDRESS:04X}'
+screen[3].text = f'Message to send(to 0x{TMP_CONTACT:04X})'
 screen[4].text = message_to_send
 screen[6].text = f'Received SNR:{0} RSSI:{0} :'
 screen[7].text = ""
@@ -137,16 +131,18 @@ rfm9x.tx_power = 23
 rfm9x.preamble_length = 8
 info_timeout = 0
 
-node_process = NodeProcess(rfm9x, show_info_notification)
+node_process = NodeProcess(rfm9x, show_info_notification, config)
 counter = 0
 while True:
     start_time = round(time.monotonic() * 1000)
     keys = keypad.pressed_keys
-    r_msg = node_process.receive_message() #Adds 100ms delay...
     node_process.tick()
+    r_msg = node_process.get_latest_message()
 
     if r_msg is not None:
       (msg_instance, snr, rssi) = r_msg
+      received_counter += 1
+      screen[0].text = f"received:{received_counter} sent:{sent_counter}"
       screen[6].text = f'Received SNR:{snr} RSSI:{rssi}'
 
       if msg_instance.get_message_type() == MessageType.SENSOR_DATA:

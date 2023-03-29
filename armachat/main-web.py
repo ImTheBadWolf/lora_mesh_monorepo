@@ -31,6 +31,7 @@ ssid = None
 wifi_connected = False
 my_ip = None
 
+
 spi_lora = busio.SPI(board.GP10, MOSI=board.GP11, MISO=board.GP12)
 CS = digitalio.DigitalInOut(board.GP13)
 RESET = digitalio.DigitalInOut(board.GP17)
@@ -318,11 +319,14 @@ def api_dump(request: HTTPRequest):
 
     page_size = 1
     num_pages = (len(parsed_message_queue)-1) // page_size + 1
+    received, sent = node_process.get_stats()
 
     data = {
       'messages': parsed_message_queue[page*page_size:(page+1)*page_size],
       'pages': num_pages,
       'total': len(parsed_message_queue),
+      'received': received,
+      'sent': sent
     }
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       try:

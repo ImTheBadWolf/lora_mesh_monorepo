@@ -100,3 +100,6 @@ class MessageQueueItem():
 
   def get_message_counter(self):
     return self.message_counter
+
+  def get_packet_info(self):
+    return self.message_instance.get_packet_info()

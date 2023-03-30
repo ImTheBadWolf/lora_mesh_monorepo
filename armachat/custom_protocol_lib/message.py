@@ -2,13 +2,16 @@ from base_utils import *
 from header import Header
 
 class Message():
-  def __init__(self, config):
+  def __init__(self, config, snr=None, rssi=None):
     self.w_ack = False
     self.message_id = None
     self.config = config
     self.text_message = None
     self.sensor_data = None
     self.initialMaxHop = None
+    self.snr = snr
+    self.rssi = rssi
+    self.lora_config = "Bw500Cr45Sf128"  #TODO add loraconfig from config here
 
   def new_text_message(self, destination_address, sender_address, message, w_ack = False, max_hop=None, priority=Priority.NORMAL):
     #This method is used only for user-created new text messages
@@ -181,3 +184,6 @@ class Message():
 
   def get_ack_message_id(self):
     return self.ack_message_id
+
+  def get_packet_info(self):
+    return (self.snr, self.rssi, self.lora_config)

@@ -68,6 +68,13 @@ def parse_messages(messageList, config):
     message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
     message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
 
+    lora_info = message_queue_item.get_packet_info()
+    message_entity['lora_info'] = {
+      'snr': lora_info[0],
+      'rssi': lora_info[1],
+      'lora_config': lora_info[2]
+    }
+
     msg_type = message_queue_item.get_message_type()
     msg_instance = message_queue_item.get_message_instance()
     message_entity['msg_type'] = get_string_msg_type(msg_type)
@@ -90,6 +97,13 @@ def parse_message_queue(message_queue):
     message_entity['order'] = message_queue_item.get_message_counter()
     message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
     message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
+
+    lora_info = message_queue_item.get_packet_info()
+    message_entity['lora_info'] = {
+      'snr': lora_info[0],
+      'rssi': lora_info[1],
+      'lora_config': lora_info[2]
+    }
 
     msg_type = message_queue_item.get_message_type()
     msg_instance = message_queue_item.get_message_instance()

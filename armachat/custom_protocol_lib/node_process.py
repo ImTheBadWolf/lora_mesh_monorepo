@@ -98,9 +98,10 @@ class NodeProcess():
 
       if checksum_bytes[0] != received_packet[8] or checksum_bytes[1] != received_packet[9]:
         #Received packet does not belong to this protocol
+        #TODO add to queue as non parsed message when monitoring is enabled
         return
 
-      message = Message(self.config)
+      message = Message(self.config, self.rfm9x.last_snr, self.rfm9x.last_rssi)
       message.construct_message_from_bytes(received_packet)
 
       if message.get_destination() == self.config.MY_ADDRESS:

@@ -90,6 +90,11 @@ MESSAGE_ENTITY = {
   'payload': String
   'msg_type': OneOf('TEXT', 'WACK_TEXT', 'SENSOR', 'TRACEROUTE'),
   'state': OneOf('DONE', 'REBROADCASTED', 'ACK', 'NAK', 'FAILED',)//Optional, set only for messages sent by "me"
+  'lora_info': {
+    'snr': Number,
+    'rssi': Number,
+    'lora_config': String //Lora settings, e.g. "Bw500Cr45Sf128"
+  }
 }
 ```
 ```

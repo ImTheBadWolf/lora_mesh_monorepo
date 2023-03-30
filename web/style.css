@@ -178,6 +178,7 @@ input:checked+.slider:before {
   border-radius: 0px 15px 15px 15px;
   box-shadow: 0px 6px 8px 1px #bebebe;
   font-size: 14px;
+  word-break: break-all;
 }
 
 .sns-content {
@@ -197,6 +198,10 @@ input:checked+.slider:before {
 .new_msg,
 .new_contact {
   margin-top: 22px;
+}
+
+.new_msg {
+  position: relative;
 }
 
 #textArea {
@@ -557,6 +562,13 @@ input:checked+.slider:before {
   align-items: center;
 }
 
+#remainingChars {
+  position: absolute;
+  top: 76px;
+  right: 23px;
+  font-size: 12px;
+}
+
 @media only screen and (max-width: 650px) {
   .menu ul {
     gap: 14px;
@@ -606,6 +618,15 @@ input:checked+.slider:before {
     flex-direction: column;
     gap: 8px;
   }
+
+  #textArea {
+    height: 90px;
+  }
+
+  #remainingChars {
+    top: 110px;
+    right: 12px;
+  }
 }
 
 @media only screen and (max-width: 460px) {
@@ -633,5 +654,14 @@ input:checked+.slider:before {
   #removeBtn {
     margin-left: 0;
     margin-top: 3px;
+  }
+
+  #textArea {
+    height: 105px;
+  }
+
+  #remainingChars {
+    top: 124px;
+    right: 12px;
   }
 }

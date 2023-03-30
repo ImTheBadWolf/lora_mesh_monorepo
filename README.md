@@ -193,6 +193,7 @@ CONFIG_ENTITY = {
   'resend_timeout': Number,
   'ack_wait': Number,
   'randomize_path': Boolean,
+  'monitoring_enabled': Boolean
   'lora_config': String, oneOf(
       "Bw500Cr45Sf128",
       "Bw125Cr45Sf128",

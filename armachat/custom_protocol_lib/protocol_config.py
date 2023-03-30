@@ -158,6 +158,7 @@ class ProtocolConfig():
       'ack_wait': self.ACK_WAIT_TIME,
       'randomize_path': self.RANDOMIZE_PATH,
       'my_address': f"0x{self.MY_ADDRESS:04x}" if self.MY_ADDRESS is not None else None,
+      'monitoring_enabled': self.MONITORING_ENABLED,
       'lora_config': "Bw500Cr45Sf128" #TODO
     }
     return ret_dict
@@ -168,6 +169,7 @@ class ProtocolConfig():
     self.RESEND_TIMEOUT = config['resend_timeout']
     self.ACK_WAIT_TIME = config['ack_wait']
     self.RANDOMIZE_PATH = config['randomize_path']
+    self.MONITORING_ENABLED = config['monitoring_enabled']
 
     if self.MY_ADDRESS is None:
       print("Setting my address")

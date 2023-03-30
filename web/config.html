@@ -95,6 +95,7 @@
           document.getElementById("resendTimeout").value = config.resend_timeout;
           document.getElementById("ackWait").value = config.ack_wait;
           document.getElementById("randomizePath").checked = config.randomize_path;
+          document.getElementById("monitoringEnabled").checked = config.monitoring_enabled;
           document.getElementById("saveCfgBtn").disabled = false;
         }
         else {
@@ -111,6 +112,7 @@
         const resendTimeout = document.getElementById("resendTimeout").value;
         const ackWait = document.getElementById("ackWait").value;
         const randomize = document.getElementById("randomizePath").checked
+        const monitoring = document.getElementById("monitoringEnabled").checked
         //TODO lora config
 
         if (!addressValue.match(/^0x[0-9a-fA-F]{4}$/)) {
@@ -147,6 +149,7 @@
             body: JSON.stringify({
               "config":{
                 "randomize_path": randomize,
+                'monitoring_enabled': monitoring,
                 "aes_key": aesKey,
                 "resend_count": resendCount,
                 "resend_timeout": resendTimeout,
@@ -232,9 +235,16 @@
             <input id="ackWait" type="number" min=1 max=300>
           </div>
           <div class="config-item">
-            <span class="info-label">Randomize path:</span>
+            <span class="info-label">Randomize enabled:</span>
             <label class="switch">
               <input type="checkbox" id="randomizePath">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="config-item">
+            <span class="info-label">Monitoring mode:</span>
+            <label class="switch">
+              <input type="checkbox" id="monitoringEnabled">
               <span class="slider round"></span>
             </label>
           </div>
@@ -258,6 +268,7 @@
               <li>Resend timeout - How long to wait between each re-send (In seconds). Short timeout may result in undelivered messages.</li>
               <li>ACK wait timeout - How long to wait for ACK packet until the message is considered failed (In seconds)</li>
               <li>Randomize path - Experimental setting. Will result in randomization of packets path. Only use if the messages cant be sucessfully delivered to the destination. This setting is not saved and will reset after next reboot.</li>
+              <li>Monitoring enabled - If enabled, you will also receive packets which do not belong to this protocol. These raw packet wont be parsed or decrypted, you will only see the raw received bytes.</li>
               <li>LoRa config - LoRa configuration parameters. Configuration affects the usable range and reliability.<br><span class="red">Each node in the network has to use the same parameters. Device will reboot after updating the LoRa config.</span></li>
               <br><br><span>Manual device reboot is needed after WiFi networks have changed.</span>
             </ul>

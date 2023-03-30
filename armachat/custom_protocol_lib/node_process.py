@@ -187,7 +187,7 @@ class NodeProcess():
             #Only delete if the maxhop/ttl is less or equal to current node's maxhop/ttl
             should_delete = False
             if message_queue_item.get_message_type() == MessageType.SENSOR_DATA:
-              if message.get_ttl() <= message_queue_item.get_ttl:
+              if message.get_ttl() <= message_queue_item.get_ttl():
                 should_delete = True
             else:
               if message.get_maxHop() <= message_queue_item.get_maxhop():

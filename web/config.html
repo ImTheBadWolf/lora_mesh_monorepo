@@ -85,7 +85,10 @@
             document.getElementById("address-config-item").classList.add("disabled-item");
             document.getElementById("myAddressInput").disabled = true;
             document.getElementById("randomizeBtn").disabled = true;
-            document.getElementById("address-warn").remove()
+            const addressWarn = document.getElementById("address-warn")
+            if (addressWarn) {
+              addressWarn.remove()
+            }
           }
           document.getElementById("aesKey").value = config.aes_key
           document.getElementById("resendCount").value = config.resend_count;

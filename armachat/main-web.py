@@ -74,6 +74,8 @@ if not wifi_connected:
     if network['AP'] == True:
       try:
         ssid = network['SSID']
+        wifi.radio.stop_station()
+        sleep(1)
         wifi.radio.start_ap(ssid, network['PASSWORD'])
         print(f"Started AP: {ssid} password: {network['PASSWORD']}")
         my_ip = wifi.radio.ipv4_address_ap
@@ -83,8 +85,26 @@ if not wifi_connected:
         print("Failed to start AP:", ssid)
         print(e)
 
-pool = socketpool.SocketPool(wifi.radio)
-server = HTTPServer(pool)
+if not wifi_connected:
+  print("Failed to connect or create network.")
+  sys.exit()
+
+sleep(1)
+
+try:
+  pool = socketpool.SocketPool(wifi.radio)
+  server = HTTPServer(pool)
+except:
+  print("Failed to create socketpool. Will retry.")
+  sleep(2)
+
+try:
+  pool = socketpool.SocketPool(wifi.radio)
+  server = HTTPServer(pool)
+except:
+  print("Failed to create socketpool after 2 retries. Rebooting")
+  sleep(2)
+  microcontroller.reset()
 
 if initialised:
   node_process = NodeProcess(rfm9x, show_info_notification, config)

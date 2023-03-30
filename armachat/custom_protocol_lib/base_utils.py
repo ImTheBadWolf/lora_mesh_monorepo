@@ -63,11 +63,9 @@ def parse_messages(messageList, config):
   message_entity_list = []
   for message_queue_item in messageList:
     message_entity = {}
+
     message_entity['id'] = message_queue_item.get_message_id()
     message_entity['order'] = message_queue_item.get_message_counter()
-    message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
-    message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
-
     lora_info = message_queue_item.get_packet_info()
     message_entity['lora_info'] = {
       'snr': lora_info[0],
@@ -75,16 +73,24 @@ def parse_messages(messageList, config):
       'lora_config': lora_info[2]
     }
 
-    msg_type = message_queue_item.get_message_type()
-    msg_instance = message_queue_item.get_message_instance()
-    message_entity['msg_type'] = get_string_msg_type(msg_type)
-    if msg_type == MessageType.SENSOR_DATA:
-      message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
+    if message_queue_item.get_message_type() == MessageType.RAW_PACKET:
+      message_entity['payload'] = hex_print(message_queue_item.get_message_bytes())
     else:
-      message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
+      message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
+      message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
+      msg_type = message_queue_item.get_message_type()
+      msg_instance = message_queue_item.get_message_instance()
+      message_entity['msg_type'] = get_string_msg_type(msg_type)
+      if msg_type == MessageType.SENSOR_DATA:
+        message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
+      else:
+        message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
 
-    if message_queue_item.get_sender() == config.MY_ADDRESS:
-      message_entity['state'] = get_string_msg_state(message_queue_item.get_state())
+      if msg_type == MessageType.TEXT_MSG or msg_type == MessageType.TEXT_MSG_W_ACK:
+        message_entity['hop_count'] = msg_instance.get_initialMaxHop() - msg_instance.get_maxHop()
+
+      if message_queue_item.get_sender() == config.MY_ADDRESS:
+        message_entity['state'] = get_string_msg_state(message_queue_item.get_state())
 
     message_entity_list.append(message_entity)
   return message_entity_list
@@ -93,11 +99,11 @@ def parse_message_queue(message_queue):
   message_entity_list = []
   for message_queue_item in message_queue.values():
     message_entity = {}
-    message_entity['id'] = message_queue_item.get_message_id()
-    message_entity['order'] = message_queue_item.get_message_counter()
-    message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
-    message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
 
+    message_entity['id'] = message_queue_item.get_message_id()
+    message_entity['message_bytes'] = hex_print(message_queue_item.get_message_bytes())
+    message_entity['state'] = get_string_msg_state(message_queue_item.get_state())
+    message_entity['order'] = message_queue_item.get_message_counter()
     lora_info = message_queue_item.get_packet_info()
     message_entity['lora_info'] = {
       'snr': lora_info[0],
@@ -105,23 +111,25 @@ def parse_message_queue(message_queue):
       'lora_config': lora_info[2]
     }
 
-    msg_type = message_queue_item.get_message_type()
-    msg_instance = message_queue_item.get_message_instance()
-    message_entity['msg_type'] = get_string_msg_type(msg_type)
-    if msg_type == MessageType.SENSOR_DATA:
-      message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
-      message_entity['ttl'] = message_queue_item.get_ttl()
-    else:
-      message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
-      message_entity['max_hop'] = message_queue_item.get_maxhop()
-      message_entity['initial_max_hop'] = msg_instance.get_initialMaxHop()
+    if message_queue_item.get_message_type() != MessageType.RAW_PACKET:
+      message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
+      message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
 
-    message_entity['state'] = get_string_msg_state(message_queue_item.get_state())
-    message_entity['last_millis'] = message_queue_item.get_last_millis()
-    message_entity['timeout'] = message_queue_item.get_timeout()
-    message_entity['retry_counter'] = message_queue_item.get_counter()
-    message_entity['message_bytes'] = hex_print(message_queue_item.get_message_bytes())
-    message_entity['priority'] = message_queue_item.get_priority()
+      msg_type = message_queue_item.get_message_type()
+      msg_instance = message_queue_item.get_message_instance()
+      message_entity['msg_type'] = get_string_msg_type(msg_type)
+      if msg_type == MessageType.SENSOR_DATA:
+        message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
+        message_entity['ttl'] = message_queue_item.get_ttl()
+      else:
+        message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
+        message_entity['max_hop'] = message_queue_item.get_maxhop()
+        message_entity['initial_max_hop'] = msg_instance.get_initialMaxHop()
+
+      message_entity['last_millis'] = message_queue_item.get_last_millis()
+      message_entity['timeout'] = message_queue_item.get_timeout()
+      message_entity['retry_counter'] = message_queue_item.get_counter()
+      message_entity['priority'] = message_queue_item.get_priority()
 
     message_entity_list.append(message_entity)
   return message_entity_list
@@ -133,7 +141,7 @@ class Enum():
   def __getattr__(self, item):
     return self.tupleItems.index(item)
 
-MessageType = Enum(('ACK', 'TEXT_MSG', 'TEXT_MSG_W_ACK', 'SENSOR_DATA', 'TRACEROUTE_REQUEST', 'TRACEROUTE'))
+MessageType = Enum(('ACK', 'TEXT_MSG', 'TEXT_MSG_W_ACK', 'SENSOR_DATA', 'TRACEROUTE_REQUEST', 'TRACEROUTE', 'RAW_PACKET'))
 Priority = Enum(('NORMAL', 'HIGH'))
 MessageState = Enum(('NEW', 'SENT', 'REBROADCASTED', 'ACK', 'NAK', 'DONE', 'FAILED', 'DELETED'))
 

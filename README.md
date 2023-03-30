@@ -95,6 +95,7 @@ MESSAGE_ENTITY = {
     'rssi': Number,
     'lora_config': String //Lora settings, e.g. "Bw500Cr45Sf128"
   }
+  'hop_count': Number //Only in text messages
 }
 ```
 ```

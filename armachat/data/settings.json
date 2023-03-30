@@ -1,6 +1,7 @@
 {
   "MY_ADDRESS": null,
   "AES_KEY": "SuperTajne heslo",
+  "MONITORING_ENABLED": false,
   "RESEND_COUNT": 5,
   "RESEND_TIMEOUT": 3,
   "ACK_WAIT_TIME": 60,

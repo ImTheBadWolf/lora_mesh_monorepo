@@ -71,7 +71,7 @@
                 <span>Message failed</span>
               </button>` : ''}
               <span class="message__header ${message.state ? 'my-header':''}">
-                ${addressTranslation(message.from, message.msg_type)} ⟶ ${addressTranslation(message.to, message.msg_type)} | ${message.lora_info.snr ? (`SNR:${message.lora_info.snr} RSSI:${message.lora_info.rssi}`) : ''} ${message.lora_info.lora_config}
+                ${message.from ? (`${addressTranslation(message.from, message.msg_type)} ⟶ ${addressTranslation(message.to, message.msg_type)} |`):'' } ${message.lora_info.snr ? (`SNR:${message.lora_info.snr} RSSI:${message.lora_info.rssi}`) : ''} ${message.lora_info.lora_config} ${isNaN(message.hop_count) ? '':`Hops: ${message.hop_count}`}
               </span>
               <div class="message__content ${message.msg_type === 'SENSOR' ? 'sns-content':''} ${message.msg_type === 'TRACEROUTE' ? 'trc-content':''} ${message.state ? 'my-content':''} ${message.state && isFailed(message.state) ? 'failed':''}">
                 ${message.msg_type === 'TRACEROUTE' ? translateTraceroute(message.payload):message.payload}

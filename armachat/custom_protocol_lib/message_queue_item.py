@@ -4,8 +4,6 @@ from base_utils import *
 
 class MessageQueueItem():
   def __init__(self, message_instance:Message, message_counter, config, timeout=0):
-    #If timeout == 0 -> message is newly created and sent from the same node,
-    # so no wait timeout (unless csma ? #TODO not implemented yet) before broadcasting it
     self.message_instance = message_instance
     self.message_id = message_instance.get_message_id()
     self.message_bytes = message_instance.get_message_bytes()
@@ -14,7 +12,7 @@ class MessageQueueItem():
     self.counter = self.config.RESEND_COUNT
     self.timeout = timeout
     self.last_millis = round(time.monotonic() * 1000)
-    self.message_type = message_instance.get_header().get_message_type() #TODO
+    self.message_type = message_instance.get_header().get_message_type()
     self.maxhop = None
     self.ttl = None
     self.priority = message_instance.get_header().get_priority()
@@ -25,6 +23,9 @@ class MessageQueueItem():
 
   def setMHTTL(self):
     #Set maxhop or ttl depending on message type
+    if self.message_type == MessageType.RAW_PACKET:
+      return
+
     if self.message_type == MessageType.SENSOR_DATA:
       self.ttl = self.message_instance.get_ttl()
     else:

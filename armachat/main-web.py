@@ -342,11 +342,13 @@ def api_dump(request: HTTPRequest):
     received, sent = node_process.get_stats()
 
     data = {
-      'messages': parsed_message_queue[page*page_size:(page+1)*page_size],
+      'message': parsed_message_queue[page*page_size:(page+1)*page_size],
+      'device_info': {
+        'received': received,
+        'sent': sent
+      },
       'pages': num_pages,
       'total': len(parsed_message_queue),
-      'received': received,
-      'sent': sent
     }
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       try:

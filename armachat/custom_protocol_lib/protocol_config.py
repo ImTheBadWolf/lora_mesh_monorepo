@@ -128,6 +128,14 @@ class ProtocolConfig():
     self.update_item_in_config("RANDOMIZE_PATH", value)
 
   @property
+  def MONITORING_ENABLED(self):
+    return self.get_item_from_config("MONITORING_ENABLED")
+
+  @MONITORING_ENABLED.setter
+  def MONITORING_ENABLED(self, value):
+    self.update_item_in_config("MONITORING_ENABLED", value)
+
+  @property
   def DELETE_WAIT_TIME(self):
     return 120 #DEFAULT value (in seconds)
 

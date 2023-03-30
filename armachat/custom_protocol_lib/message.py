@@ -87,6 +87,14 @@ class Message():
     else: #text_msg or text_msg_wack or traceroute_request
       return list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(self.initialMaxHop.to_bytes(1, 'big'))) + list(encrypted_message)
 
+  def construct_raw_packet(self, bytes_array):
+    self.header = Header()
+    self.header.construct_raw_packet()
+
+    self.message_id = int.from_bytes(bytes_array[:5], 'big')
+
+    self.payload = bytes_array
+
   def construct_message_from_bytes(self, bytes_array):
     self.header = Header()
     self.header.construct_header_from_bytes(bytes_array[:HEADER_LENGTH])
@@ -180,7 +188,10 @@ class Message():
     return self.header
 
   def get_message_bytes(self):
-    return self.header.get_header_bytes() + bytearray(self.payload)
+    if self.header.get_message_type() != MessageType.RAW_PACKET:
+      return self.header.get_header_bytes() + bytearray(self.payload)
+    else:
+      return bytearray(self.payload)
 
   def get_ack_message_id(self):
     return self.ack_message_id

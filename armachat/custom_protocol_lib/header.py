@@ -11,7 +11,10 @@ from base_utils import *
 
 class Header:
   def __init__(self):
-    pass
+    self.destination_address = None
+    self.sender_address = None
+    self.header = None
+    self.priority = None
 
   def new_header(self, destination_address, sender_address, message_type=MessageType.TEXT_MSG, priority=Priority.NORMAL):
     self.destination_address = destination_address
@@ -77,3 +80,6 @@ class Header:
     self.header[7] = bytes_array[7]
     self.header[8] = bytes_array[8]
     self.header[9] = bytes_array[9]
+
+  def construct_raw_packet(self):
+    self.message_type = MessageType.RAW_PACKET

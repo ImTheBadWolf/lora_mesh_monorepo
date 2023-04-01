@@ -91,7 +91,7 @@ class NodeProcess():
     return self.latest_message
 
   def receive_message(self):
-    received_packet = self.rfm9x.receive(timeout=20) #TODO timeout has to be bigger when using long range mode (~15 seconds)
+    received_packet = self.rfm9x.receive(timeout=25)
     if received_packet is not None and len(received_packet) >= HEADER_LENGTH:
       checksum = calculate_checksum(received_packet)
       checksum_bytes = checksum.to_bytes(2, 'big')
@@ -123,8 +123,8 @@ class NodeProcess():
               self.add_message(ack_message_instance, 1500)
             else:
               #Received message does not require to send back ACK
-              #But we have to send ACK anyway, so that neighbor node can remove this message from queue and stop rebroadcasting it
-              #This ACK message will have maxHop set to 0 so that only neighbor node will receive it
+              #But we have to send ACK anyway, so that neighbor nodes can remove this message from queue and stop rebroadcasting it
+              #This ACK message will have maxHop set to 0 so that only neighbor nodes will receive it
               ack_message_instance = Message(self.config)
               ack_message_instance.new_ack_message(message.get_sender(), self.config.MY_ADDRESS, message.get_message_id(), max_hop=0)
               self.notification_callback(f"Created ACK message(id: {ack_message_instance.get_message_id()}), confirming msgID: {message.get_message_id()}, maxHop={ack_message_instance.get_maxHop()}")
@@ -165,7 +165,6 @@ class NodeProcess():
                 message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
               else:
                 message_queue_item.update_message_state(MessageState.ACK)
-
       else:
         #Received message is not for current node, add it to queue and rebroadcast it or update state
         if message.get_message_id() in self.message_queue:
@@ -213,7 +212,19 @@ class NodeProcess():
               message_queue_item.update_last_millis()
               message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
               return
-          #Received message is not in queue, decrement maxHop/TTL and add it to queue
+          #Received message is not in queue. Check if it isnt broadcast message, decrement maxHop/TTL and add it to queue
+          if message.get_destination() == self.config.BROADCAST_ADDRESS:
+            #It is broadcast message. Add it to user messages
+            self.notification_callback("Received new BROADCAST message, msgId: " + str(message.get_message_id()))
+            #Add message to queue with state DONE so that it wont be "received" again
+            #We have to create another copy of the received message, so that it will have different ID
+            #This is needed because one copy of the message will be rebrodcasted further, while the other copy will be displayed to user as received message
+            message_copy = Message(self.config, self.rfm9x.last_snr, self.rfm9x.last_rssi)
+            message_copy.construct_message_from_bytes(received_packet)
+            self.received_counter += 1
+            self.add_message(message_copy, 0, False, state=MessageState.DONE)
+            self.latest_message = (message, self.rfm9x.last_snr, self.rfm9x.last_rssi)
+
           if (message.get_message_type() != MessageType.SENSOR_DATA and message.get_maxHop() > 0) or (message.get_message_type() == MessageType.SENSOR_DATA and message.get_ttl() > 0):
             self.add_message(message, self.get_timeout(self.rfm9x.last_snr), True)
 

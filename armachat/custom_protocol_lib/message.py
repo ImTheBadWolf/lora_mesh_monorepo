@@ -18,7 +18,7 @@ class Message():
     if max_hop is None:
       max_hop = self.config.DEFAULT_MAX_HOP
     message_type = MessageType.TEXT_MSG
-    if w_ack:
+    if w_ack and destination_address != self.config.BROADCAST_ADDRESS:
       message_type = MessageType.TEXT_MSG_W_ACK
 
     self.header = Header()
@@ -31,17 +31,6 @@ class Message():
     self.w_ack = w_ack
     self.message_id = self.header.get_message_id()
 
-  def new_ack_message(self, destination_address, sender_address, message_id, max_hop=None, priority=Priority.NORMAL):
-    if max_hop is None:
-      max_hop = self.config.DEFAULT_MAX_HOP
-    self.header = Header()
-    self.header.new_header(destination_address, sender_address, MessageType.ACK, priority)
-
-    self.message_id = self.header.get_message_id()
-    self.maxHop = max_hop
-    self.payload = self.__construct_message_payload(str(message_id), MessageType.ACK)
-    self.ack_message_id = message_id
-
   def new_sensor_message(self, destination_address, sender_address, sensor_data, ttl=None, priority=Priority.NORMAL):
     if ttl is None:
       ttl = self.config.DEFAULT_TTL
@@ -53,26 +42,41 @@ class Message():
     self.message_id = self.header.get_message_id()
     self.payload = self.__construct_message_payload(str(sensor_data), MessageType.SENSOR_DATA)
 
+  def new_ack_message(self, destination_address, sender_address, message_id, max_hop=None, priority=Priority.NORMAL):
+    if max_hop is None:
+      max_hop = self.config.DEFAULT_MAX_HOP
+
+    if destination_address != self.config.BROADCAST_ADDRESS:
+      self.header = Header()
+      self.header.new_header(destination_address, sender_address, MessageType.ACK, priority)
+
+      self.message_id = self.header.get_message_id()
+      self.maxHop = max_hop
+      self.payload = self.__construct_message_payload(str(message_id), MessageType.ACK)
+      self.ack_message_id = message_id
+
   def new_traceroute_request(self, destination_address, sender_address, max_hop=None, priority=Priority.NORMAL):
     if max_hop is None:
       max_hop = self.config.DEFAULT_MAX_HOP
-    self.header = Header()
-    self.header.new_header(destination_address, sender_address, MessageType.TRACEROUTE_REQUEST, priority)
+    if destination_address != self.config.BROADCAST_ADDRESS:
+      self.header = Header()
+      self.header.new_header(destination_address, sender_address, MessageType.TRACEROUTE_REQUEST, priority)
 
-    self.maxHop = max_hop
-    self.initialMaxHop = max_hop
-    self.message_id = self.header.get_message_id()
-    self.payload = self.__construct_message_payload("", MessageType.TRACEROUTE_REQUEST)
+      self.maxHop = max_hop
+      self.initialMaxHop = max_hop
+      self.message_id = self.header.get_message_id()
+      self.payload = self.__construct_message_payload("", MessageType.TRACEROUTE_REQUEST)
 
   def new_traceroute_message(self, destination_address, sender_address, max_hop=None, priority=Priority.NORMAL):
     if max_hop is None:
       max_hop = self.config.DEFAULT_MAX_HOP
-    self.header = Header()
-    self.header.new_header(destination_address, sender_address, MessageType.TRACEROUTE, priority)
+    if destination_address != self.config.BROADCAST_ADDRESS:
+      self.header = Header()
+      self.header.new_header(destination_address, sender_address, MessageType.TRACEROUTE, priority)
 
-    self.maxHop = max_hop
-    self.message_id = self.header.get_message_id()
-    self.payload = self.__construct_message_payload(f"0x{sender_address:04x}", MessageType.TRACEROUTE)
+      self.maxHop = max_hop
+      self.message_id = self.header.get_message_id()
+      self.payload = self.__construct_message_payload(f"0x{sender_address:04x}", MessageType.TRACEROUTE)
 
   def __construct_message_payload(self, message, message_type):
     encrypted_message = bytearray(len(message))
@@ -131,7 +135,7 @@ class Message():
       #ACK and TRACEROUTE messages are not encrypted
       self.text_message = self.payload[1:]
 
-    if self.get_destination() == self.config.MY_ADDRESS:
+    if self.get_destination() == self.config.MY_ADDRESS or self.get_destination() == self.config.BROADCAST_ADDRESS:
       cipher = aesio.AES(self.config.AES_KEY, aesio.MODE_CTR, self.config.AES_KEY)
       input = bytes(self.payload[2:])
       decrypted_message = bytearray(len(input))

@@ -254,8 +254,9 @@ class NodeProcess():
                   self.notification_callback("Sent, messageId: " + str(message_queue_itm.get_message_id()))
                 else:
                   self.notification_callback("Resent, messageId: " + str(message_queue_itm.get_message_id()))
-              except:
+              except Exception as e:
                 print("RFM9x send failed")
+                print(e)
             else:
               #Channel is busy, wait for fixed time and try again
               message_queue_itm.update_last_millis()

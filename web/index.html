@@ -19,7 +19,7 @@
 
       function scrolledEnd() {
         const messagesElement = document.getElementsByClassName("messages")[0];
-        return Math.ceil(messagesElement.scrollTop + messagesElement.clientHeight) === messagesElement.scrollHeight
+        return Math.abs(Math.ceil(messagesElement.scrollTop + messagesElement.clientHeight) - messagesElement.scrollHeight) < 20
       }
 
       function isFailed(messageState) {

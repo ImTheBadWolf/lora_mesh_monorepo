@@ -41,7 +41,7 @@ RESET = digitalio.DigitalInOut(board.GP17)
 # 4 => Bw250Cr46Sf2048      Medium/Slow
 # 5 => Bw31_25Cr48Sf512     Long/Fast
 # 6 => Bw125Cr48Sf4096      Long/Slow
-rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=False)
+rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=True)
 rfm9x.signal_bandwidth = 500000
 rfm9x.coding_rate = 6
 rfm9x.spreading_factor = 9
@@ -64,33 +64,33 @@ initialised = config.is_initialised()
 
 networks = config.get_networks()
 for network in networks:
-  if network['AP'] != True:
+  if network['AP'] == True:
     try:
+      sleep(1)
       ssid = network['SSID']
-      wifi.radio.connect(ssid, network['PASSWORD'])
-      print("Connected to:", ssid)
-      my_ip = wifi.radio.ipv4_address
+      wifi.radio.start_ap(ssid, network['PASSWORD'])
+      print(f"Started AP: {ssid} password: {network['PASSWORD']}")
+      my_ip = wifi.radio.ipv4_address_ap
       wifi_connected = True
       break
-    except:
-      print("Failed to connect to:", ssid)
+    except Exception as e:
+      print("Failed to start AP:", ssid)
+      print(e)
 
 if not wifi_connected:
   print("No networks found, starting AP mode")
   #find network which hash ["AP"] = true in networks
   for network in networks:
-    if network['AP'] == True:
+    if network['AP'] != True:
       try:
         ssid = network['SSID']
-        wifi.radio.stop_station()
-        sleep(1)
-        wifi.radio.start_ap(ssid, network['PASSWORD'])
-        print(f"Started AP: {ssid} password: {network['PASSWORD']}")
-        my_ip = wifi.radio.ipv4_address_ap
+        wifi.radio.connect(ssid, network['PASSWORD'])
+        print("Connected to:", ssid)
+        my_ip = wifi.radio.ipv4_address
         wifi_connected = True
         break
       except Exception as e:
-        print("Failed to start AP:", ssid)
+        print(f"Failed to connect to: {ssid}.")
         print(e)
 
 if not wifi_connected:

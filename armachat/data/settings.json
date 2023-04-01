@@ -24,5 +24,6 @@
       "PASSWORD": "password2",
       "AP": false
     }
-  ]
+  ],
+  "CONTACTS": ["0x0005", "0x0002"]
 }

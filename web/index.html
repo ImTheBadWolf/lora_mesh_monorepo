@@ -209,17 +209,17 @@
         const traceRouteButton = document.getElementById('tracerouteBtn');
 
         if (!addressInput.value.match(/^0x[0-9a-fA-F]{4}$/)) {
-          alert('Invalid address');
+          alert('Invalid address. Address must by in a 0xNNNN format. (e.g. 0x1234)');
           return;
         }
 
         if(!maxHopInput.value.match(/^[0-9]+$/) || maxHopInput.value < 1 || maxHopInput.value > 255) {
-          alert('Invalid max hop value');
+          alert('Invalid max hop value. Value must be between 1 and 255');
           return;
         }
 
         if (messageInput.value.length > MAX_MESSAGE_LENGTH || messageInput.value.length === 0) {
-          alert('Message is too long or empty');
+          alert('Message too long or empty');
           return;
         }
 

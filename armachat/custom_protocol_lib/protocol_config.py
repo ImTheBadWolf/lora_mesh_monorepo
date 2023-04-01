@@ -1,7 +1,5 @@
 import json
 
-CONTACT = 0x0002 #TODO just for testing
-
 REBOOT_REQUIRED_KEYS = ['MY_ADDRESS', 'LORA_CONFIG']
 class ProtocolConfig():
   def __init__(self, config_path):
@@ -109,17 +107,6 @@ class ProtocolConfig():
     self.update_item_in_config("DEFAULT_MAX_HOP", value)
 
   @property
-  def DEFAULT_TTL(self):
-    return 50 #DEFAULT value (in seconds, max 2B - 65536)
-
-  @DEFAULT_TTL.setter
-  def DEFAULT_TTL(self, value):
-    value = int(value)
-    if value > 65536:
-      raise ValueError("DEFAULT_TTL must be less than 65536")
-    self.update_item_in_config("DEFAULT_TTL", value)
-
-  @property
   def RANDOMIZE_PATH(self):
     return self.get_item_from_config("RANDOMIZE_PATH")
 
@@ -135,6 +122,11 @@ class ProtocolConfig():
   def MONITORING_ENABLED(self, value):
     self.update_item_in_config("MONITORING_ENABLED", value)
 
+  #Properties bellow are read-only, and can be changed only by changing the hard-coded values in this file
+  @property
+  def DEFAULT_TTL(self):
+    return 50 #DEFAULT value (in seconds, max 2B - 65536)
+
   @property
   def DELETE_WAIT_TIME(self):
     return 120 #DEFAULT value (in seconds)
@@ -146,6 +138,10 @@ class ProtocolConfig():
   @property
   def BROADCAST_ADDRESS(self):
     return 0xFFFF
+
+  @property
+  def CONTACTS(self):
+    return self.get_item_from_config("CONTACTS")
 
   def is_reboot_required(self):
     return self.reboot_required

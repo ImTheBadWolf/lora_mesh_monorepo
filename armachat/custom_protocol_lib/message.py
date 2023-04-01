@@ -112,8 +112,13 @@ class Message():
 
     if self.header.get_message_type() == MessageType.ACK:
       #Get the message id this ACK packet is confirming
-      str = ''.join(chr(i) for i in self.text_message)
-      self.ack_message_id = int(str)
+      try:
+        str = ''.join(chr(i) for i in self.text_message)
+        print("DEBUG: ACK received for message id: " + str + "")
+        self.ack_message_id = int(str)
+      except:
+        #Error parsing the message id (happens probably only when CRC is not checked in LoRa)
+        self.ack_message_id = -1
 
   def parse_message_from_payload(self):
     if self.header.get_message_type() == MessageType.TEXT_MSG_W_ACK or self.header.get_message_type() == MessageType.TEXT_MSG or self.header.get_message_type() == MessageType.TRACEROUTE_REQUEST:

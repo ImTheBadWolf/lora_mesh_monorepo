@@ -86,7 +86,7 @@ def parse_messages(messageList, config):
       else:
         message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
 
-      if msg_type == MessageType.TEXT_MSG or msg_type == MessageType.TEXT_MSG_W_ACK:
+      if (msg_type == MessageType.TEXT_MSG or msg_type == MessageType.TEXT_MSG_W_ACK) and message_queue_item.get_sender() != config.MY_ADDRESS:
         message_entity['hop_count'] = msg_instance.get_initialMaxHop() - msg_instance.get_maxHop()
 
       if message_queue_item.get_sender() == config.MY_ADDRESS:

@@ -41,6 +41,11 @@ TMP_CONTACT = 0x0005
 received_counter = 0
 sent_counter = 0
 
+VSYS_voltage = analogio.AnalogIn(board.VOLTAGE_MONITOR)
+tmp_sensor_counter = 0 #TODO remove
+sensor_report_interval = 30 #Seconds
+last_sensor_report = 0
+
 config = protocol_config.ProtocolConfig('data/settings.json')
 initialised = config.is_initialised()
 
@@ -56,10 +61,27 @@ def show_info_notification(text):
   global info_timeout
   info_timeout = round(time.monotonic() * 1000)
 
+def send_sensor_message():
+  contacts = config.CONTACTS
+  if contacts == None or len(contacts) == 0:
+    print("No contacts")
+    return
+  else:
+    voltage =((VSYS_voltage.value * 3.3) / 65536) * 3
+    uptime = time.monotonic()/60
+    uptime = int(uptime * 100) / 100
+    voltage = int(voltage * 100) / 100
+    global tmp_sensor_counter
+    sensor_message = f"Uptime: {uptime} Min\nFree mem: {gc.mem_free()} B\nCPU temp: {microcontroller.cpu.temperature} C\nVoltage: {voltage} V\nCounter: {tmp_sensor_counter}"
+    tmp_sensor_counter += 1
+    for contact in contacts:
+      node_process.new_sensor_message(int(contact, 16), sensor_message)
+      sleep(0.2)
+
 def handle_key_press(pressed_key):
   global message_to_send
   if pressed_key == "alt":
-    node_process.new_sensor_message(TMP_CONTACT, f"Sensor value: {random.randint(0, 100)}")
+    send_sensor_message()
     global sent_counter
     sent_counter += 1
     screen[0].text = f"received:{received_counter} sent:{sent_counter}"
@@ -120,10 +142,11 @@ screen[3].text = f'Message to send(to 0x{TMP_CONTACT:04X})'
 screen[4].text = message_to_send
 screen[6].text = f'Received SNR:{0} RSSI:{0} :'
 screen[7].text = ""
+screen[11].text = "ENT-send ALT-sensor Z-traceroute"
 screen.show()
 
 #TODO load settings from config
-rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=False)
+rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=True)
 rfm9x.signal_bandwidth = 500000
 rfm9x.coding_rate = 6
 rfm9x.spreading_factor = 9
@@ -142,7 +165,6 @@ else:
 node_process = NodeProcess(rfm9x, show_info_notification, config)
 counter = 0
 while True:
-    start_time = round(time.monotonic() * 1000)
     keys = keypad.pressed_keys
     node_process.tick()
     r_msg = node_process.get_latest_message()
@@ -180,10 +202,6 @@ while True:
       screen[2].text = ""
       info_timeout = 0
 
-    end_time = round(time.monotonic() * 1000)
-    """ print(f'Loop time: {end_time - start_time}')
-    counter += 1
-    if counter > 25:
-      exit() """
-    #Loop time ~30ms, ~80ms when receiving a message while using rfm9x.receive() with timeout 0.025
-    #screen.show()
+    if last_sensor_report + sensor_report_interval*1000 < round(time.monotonic() * 1000):
+      last_sensor_report = round(time.monotonic() * 1000)
+      send_sensor_message()

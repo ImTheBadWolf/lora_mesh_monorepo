@@ -34,8 +34,13 @@
         }
         return contactsMap.get(address) || address;
       }
-      function sanitize(text) {
-        text = text.replace(/[\<\>]/g, " ")
+      function sanitize(text, keepRightArrow = false) {
+        if (keepRightArrow) {
+          text = text.replace(/[\<]/g, " ")
+        }
+        else {
+          text = text.replace(/[\<\>]/g, " ")
+        }
         text = text.replace(/\n/g, "<br>")
         return text
       }
@@ -46,7 +51,7 @@
           contact = contactsMap.get(address) || sensorsMap.get(address) || address;
           message = message.replace(address, contact);
         })
-        return "Traceroute:<br>" + sanitize(message);
+        return "Traceroute:<br>" + sanitize(message, true);
       }
 
       function updateMessageList() {
@@ -237,6 +242,7 @@
         document.getElementById("infoNotif").innerText = "Message sent"
 
         messageInput.value = '';
+        textAreaPress();
         scrollToEnd = true;
       }
       function traceRoute() {
@@ -288,6 +294,7 @@
         };
         fetch('/api/resend_message', requestOptions)
         document.getElementById("infoNotif").innerText = "Message resent"
+        textAreaPress()
         scrollToEnd = true;
       }
 

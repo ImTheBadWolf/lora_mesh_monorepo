@@ -336,7 +336,7 @@ class RFM9x:
         """The amount of time to poll for a received packet.
            If no packet is received, the returned packet will be None
         """
-        self.xmit_timeout = 4.0
+        self.xmit_timeout = 20
         """The amount of time to wait for the HW to transmit the packet.
            This is mainly used to prevent a hang due to a HW issue
         """

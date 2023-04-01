@@ -91,7 +91,7 @@ class NodeProcess():
     return self.latest_message
 
   def receive_message(self):
-    received_packet = self.rfm9x.receive(timeout=0.8)
+    received_packet = self.rfm9x.receive(timeout=20) #TODO timeout has to be bigger when using long range mode (~15 seconds)
     if received_packet is not None and len(received_packet) >= HEADER_LENGTH:
       checksum = calculate_checksum(received_packet)
       checksum_bytes = checksum.to_bytes(2, 'big')
@@ -238,7 +238,7 @@ class NodeProcess():
 
     for message_queue_itm in self.message_queue.values():
       if message_queue_itm.get_state() == MessageState.NEW or message_queue_itm.get_state() == MessageState.SENT:
-        if message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000) or message_queue_itm.get_priority == Priority.HIGH:
+        if message_queue_itm.get_last_millis() + message_queue_itm.get_timeout() < round(time.monotonic() * 1000) or message_queue_itm.get_priority() == Priority.HIGH:
           if (message_queue_itm.get_message_type() != MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0) \
           or (message_queue_itm.get_message_type() == MessageType.SENSOR_DATA and message_queue_itm.get_counter() > 0 and message_queue_itm.get_ttl() > 0):
             if message_queue_itm.get_message_type() == MessageType.SENSOR_DATA:

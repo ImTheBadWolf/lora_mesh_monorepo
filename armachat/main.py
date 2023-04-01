@@ -123,13 +123,21 @@ screen[7].text = ""
 screen.show()
 
 #TODO load settings from config
-rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=500000)
+rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=False)
 rfm9x.signal_bandwidth = 500000
-rfm9x.coding_rate = 5
-rfm9x.spreading_factor = 7
+rfm9x.coding_rate = 6
+rfm9x.spreading_factor = 9
 rfm9x.tx_power = 23
-rfm9x.preamble_length = 8
+rfm9x.preamble_length = 8  #TODO has to be 50 for long range
 info_timeout = 0
+
+symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )
+if symbolDuration > 16:
+    rfm9x.low_datarate_optimize = 1
+    print("low datarate on")
+else:
+    rfm9x.low_datarate_optimize = 0
+    print("low datarate off")
 
 node_process = NodeProcess(rfm9x, show_info_notification, config)
 counter = 0

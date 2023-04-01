@@ -41,12 +41,20 @@ RESET = digitalio.DigitalInOut(board.GP17)
 # 4 => Bw250Cr46Sf2048      Medium/Slow
 # 5 => Bw31_25Cr48Sf512     Long/Fast
 # 6 => Bw125Cr48Sf4096      Long/Slow
-rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=500000)
+rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=False)
 rfm9x.signal_bandwidth = 500000
-rfm9x.coding_rate = 5
-rfm9x.spreading_factor = 7
+rfm9x.coding_rate = 6
+rfm9x.spreading_factor = 9
 rfm9x.tx_power = 23
-rfm9x.preamble_length = 8
+rfm9x.preamble_length = 8 #TODO has to be 50 for long range
+
+symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )
+if symbolDuration > 16:
+    rfm9x.low_datarate_optimize = 1
+    print("low datarate on")
+else:
+    rfm9x.low_datarate_optimize = 0
+    print("low datarate off")
 
 def show_info_notification(text):
   print(text)

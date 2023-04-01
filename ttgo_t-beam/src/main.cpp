@@ -34,7 +34,7 @@ void setup()
   delay(1500);
   Serial.print(F("[SX1262] Initializing ... "));
 
-  int state = radio.begin(868.0, 500, 7, 5, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, 10, 8);
+  int state = radio.begin(868.0, 125, 12, 8, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, 10, 16);
   if (state == RADIOLIB_ERR_NONE)
   {
     Serial.println(F("success!"));

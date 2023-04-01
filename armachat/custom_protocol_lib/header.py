@@ -66,20 +66,22 @@ class Header:
   def get_message_type(self):
     return self.message_type
 
-  def construct_header_from_bytes(self, bytes_array):
+  def construct_header_from_bytes(self, bytes_array, override_msg_id=True):
     self.header = bytearray(HEADER_LENGTH)
     self.destination_address = int.from_bytes(bytes_array[:2], 'big')
     self.sender_address = int.from_bytes(bytes_array[2:4], 'big')
     self.message_type = bytes_array[10]
     self.priority = bytes_array[11]
     self.__construct_header()
-    #Important to override messageId and checksum on received messages
-    self.header[4] = bytes_array[4]
-    self.header[5] = bytes_array[5]
-    self.header[6] = bytes_array[6]
-    self.header[7] = bytes_array[7]
-    self.header[8] = bytes_array[8]
-    self.header[9] = bytes_array[9]
+
+    if override_msg_id:
+      #Important to override messageId and checksum on received messages.
+      self.header[4] = bytes_array[4]
+      self.header[5] = bytes_array[5]
+      self.header[6] = bytes_array[6]
+      self.header[7] = bytes_array[7]
+      self.header[8] = bytes_array[8]
+      self.header[9] = bytes_array[9]
 
   def construct_raw_packet(self):
     self.message_type = MessageType.RAW_PACKET

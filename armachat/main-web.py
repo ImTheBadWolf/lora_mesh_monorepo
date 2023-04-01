@@ -66,7 +66,6 @@ networks = config.get_networks()
 for network in networks:
   if network['AP'] == True:
     try:
-      sleep(1)
       ssid = network['SSID']
       wifi.radio.start_ap(ssid, network['PASSWORD'])
       print(f"Started AP: {ssid} password: {network['PASSWORD']}")
@@ -78,7 +77,7 @@ for network in networks:
       print(e)
 
 if not wifi_connected:
-  print("No networks found, starting AP mode")
+  print("No networks found, starting AP mode") #TODO refactor all of this.
   #find network which hash ["AP"] = true in networks
   for network in networks:
     if network['AP'] != True:

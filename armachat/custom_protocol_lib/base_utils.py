@@ -59,6 +59,10 @@ def get_string_msg_state(msg_state):
   else:
     return "DONE"
 
+def parse_hex_address(intAddres):
+  stringAddress = f"{intAddres:04x}"
+  return f"0x{stringAddress.upper()}"
+
 def parse_messages(messageList, config):
   message_entity_list = []
   for message_queue_item in messageList:
@@ -76,8 +80,8 @@ def parse_messages(messageList, config):
     if message_queue_item.get_message_type() == MessageType.RAW_PACKET:
       message_entity['payload'] = hex_print(message_queue_item.get_message_bytes())
     else:
-      message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
-      message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
+      message_entity['from'] = parse_hex_address(message_queue_item.get_sender())
+      message_entity['to'] = parse_hex_address(message_queue_item.get_destination())
       msg_type = message_queue_item.get_message_type()
       msg_instance = message_queue_item.get_message_instance()
       message_entity['msg_type'] = get_string_msg_type(msg_type)
@@ -112,8 +116,8 @@ def parse_message_queue(message_queue):
     }
 
     if message_queue_item.get_message_type() != MessageType.RAW_PACKET:
-      message_entity['from'] = f"0x{message_queue_item.get_sender():04x}"
-      message_entity['to'] = f"0x{message_queue_item.get_destination():04x}"
+      message_entity['from'] = parse_hex_address(message_queue_item.get_sender())
+      message_entity['to'] = parse_hex_address(message_queue_item.get_destination())
 
       msg_type = message_queue_item.get_message_type()
       msg_instance = message_queue_item.get_message_instance()

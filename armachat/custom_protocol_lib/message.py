@@ -99,9 +99,9 @@ class Message():
 
     self.payload = bytes_array
 
-  def construct_message_from_bytes(self, bytes_array):
+  def construct_message_from_bytes(self, bytes_array, override_msg_id=True):
     self.header = Header()
-    self.header.construct_header_from_bytes(bytes_array[:HEADER_LENGTH])
+    self.header.construct_header_from_bytes(bytes_array[:HEADER_LENGTH], override_msg_id)
     self.payload = bytes_array[HEADER_LENGTH:]
 
     self.message_id = self.header.get_message_id()

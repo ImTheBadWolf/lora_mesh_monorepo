@@ -220,7 +220,7 @@ class NodeProcess():
             #We have to create another copy of the received message, so that it will have different ID
             #This is needed because one copy of the message will be rebrodcasted further, while the other copy will be displayed to user as received message
             message_copy = Message(self.config, self.rfm9x.last_snr, self.rfm9x.last_rssi)
-            message_copy.construct_message_from_bytes(received_packet)
+            message_copy.construct_message_from_bytes(received_packet, override_msg_id=False)
             self.received_counter += 1
             self.add_message(message_copy, 0, False, state=MessageState.DONE)
             self.latest_message = (message, self.rfm9x.last_snr, self.rfm9x.last_rssi)
@@ -308,7 +308,7 @@ class NodeProcess():
       if message_queue_itm.get_message_type() != MessageType.ACK and message_queue_itm.get_message_type() != MessageType.TRACEROUTE_REQUEST and message_queue_itm.get_state() != MessageState.DELETED:
         if message_queue_itm.get_sender() == self.config.MY_ADDRESS and message_queue_itm.get_message_type() != MessageType.TRACEROUTE:
           messages.append(message_queue_itm)
-        elif message_queue_itm.get_destination() == self.config.MY_ADDRESS:
+        elif message_queue_itm.get_destination() == self.config.MY_ADDRESS or (message_queue_itm.get_destination() == self.config.BROADCAST_ADDRESS and message_queue_itm.get_state() != MessageState.DONE):
           messages.append(message_queue_itm)
         elif message_queue_itm.get_message_type() == MessageType.RAW_PACKET and self.config.MONITORING_ENABLED:
           messages.append(message_queue_itm)

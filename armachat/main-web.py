@@ -48,19 +48,22 @@ rfm9x.spreading_factor = 9
 rfm9x.tx_power = 23
 rfm9x.preamble_length = 8 #TODO has to be 50 for long range
 
-symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )
-if symbolDuration > 16:
-    rfm9x.low_datarate_optimize = 1
-    print("low datarate on")
-else:
-    rfm9x.low_datarate_optimize = 0
-    print("low datarate off")
-
 def show_info_notification(text):
-  print(text)
+  if config.DEBUG:
+    print(text)
 
 config = protocol_config.ProtocolConfig('data/settings.json')
 initialised = config.is_initialised()
+
+symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )
+if symbolDuration > 16:
+    rfm9x.low_datarate_optimize = 1
+    if config.DEBUG:
+      print("low datarate on")
+else:
+    rfm9x.low_datarate_optimize = 0
+    if config.DEBUG:
+      print("low datarate off")
 
 networks = config.get_networks()
 for network in networks:
@@ -122,7 +125,7 @@ if initialised:
     address_book.add_sensor("YOU", f"0x{config.MY_ADDRESS:04X}")
     address_book.add_sensor("ALL", f"0x{config.BROADCAST_ADDRESS:04X}")
   except:
-    print("Cant save. Readonly filesystem")
+    pass
 
 else:
   print("Not initialised, set your address first. Then restart the device.")
@@ -189,8 +192,9 @@ def api_messages(request: HTTPRequest):
         response.send(json.dumps(data))
       except MemoryError as e:
         print(e)
-        print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
-        print(f"Allocated memory: {gc.mem_alloc()}")
+        if config.DEBUG:
+          print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
+          print(f"Allocated memory: {gc.mem_alloc()}")
 
 #Create and send new text message
 @server.route("/api/send_text_message", method=HTTPMethod.POST)
@@ -209,7 +213,8 @@ def api_send_message(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data")
+      if config.DEBUG:
+        print("Could not parse data")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("Could not parse data")
 
@@ -225,7 +230,8 @@ def api_resend_message(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data")
+      if config.DEBUG:
+        print("Could not parse data")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("Could not parse data")
 
@@ -243,7 +249,8 @@ def api_send_traceroute(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data")
+      if config.DEBUG:
+        print("Could not parse data")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("Could not parse data")
 
@@ -269,7 +276,8 @@ def api_add_contact(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data, or save file")
+      if config.DEBUG:
+        print("Could not parse data, or save file")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("Could not parse data, or save file")
 
@@ -283,7 +291,8 @@ def api_del_contact(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data, or save file")
+      if config.DEBUG:
+        print("Could not parse data, or save file")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("Could not parse data, or save file")
 
@@ -309,7 +318,8 @@ def api_add_sensor(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data, or save file")
+      if config.DEBUG:
+        print("Could not parse data, or save file")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("Could not parse data, or save file")
 
@@ -323,7 +333,8 @@ def api_del_sensor(request: HTTPRequest):
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("OK")
     except:
-      print("Could not parse data, or save file")
+      if config.DEBUG:
+        print("Could not parse data, or save file")
       with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
         response.send("Could not parse data, or save file")
 
@@ -362,8 +373,9 @@ def api_dump(request: HTTPRequest):
         response.send(json.dumps(data))
       except MemoryError as e:
         print(e)
-        print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
-        print(f"Allocated memory: {gc.mem_alloc()}")
+        if config.DEBUG:
+          print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
+          print(f"Allocated memory: {gc.mem_alloc()}")
 
 @server.route("/api/config")
 def api_config(request: HTTPRequest):
@@ -386,7 +398,8 @@ def api_update_config(request: HTTPRequest):
       sleep(1)
       microcontroller.reset()
   except Exception as e:
-    print("Could not parse data, or save file ")
+    if config.DEBUG:
+      print("Could not parse data, or save file ")
     print(e)
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send(f"Could not parse data, or save file\n{str(e)}")
@@ -412,7 +425,8 @@ def api_add_network(request: HTTPRequest):
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send("OK")
   except Exception as e:
-    print("Could not parse data, or save file ")
+    if config.DEBUG:
+      print("Could not parse data, or save file ")
     print(e)
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send(f"Could not parse data, or save file\n{str(e)}")
@@ -426,15 +440,17 @@ def api_remove_network(request: HTTPRequest):
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send("OK")
   except Exception as e:
-    print("Could not parse data, or save file ")
+    if config.DEBUG:
+      print("Could not parse data, or save file ")
     print(e)
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send(f"Could not parse data, or save file\n{str(e)}")
 
 if wifi_connected and my_ip != None:
   #Start the server.
-  print(f"Listening on http://{my_ip}:80")
   server.start(str(my_ip))
+  sleep(3)
+  print(f"Listening on http://{my_ip}:80")
 
 loop_times = [] #TODO just for testing
 while True:

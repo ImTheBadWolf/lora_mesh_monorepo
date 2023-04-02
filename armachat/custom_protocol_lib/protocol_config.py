@@ -143,6 +143,10 @@ class ProtocolConfig():
   def CONTACTS(self):
     return self.get_item_from_config("CONTACTS")
 
+  @property
+  def DEBUG(self):
+    return False #True if you want the display to show all debug messages
+
   def is_reboot_required(self):
     return self.reboot_required
 

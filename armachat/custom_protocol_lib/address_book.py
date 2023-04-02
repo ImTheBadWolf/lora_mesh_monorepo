@@ -36,6 +36,9 @@ class AddressBook():
   def add_contact(self, name, address):
     for contact in self.contacts:
       if contact['address'] == address:
+        self.contacts.remove(contact)
+        self.contacts.append({'address': address, 'name': name})
+        self.save_contacts()
         return
     self.contacts.append({'address': address, 'name': name})
     self.save_contacts()
@@ -43,6 +46,9 @@ class AddressBook():
   def add_sensor(self, name, address):
     for sensor in self.sensors:
       if sensor['address'] == address:
+        self.sensors.remove(sensor)
+        self.sensors.append({'address': address, 'name': name})
+        self.save_sensors()
         return
     self.sensors.append({'address': address, 'name': name})
     self.save_sensors()

@@ -7,13 +7,21 @@
     <link rel="stylesheet" href="web/style.css">
     <script>
       let selectedId;
+      let sensorsMap = new Map()
+
       async function pullSensors() {
         const response = await fetch('/api/sensors')
         const { sensors } = await response.json()
         if (sensors){
+          sensorsMap = new Map()
           let contactsElm = document.getElementsByClassName("contacts")[0];
           contactsElm.innerHTML = '';
-          sensors.forEach((contact)=>{
+          sensors.forEach((sensor)=>{
+
+            if (!sensorsMap.has(sensor.address)) {
+              sensorsMap.set(sensor.address, sensor)
+            }
+
             let newSensor = `<button onclick="selectContact('${sensor.address}')" id="${sensor.address}" class="contact">
               <span class="contact-name">${sensor.name}</span>
               <span class="contact-address">${sensor.address}</span>
@@ -36,9 +44,15 @@
         }
         if (selectedId) {
           document.getElementById("removeBtn").disabled = false;
+          document.getElementById("contactNameInput").value = sensorsMap.get(selectedId).name
+          document.getElementById("contactAddInput").value = sensorsMap.get(selectedId).address
+          document.getElementById("addBtn").innerText = "EDIT";
         }
         else {
           document.getElementById("removeBtn").disabled = true;
+          document.getElementById("contactNameInput").value = ""
+          document.getElementById("contactAddInput").value = ""
+          document.getElementById("addBtn").innerText = "ADD";
         }
       }
       function removeSelected() {
@@ -63,7 +77,7 @@
         let address = document.getElementById("contactAddInput").value;
         if (name && address) {
           if (!address.match(/^0x[0-9a-fA-F]{4}$/)) {
-            alert('Invalid address');
+            alert('Invalid address. Address must by in a 0xNNNN format. (e.g. 0x1234)');
             return;
           }
           if (name.length > 25 || name.length < 1) {

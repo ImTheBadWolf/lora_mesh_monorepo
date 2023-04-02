@@ -118,7 +118,6 @@ class Message():
       #Get the message id this ACK packet is confirming
       try:
         str = ''.join(chr(i) for i in self.text_message)
-        print("DEBUG: ACK received for message id: " + str + "")
         self.ack_message_id = int(str)
       except:
         #Error parsing the message id (happens probably only when CRC is not checked in LoRa)

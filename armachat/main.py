@@ -145,13 +145,16 @@ screen[7].text = ""
 screen[11].text = "ENT-send ALT-sensor Z-traceroute"
 screen.show()
 
-#TODO load settings from config
+
 rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=True)
-rfm9x.signal_bandwidth = 500000
-rfm9x.coding_rate = 6
-rfm9x.spreading_factor = 9
+lora_config = config.LORA_CONFIG
+rfm9x.signal_bandwidth = lora_config[0] * 1000
+rfm9x.coding_rate = lora_config[1]
+rfm9x.spreading_factor = lora_config[2]
+
 rfm9x.tx_power = 23
 rfm9x.preamble_length = 8  #TODO has to be 50 for long range
+
 info_timeout = 0
 
 symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )

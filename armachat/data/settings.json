@@ -7,7 +7,7 @@
   "ACK_WAIT_TIME": 60,
   "DEFAULT_MAX_HOP": 5,
   "RANDOMIZE_PATH": false,
-  "LORA_CONFIG": "Bw500Cr45Sf128",
+  "LORA_CONFIG": [500, 6, 9],
   "WIFI_NETWORKS": [
     {
       "SSID": "ssid",

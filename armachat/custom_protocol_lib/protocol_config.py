@@ -122,6 +122,14 @@ class ProtocolConfig():
   def MONITORING_ENABLED(self, value):
     self.update_item_in_config("MONITORING_ENABLED", value)
 
+  @property
+  def LORA_CONFIG(self):
+    return self.get_item_from_config("LORA_CONFIG")
+
+  @LORA_CONFIG.setter
+  def LORA_CONFIG(self, value):
+    self.update_item_in_config("LORA_CONFIG", value)# [bandwidth, cr, sf] e.g.[500, 5, 7]
+
   #Properties bellow are read-only, and can be changed only by changing the hard-coded values in this file
   @property
   def DEFAULT_TTL(self):
@@ -145,7 +153,7 @@ class ProtocolConfig():
 
   @property
   def DEBUG(self):
-    return False #True if you want the display to show all debug messages
+    return False #True if you want to show all debug messages
 
   def is_reboot_required(self):
     return self.reboot_required
@@ -159,7 +167,7 @@ class ProtocolConfig():
       'randomize_path': self.RANDOMIZE_PATH,
       'my_address': f"0x{self.MY_ADDRESS:04x}" if self.MY_ADDRESS is not None else None,
       'monitoring_enabled': self.MONITORING_ENABLED,
-      'lora_config': "Bw500Cr45Sf128" #TODO
+      'lora_config': self.LORA_CONFIG
     }
     return ret_dict
 
@@ -170,13 +178,13 @@ class ProtocolConfig():
     self.ACK_WAIT_TIME = config['ack_wait']
     self.RANDOMIZE_PATH = config['randomize_path']
     self.MONITORING_ENABLED = config['monitoring_enabled']
+    self.LORA_CONFIG = config['lora_config']
 
     if self.MY_ADDRESS is None:
       print("Setting my address")
       self.MY_ADDRESS = config['my_address']
     self.save_config()
 
-    #TODO lora config
 
   def get_networks(self):
     return self.get_item_from_config("WIFI_NETWORKS")
@@ -205,5 +213,3 @@ class ProtocolConfig():
       networks = [network for network in networks if network['SSID'] != ssid]
       self.update_item_in_config("WIFI_NETWORKS", networks)
       self.save_config()
-
-#TODO parse lora config and export each parameter separately. But set them all at once with string "Bw500Cr45Sf128"

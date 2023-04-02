@@ -35,16 +35,24 @@ my_ip = None
 spi_lora = busio.SPI(board.GP10, MOSI=board.GP11, MISO=board.GP12)
 CS = digitalio.DigitalInOut(board.GP13)
 RESET = digitalio.DigitalInOut(board.GP17)
+
+config = protocol_config.ProtocolConfig('data/settings.json')
+initialised = config.is_initialised()
+
 # 1 => Bw500Cr45Sf128       Short/Fast --X
 # 2 => Bw125Cr45Sf128       Short/Slow
 # 3 => Bw250Cr47Sf1024      Medium/Fast
 # 4 => Bw250Cr46Sf2048      Medium/Slow
 # 5 => Bw31_25Cr48Sf512     Long/Fast
 # 6 => Bw125Cr48Sf4096      Long/Slow
+
 rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=True)
-rfm9x.signal_bandwidth = 500000
-rfm9x.coding_rate = 6
-rfm9x.spreading_factor = 9
+print("\n\n\n")
+lora_config = config.LORA_CONFIG
+rfm9x.signal_bandwidth = lora_config[0] * 1000
+rfm9x.coding_rate = lora_config[1]
+rfm9x.spreading_factor = lora_config[2]
+
 rfm9x.tx_power = 23
 rfm9x.preamble_length = 8 #TODO has to be 50 for long range
 
@@ -52,8 +60,7 @@ def show_info_notification(text):
   if config.DEBUG:
     print(text)
 
-config = protocol_config.ProtocolConfig('data/settings.json')
-initialised = config.is_initialised()
+
 
 symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )
 if symbolDuration > 16:

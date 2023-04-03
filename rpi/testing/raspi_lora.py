@@ -57,6 +57,8 @@ class LoRa(object):
         self.spi.max_speed_hz = 5000000
 
         self._spi_write(REG_01_OP_MODE, MODE_SLEEP | LONG_RANGE_MODE)
+        version = self._spi_read(0x42)
+        print(f'Version: {version}')
         time.sleep(0.1)
 
         assert self._spi_read(REG_01_OP_MODE) == (MODE_SLEEP | LONG_RANGE_MODE), \
@@ -168,27 +170,14 @@ class LoRa(object):
         header = [
             0x13,
             0x12,
-            0x11,
-            0x22, # Destination
-            0x13,
-            0x12,
-            0x11,
-            0x66, # Sender
-            0x13,
-            0x12,
-            randint(0, 255),
-            randint(0, 255),
-            0,
-            0,
-            0,
-            3
+            0x11
         ]
         data = [ord(s) for s in message]
         data += [0x7C] * 7 #"|" character, which is used in armachat as newline
 
         crypto = AES.new("Sixteen byte key", AES.MODE_CTR, "Sixteen byte key", counter=lambda: b'Sixteen byte key')
         encrypted = crypto.encrypt(bytes(data))
-        payload = header + [byte for byte in list(encrypted)]
+        payload = header# + [byte for byte in list(encrypted)]
 
         print("Sending:")
         print([hex(hex_c) for hex_c in payload])

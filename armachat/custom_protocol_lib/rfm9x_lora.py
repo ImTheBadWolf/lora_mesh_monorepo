@@ -574,10 +574,6 @@ class RFM9x:
         else:
             bw_id = 9
 
-        if bw_id >= len(self.bw_bins):
-            print("Setting bandwidth to", 500000)
-        else:
-            print("Setting bandwidth to", self.bw_bins[bw_id])
         self._write_u8(
             _RH_RF95_REG_1D_MODEM_CONFIG1,
             (self._read_u8(_RH_RF95_REG_1D_MODEM_CONFIG1) & 0x0F) | (bw_id << 4),
@@ -621,7 +617,6 @@ class RFM9x:
         denominator = min(max(val, 5), 8)
         cr_id = denominator - 4
 
-        print("Setting coding rate to 4/", denominator, sep="")
         self._write_u8(
             _RH_RF95_REG_1D_MODEM_CONFIG1,
             (self._read_u8(_RH_RF95_REG_1D_MODEM_CONFIG1) & 0xF1) | (cr_id << 1),
@@ -646,7 +641,6 @@ class RFM9x:
         else:
             self.detection_optimize = 0x3
 
-        print("Setting spreading factor to", val, sep="")
         self._write_u8(_RH_RF95_DETECTION_THRESHOLD, 0x0C if val == 6 else 0x0A)
         self._write_u8(
             _RH_RF95_REG_1E_MODEM_CONFIG2,

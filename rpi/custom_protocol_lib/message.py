@@ -82,8 +82,7 @@ class Message():
       self.payload = self.__construct_message_payload(f"0x{sender_address:04x}", MessageType.TRACEROUTE)
 
   def __construct_message_payload(self, message, message_type):
-    #TODO is counter necessary?
-    crypto = AES.new(self.config.AES_KEY, AES.MODE_CTR, self.config.AES_KEY)
+    crypto = AES.new(self.config.AES_KEY, AES.MODE_CTR, self.config.AES_KEY, counter=lambda: bytes(self.config.AES_KEY, "utf-8"))
     encrypted_message = crypto.encrypt(bytes(message, "utf-8"))
 
     if message_type == MessageType.ACK or message_type == MessageType.TRACEROUTE:
@@ -138,7 +137,7 @@ class Message():
       self.text_message = self.payload[1:]
 
     if self.get_destination() == self.config.MY_ADDRESS or self.get_destination() == self.config.BROADCAST_ADDRESS:
-      crypto = AES.new(self.config.AES_KEY, AES.MODE_CTR, self.config.AES_KEY)
+      crypto = AES.new(self.config.AES_KEY, AES.MODE_CTR, self.config.AES_KEY, counter=lambda: bytes(self.config.AES_KEY, "utf-8"))
       decrypted_message = crypto.decrypt(bytes(self.payload[2:]))
 
       if self.header.get_message_type() == MessageType.TEXT_MSG_W_ACK or self.header.get_message_type() == MessageType.TEXT_MSG or self.header.get_message_type() == MessageType.TRACEROUTE_REQUEST:

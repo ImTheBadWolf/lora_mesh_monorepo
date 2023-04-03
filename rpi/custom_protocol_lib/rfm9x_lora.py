@@ -283,7 +283,6 @@ class RFM9x:
         # No device type check!  Catch an error from the very first request and
         # throw a nicer message to indicate possible wiring problems.
         version = self._read_u8(_RH_RF95_REG_42_VERSION)
-        print(f"Version: {version}")#TODO prec
         if version != 18:
             raise RuntimeError(
                 "Failed to find rfm9x with expected version -- check wiring"
@@ -387,9 +386,10 @@ class RFM9x:
         # will be filled.
         if length is None:
             length = len(buf)
-        with self._device as device:
-            new_val = device.xfer([address] + [0] * length)[1:]
-            self._BUFFER = new_val
+
+        new_val = self._device.xfer([address] + [0] * length)[1:]
+        for i in range(length):
+            buf[i] = new_val[i]
 
 
     def _read_u8(self, address: int) -> int:
@@ -405,30 +405,20 @@ class RFM9x:
         # buffer is written.
         if length is None:
             length = len(buf)
-        with self._device as device:
-            """ self._BUFFER[0] = (address | 0x80) & 0xFF  # Set top bit to 1 to
-            # indicate a write.
-            device.write(self._BUFFER, end=1)
-            device.write(buf, end=length) """
-            if type(buf) == int:
-                buf = [buf]
-            elif type(buf) == bytes:
-                buf = [p for p in buf]
-            elif type(buf) == str:
-                buf = [ord(s) for s in buf]
-            device.xfer([address | 0x80] + buf)
+
+        if type(buf) == int:
+            buf = [buf]
+        elif type(buf) == bytes or type(buf) == bytearray:
+            buf = [p for p in buf]
+        elif type(buf) == str:
+            buf = [ord(s) for s in buf]
+        self._device.xfer([address | 0x80] + buf)
 
     def _write_u8(self, address: int, val: int) -> None:
         # Write a byte register to the chip.  Specify the 7-bit address and the
         # 8-bit value to write to that address.
-        with self._device as device:
-            """ self._BUFFER[0] = (
-                address | 0x80
-            ) & 0xFF  # Set top bit to 1 to indicate a write.
-            self._BUFFER[1] = val & 0xFF
-            device.write(self._BUFFER, end=2) """
-            payload = [val]
-            device.xfer([address | 0x80] + payload)
+        payload = [val]
+        self._device.xfer([address | 0x80] + payload)
 
     def reset(self) -> None:
         """Perform a reset of the chip."""

@@ -29,7 +29,7 @@ def show_info_notification(text):
 
 spi_lora = spidev.SpiDev()
 spi_lora.open(0, 0)
-spi_lora.max_speed_hz = 5000000
+spi_lora.max_speed_hz = 500000
 
 RESET = digitalio.DigitalInOut(board.D22)
 

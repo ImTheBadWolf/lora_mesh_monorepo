@@ -149,6 +149,10 @@ input:checked+.slider:before {
   overflow-y: scroll;
 }
 
+.messages {
+  height: 50vh;
+}
+
 .message {
   margin-bottom: 10px;
   display: flex;

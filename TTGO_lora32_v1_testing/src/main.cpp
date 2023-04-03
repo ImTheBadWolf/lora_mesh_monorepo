@@ -45,8 +45,8 @@ void setSettings(uint8_t config)
 {
   double bandwidth = bandwidthOptions[config] * 1000;
   LoRa.setSignalBandwidth(500E3);
-  LoRa.setSpreadingFactor(spreadingFactorOptions[config]);
-  LoRa.setCodingRate4(codingRateOptions[config]);
+  LoRa.setSpreadingFactor(9);
+  LoRa.setCodingRate4(6);
 
   // Default, do not change
   LoRa.setSyncWord(0x12);

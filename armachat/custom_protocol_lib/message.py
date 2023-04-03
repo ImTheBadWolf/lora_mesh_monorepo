@@ -11,7 +11,7 @@ class Message():
     self.initialMaxHop = None
     self.snr = snr
     self.rssi = rssi
-    self.lora_config = "Bw500Cr45Sf128"  #TODO add loraconfig from config here
+    self.lora_config = self.config.get_lora_config()
 
   def new_text_message(self, destination_address, sender_address, message, w_ack = False, max_hop=None, priority=Priority.NORMAL):
     #This method is used only for user-created new text messages

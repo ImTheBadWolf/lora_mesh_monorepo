@@ -112,13 +112,13 @@
           let map = L.map(element, {
             scrollWheelZoom: false,
             center: [position[0], position[1]],
-            zoom: 14,
+            zoom: 12,
             layers: [
               L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png')
             ]
           });
           var target = L.latLng(position[0], position[1]);
-            map.setView(target, 14);
+            map.setView(target, 12);
             L.marker(target).addTo(map);
         })
 

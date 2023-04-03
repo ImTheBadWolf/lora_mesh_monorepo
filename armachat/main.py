@@ -84,7 +84,7 @@ def handle_key_press(pressed_key):
     send_sensor_message()
     global sent_counter
     sent_counter += 1
-    screen[0].text = f"received:{received_counter} sent:{sent_counter}"
+    screen[0].text = f"I: 0x{config.MY_ADDRESS:04X} received:{received_counter} sent:{sent_counter}"
   elif pressed_key == "z":
     node_process.new_traceroute_request(TMP_CONTACT)
   elif pressed_key == "bsp":
@@ -93,9 +93,10 @@ def handle_key_press(pressed_key):
     node_process.new_text_message(TMP_CONTACT, message_to_send, w_ack = True)
     global sent_counter
     sent_counter += 1
-    screen[0].text = f"received:{received_counter} sent:{sent_counter}"
+    screen[0].text = f"I: 0x{config.MY_ADDRESS:04X} received:{received_counter} sent:{sent_counter}"
   else:
     message_to_send += pressed_key
+  sleep(0.15)
 
 displayio.release_displays()
 
@@ -136,8 +137,8 @@ screen = SimpleTextDisplay(
         SimpleTextDisplay.WHITE,
     ),
 )
-screen[0].text = "Messenger 3000"
-screen[1].text = f'My address: 0x{config.MY_ADDRESS:04X}'
+screen[0].text = f"I: 0x{config.MY_ADDRESS:04X}"
+screen[1].text = f'LoRa config: {config.get_lora_config()}'
 screen[3].text = f'Message to send(to 0x{TMP_CONTACT:04X})'
 screen[4].text = message_to_send
 screen[6].text = f'Received SNR:{0} RSSI:{0} :'
@@ -175,7 +176,7 @@ while True:
     if r_msg is not None:
       (msg_instance, snr, rssi) = r_msg
       received_counter += 1
-      screen[0].text = f"received:{received_counter} sent:{sent_counter}"
+      screen[0].text = f"I: 0x{config.MY_ADDRESS:04X} received:{received_counter} sent:{sent_counter}"
       screen[6].text = f'Received SNR:{snr} RSSI:{rssi}'
 
       if msg_instance.get_message_type() == MessageType.SENSOR_DATA:

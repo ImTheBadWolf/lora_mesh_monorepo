@@ -213,3 +213,7 @@ class ProtocolConfig():
       networks = [network for network in networks if network['SSID'] != ssid]
       self.update_item_in_config("WIFI_NETWORKS", networks)
       self.save_config()
+
+  def get_lora_config(self):
+    lora_cfg = self.get_item_from_config("LORA_CONFIG")
+    return f"Bw{lora_cfg[0]}Cr4/{lora_cfg[1]}Sf{lora_cfg[2]}"

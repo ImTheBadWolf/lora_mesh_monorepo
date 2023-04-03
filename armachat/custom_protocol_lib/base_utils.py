@@ -36,6 +36,8 @@ def get_string_msg_type(msg_type):
     return "TRACEROUTE_REQUEST"
   elif msg_type == MessageType.ACK:
     return "ACK"
+  elif msg_type == MessageType.RAW_PACKET:
+    return "RAW_PACKET"
   else:
     return "TEXT"
 
@@ -78,7 +80,7 @@ def parse_messages(messageList, config):
     }
 
     if message_queue_item.get_message_type() == MessageType.RAW_PACKET:
-      message_entity['payload'] = hex_print(message_queue_item.get_message_bytes())
+      message_entity['payload'] = "Raw packet: " + hex_print(message_queue_item.get_message_bytes())
     else:
       message_entity['from'] = parse_hex_address(message_queue_item.get_sender())
       message_entity['to'] = parse_hex_address(message_queue_item.get_destination())
@@ -114,6 +116,7 @@ def parse_message_queue(message_queue):
       'rssi': lora_info[1],
       'lora_config': lora_info[2]
     }
+    message_entity['msg_type'] = get_string_msg_type(message_queue_item.get_message_type())
 
     if message_queue_item.get_message_type() != MessageType.RAW_PACKET:
       message_entity['from'] = parse_hex_address(message_queue_item.get_sender())
@@ -121,7 +124,6 @@ def parse_message_queue(message_queue):
 
       msg_type = message_queue_item.get_message_type()
       msg_instance = message_queue_item.get_message_instance()
-      message_entity['msg_type'] = get_string_msg_type(msg_type)
       if msg_type == MessageType.SENSOR_DATA:
         message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
         message_entity['ttl'] = message_queue_item.get_ttl()

@@ -55,8 +55,8 @@ byte *MessageHandler::createHeader(uint16_t destinationAddress, uint16_t senderA
 
   twoByte checksum;
   checksum.value = this->calculateChecksum(header);
-  header[8] = checksum.Bytes[1];
-  header[9] = checksum.Bytes[0];
+  header[8] = checksum.Bytes[0]; // checksum.Bytes[1]; //TODO  just for testing, this message should be marked as invalid (non matching checksum) and only displayed if monitoring is on
+  header[9] = checksum.Bytes[1]; // checksum.Bytes[0];
 
   header[10] = messageType;
   header[11] = priority;

@@ -1,11 +1,12 @@
+import os
 from time import sleep
 import board
 import digitalio
 import gc
 import json
-import microcontroller
 import sys
 from flask import Flask, json, render_template, send_from_directory, request
+import threading
 
 sys.path.append("custom_protocol_lib")
 import protocol_config
@@ -135,11 +136,12 @@ def api_send_message():
       w_ack = data.get('wack')
       node_process.new_text_message(destination, message, w_ack, max_hop, priority)
       gc.collect()
-      return("OK")
-    except:
+      return "OK"
+    except Exception as e:
       if config.DEBUG:
         print("Could not parse data")
-        return("Could not parse data")
+      print(e)
+      return "Error" + e
 
 #Resend message
 @server.route("/api/resend_message", methods=['POST'])
@@ -230,6 +232,87 @@ def api_del_sensor():
         print("Could not parse data, or save file")
       return("Could not parse data, or save file")
 
+#Create and send new traceroute request
+@server.route("/api/traceroute", methods=['POST'])
+def api_send_traceroute():
+  if initialised:
+    try:
+      data = request.json
+      destination = int(data.get('destination'), 16)
+      max_hop = int(data.get('max_hop'))
+      priority = int(data.get('priority'))
+      node_process.new_traceroute_request(destination, max_hop, priority)
+      gc.collect()
+      return("OK")
+    except:
+      if config.DEBUG:
+        print("Could not parse data")
+      return("Could not parse data")
+
+#Dump message queue
+@server.route("/api/dump")
+def api_dump():
+  if initialised:
+    message_queue = node_process.get_message_queue()
+    parsed_message_queue = parse_message_queue(message_queue)
+    gc.collect()
+
+    try:
+      page = request.args.get('page', default = 0, type = int)
+      page = int(page)
+    except:
+      page = 0
+
+    page_size = 1
+    num_pages = (len(parsed_message_queue)-1) // page_size + 1
+    received, sent = node_process.get_stats()
+
+    data = {
+      'message': parsed_message_queue[page*page_size:(page+1)*page_size],
+      'device_info': {
+        'received': received,
+        'sent': sent
+      },
+      'pages': num_pages,
+      'total': len(parsed_message_queue),
+    }
+    try:
+      return(json.dumps(data))
+    except MemoryError as e:
+      print(e)
+      if config.DEBUG:
+        print(f"Free memory: {gc.mem_free()} page: {page} len: {len(data['messages'])}")
+        print(f"Allocated memory: {gc.mem_alloc()}")
+
+@server.route("/api/config")
+def api_config():
+  data = {
+    'config': config.get_config(),
+  }
+  return(json.dumps(data))
+
+@server.route("/api/config", methods=['PUT'])
+def api_update_config():
+  data = request.json
+  try:
+    new_config = data.get('config')
+    config.update_config(new_config)
+    if config.is_reboot_required():
+      print("Restarting")
+      sleep(1)
+      os.execl(sys.executable, sys.executable, *sys.argv)
+  except Exception as e:
+    if config.DEBUG:
+      print("Could not parse data, or save file ")
+    print(e)
+    return(f"Could not parse data, or save file\n{str(e)}")
+
+def process_loop(node_process):
+  while True:
+    if initialised:
+      node_process.tick()
 
 if __name__ == '__main__':
-  server.run(host='0.0.0.0', port=80)
+  t = threading.Thread(target=process_loop, args=(node_process,))
+  t.start()
+  server.run(host='0.0.0.0', port=8080)

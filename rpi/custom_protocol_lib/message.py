@@ -1,6 +1,8 @@
 from base_utils import *
 from header import Header
-from Crypto.Cipher import AES
+from binascii import unhexlify
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+#pip install cryptography
 
 class Message():
   def __init__(self, config, snr=None, rssi=None):
@@ -82,8 +84,10 @@ class Message():
       self.payload = self.__construct_message_payload(f"0x{sender_address:04x}", MessageType.TRACEROUTE)
 
   def __construct_message_payload(self, message, message_type):
-    crypto = AES.new(self.config.AES_KEY, AES.MODE_CTR, self.config.AES_KEY, counter=lambda: bytes(self.config.AES_KEY, "utf-8"))
-    encrypted_message = crypto.encrypt(bytes(message, "utf-8"))
+    key = unhexlify(self.config.AES_KEY.encode("utf-8").hex())
+    cipher = Cipher(algorithms.AES(key), modes.CTR(key))
+    encryptor = cipher.encryptor()
+    encrypted_message = encryptor.update(bytes(message, "utf-8")) + encryptor.finalize()
 
     if message_type == MessageType.ACK or message_type == MessageType.TRACEROUTE:
       #ACK and TRACEROUTE messages are not encrypted
@@ -137,8 +141,10 @@ class Message():
       self.text_message = self.payload[1:]
 
     if self.get_destination() == self.config.MY_ADDRESS or self.get_destination() == self.config.BROADCAST_ADDRESS:
-      crypto = AES.new(self.config.AES_KEY, AES.MODE_CTR, self.config.AES_KEY, counter=lambda: bytes(self.config.AES_KEY, "utf-8"))
-      decrypted_message = crypto.decrypt(bytes(self.payload[2:]))
+      key = unhexlify(self.config.AES_KEY.encode("utf-8").hex())
+      cipher = Cipher(algorithms.AES(key), modes.CTR(key))
+      decryptor = cipher.decryptor()
+      decrypted_message = decryptor.update(bytes(self.payload[2:])) + decryptor.finalize()
 
       if self.header.get_message_type() == MessageType.TEXT_MSG_W_ACK or self.header.get_message_type() == MessageType.TEXT_MSG or self.header.get_message_type() == MessageType.TRACEROUTE_REQUEST:
         try:

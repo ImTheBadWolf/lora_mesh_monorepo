@@ -3,76 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCF protocol</title>
+    <title>LoRa protocol</title>
     <link rel="stylesheet" href="web/style.css">
     <script>
-      let selectedSsid;
-
       function randomAddress() {
         let address = Math.floor(Math.random() * 65536);
         address = address.toString(16).padStart(4, '0');
         address = "0x" + address.toUpperCase();
         document.getElementById('myAddressInput').value = address;
-      }
-      function selectWifi(ssid) {
-        if (selectedSsid) {
-          document.getElementById(selectedSsid).classList.remove("selected");
-        }
-        let elm = document.getElementById(ssid);
-        if (elm && selectedSsid !== ssid) {
-          elm.classList.add("selected");
-          selectedSsid = ssid;
-        }
-        else {
-          selectedSsid = null;
-        }
-        if (selectedSsid) {
-          document.getElementById("removeWifiBtn").disabled = false;
-        }
-        else {
-          document.getElementById("removeWifiBtn").disabled = true;
-        }
-      }
-      function addNetwork(){
-        let ssid = document.getElementById("wifiSsid").value;
-        let password = document.getElementById("wifiPswd").value;
-        let apSelected = document.getElementById("apMode").checked;
-        if (ssid && password) {
-          const requestOptions = {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              "network": {
-                'SSID': ssid,
-                'PASSWORD': password,
-                'AP': apSelected
-              }
-            })
-          };
-          fetch('/api/network', requestOptions)
-            .then(response => {
-              if (response.ok) {
-                pullNetworks();
-              }
-            })
-        }
-      }
-      function removeNetwork(){
-        if (selectedSsid) {
-          const requestOptions = {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({'SSID': selectedSsid}),
-          };
-          fetch('/api/network', requestOptions)
-            .then(response => {
-              if (response.ok) {
-                selectedSsid = null;
-                document.getElementById("removeWifiBtn").disabled = true;
-                pullNetworks();
-              }
-            })
-        }
       }
 
       async function pullConfig(){
@@ -169,35 +107,6 @@
           })
       }
 
-      async function pullNetworks(){
-        let hasApDefined = false;
-        const response = await fetch('/api/networks')
-        const {networks, current} = await response.json()
-
-        let networkList = document.getElementsByClassName("saved-networks")[0];
-        networkList.innerHTML = '';
-        networks.forEach(network => {
-          if (network.AP) {
-            hasApDefined = true;
-          }
-          networkList.innerHTML += `
-          <button onclick="selectWifi('${network.SSID}')" id='${network.SSID}' class="network">
-            ${ network.AP ? '<span class="blue">AP</span>':''}<span class="network-ssid">${network.SSID}</span>
-          </button>`;
-
-        })
-        document.getElementById("current-wifi").innerText = `Connected to: ${current.ssid}, IP:${current.ipv4}`;
-
-        if (hasApDefined) {
-          document.getElementById("apMode").disabled = true;
-          document.getElementsByClassName("ap-selector")[0].classList.add("disabled-item");
-        }
-        else {
-          document.getElementById("apMode").disabled = false;
-          document.getElementsByClassName("ap-selector")[0].classList.remove("disabled-item");
-        }
-      }
-
       function handleLoraSelect(loraConfigId) {
         if (loraConfigId == 2) {
           selectedValue = document.getElementById("loraSelect2").value;
@@ -213,7 +122,6 @@
 
       document.addEventListener("DOMContentLoaded", async function(event) {
         await pullConfig();
-        await pullNetworks();
       });
     </script>
   </head>
@@ -298,52 +206,18 @@
           <div class="config-info">
             <span class="warning red" id="address-warn" >You need to set your address first</span>
             <ul>
-              <li>My Address - Can be set only once. <span class="red">Device will reboot after updating the address.</span></li>
+              <li>My Address - Can be set only once. <span class="red">System will restart updating the address.</span></li>
               <li>Resend count - How many times should we try to re-send each message until it is considered failed</li>
               <li>Resend timeout - How long to wait between each re-send (In seconds). Short timeout may result in undelivered messages.</li>
               <li>ACK wait timeout - How long to wait for ACK packet until the message is considered failed (In seconds)</li>
               <li>Randomize path - Experimental setting. Will result in randomization of packets path. Only use if the messages cant be sucessfully delivered to the destination. This setting is not saved and will reset after next reboot.</li>
               <li>Monitoring enabled - If enabled, you will also receive packets which do not belong to this protocol. These raw packet wont be parsed or decrypted, you will only see the raw received bytes.</li>
-              <li>LoRa config - LoRa configuration parameters. Configuration affects the usable range and reliability.<br><span class="red">Each node in the network has to use the same parameters. Device will reboot after updating the LoRa config.</span></li>
-              <br><br><span>Manual device reboot is needed after WiFi networks have changed. Remove AP network if you dont want the device to create its own AP everytime it boots.</span>
+              <li>LoRa config - LoRa configuration parameters. Configuration affects the usable range and reliability.<br><span class="red">Each node in the network has to use the same parameters. System will restart after updating the LoRa config.</span></li>
             </ul>
           </div>
         </div>
       </div>
       <button class="btn" id="saveCfgBtn" onclick="updateConfig()">SAVE CONFIG</button>
-      <div class="wifi-cfg">
-        <span class="info-label-big">WiFi configuration</span>
-        <span class="info-label-small" id="current-wifi">Connected to: Wifinka, IP:192.168.100.33</span>
-      </div>
-      <div class="config-container">
-        <div class="config-left">
-          <p class="info-label">Add new WiFi network</p>
-          <div class="add-wifi">
-            <div>
-              <span class="info-label-small">SSID</span>
-              <input id="wifiSsid" type="text">
-            </div>
-            <div>
-              <span class="info-label-small">PASSWORD</span>
-              <input id="wifiPswd" type="password">
-            </div>
-          </div>
-          <div class="ap-selector">
-            <span class="info-label">Use this network as AP:</span>
-            <label class="switch">
-              <input type="checkbox" id="apMode">
-              <span class="slider round"></span>
-            </label>
-          </div>
-          <button class="btn" id="addWifiBtn" onclick="addNetwork()">ADD</button>
-        </div>
-        <div class="config-right">
-          <p class="info-label">Saved networks</p>
-          <div class="saved-networks">
-          </div>
-          <button class="btn" id="removeWifiBtn" disabled onclick="removeNetwork()">DELETE</button>
-        </div>
-      </div>
     </div>
   </body>
 </html>

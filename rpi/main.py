@@ -53,6 +53,8 @@ else:
 
 node_process = NodeProcess(rfm9x, show_info_notification, config)
 
+node_process.new_text_message(0x0005, "message_to_send", w_ack = True)
+
 while True:
 
     node_process.tick()

@@ -179,12 +179,9 @@ def api_messages(request: HTTPRequest):
 
     try:
       page = request.query_params.get("page")
-    except:
-      page = None
-    if page is None:
-      page = 0
-    else:
       page = int(page)
+    except:
+      page = 0
 
     page_size = 5
     num_pages = (len(parsed_messages)-1) // page_size + 1
@@ -355,12 +352,9 @@ def api_dump(request: HTTPRequest):
 
     try:
       page = request.query_params.get("page")
-    except:
-      page = None
-    if page is None:
-      page = 0
-    else:
       page = int(page)
+    except:
+      page = 0
 
     page_size = 1
     num_pages = (len(parsed_message_queue)-1) // page_size + 1

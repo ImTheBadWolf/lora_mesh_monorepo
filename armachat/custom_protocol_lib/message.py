@@ -20,6 +20,8 @@ class Message():
     message_type = MessageType.TEXT_MSG
     if w_ack and destination_address != self.config.BROADCAST_ADDRESS:
       message_type = MessageType.TEXT_MSG_W_ACK
+    if destination_address == self.config.BROADCAST_ADDRESS:
+      w_ack = False
 
     self.header = Header()
     self.header.new_header(destination_address, sender_address, message_type, priority)

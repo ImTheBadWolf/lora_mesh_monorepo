@@ -1,0 +1,155 @@
+#include "main.h"
+#include "boards.h"
+//TTGO T-beam T22_V1.1
+
+SX1262 radio = new Module(RADIO_CS_PIN, RADIO_DIO1_PIN, RADIO_RST_PIN, RADIO_BUSY_PIN);
+TinyGPSPlus gps;
+
+//MessageHandler messageHandler = MessageHandler();
+
+int transmissionState = RADIOLIB_ERR_NONE;
+volatile bool transmittedFlag = false;
+volatile bool enableInterrupt = true;
+
+void setFlag(void){
+  if (!enableInterrupt)
+    return;
+  // we sent  packet, set the flag
+  transmittedFlag = true;
+}
+
+static void smartDelay(unsigned long ms)
+{
+  unsigned long start = millis();
+  do
+  {
+    while (Serial1.available())
+      gps.encode(Serial1.read());
+  } while (millis() - start < ms);
+}
+
+void setup()
+{
+  initBoard();
+  //Serial1.begin(9600, SERIAL_8N1, 12, 15); // 17-TX 18-RX
+  delay(1500);
+  Serial.print(F("[SX1262] Initializing ... "));
+
+  int state = radio.begin(868.0, 500, 9, 6, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, 10, 16);
+  if (state == RADIOLIB_ERR_NONE)
+  {
+    Serial.println(F("success!"));
+  }
+  else
+  {
+    Serial.print(F("failed, code "));
+    Serial.println(state);
+    while (true)
+      ;
+  }
+
+  // set the function that will be called
+  // when new packet is received or transmission is finished
+  radio.setDio1Action(setFlag);
+  //transmissionState = radio.startTransmit("Hello Woadasdas asd asd asdas asd asrldssssss!");
+  //digitalWrite(BOARD_LED, LED_OFF);
+}
+
+void loop()
+{
+  if (transmittedFlag)
+  {
+    enableInterrupt = false;
+    transmittedFlag = false;
+
+    if (transmissionState == RADIOLIB_ERR_NONE)
+    {
+      Serial.println(F("transmission finished!"));
+    }
+    else
+    {
+      Serial.print(F("failed, code "));
+      Serial.println(transmissionState);
+    }
+
+    // wait a second before transmitting again
+    delay(10000);
+
+
+    Serial.print(F("[SX1262] Sending another packet ... "));
+    transmissionState = radio.startTransmit("Hello Wosdasd asd asd ad asd asd asd asd rldssssss!");
+    // you can also transmit byte array up to 256 bytes long
+    /*
+      byte byteArr[] = {0x01, 0x23, 0x45, 0x67,
+                        0x89, 0xAB, 0xCD, 0xEF};
+      int state = radio.startTransmit(byteArr, 8);
+    */
+    enableInterrupt = true;
+  }
+  Serial.print("Latitude  : ");
+  Serial.println(gps.location.lat(), 5);
+  Serial.print("Longitude : ");
+  Serial.println(gps.location.lng(), 4);
+  Serial.print("Satellites: ");
+  Serial.println(gps.satellites.value());
+  Serial.print("Altitude  : ");
+  Serial.print(gps.altitude.feet() / 3.2808);
+  Serial.println("M");
+  Serial.print("Time      : ");
+  Serial.print(gps.time.hour());
+  Serial.print(":");
+  Serial.print(gps.time.minute());
+  Serial.print(":");
+  Serial.println(gps.time.second());
+  Serial.println("**********************");
+  smartDelay(1000);
+  if (millis() > 5000 && gps.charsProcessed() < 10)
+    Serial.println(F("No GPS data received: check wiring"));
+}
+
+// TODO just for testing
+/* uint32_t byteArraySize;
+byte *bytes = messageHandler.createTextMessage(0x0004, byteArraySize, "Hello from TTGO t-beam");
+
+transmissionState = radio.startTransmit(bytes, byteArraySize);
+transmitFlag = true; */
+
+#include <SparkFun_Ublox_Arduino_Library.h>
+SFE_UBLOX_GPS myGPS;
+
+void setup()
+{
+  Serial.begin(9600);
+  while (!Serial)
+    ; // Wait for user to open the terminal
+  Serial.println("Connected to Serial");
+  Serial1.begin(9600, SERIAL_8N1, 34, 12);
+
+  do
+  {
+    if (myGPS.begin(Serial1))
+    {
+      Serial.println("Connected to GPS");
+      myGPS.setUART1Output(COM_TYPE_NMEA); // Set the UART port to output NMEA only
+      myGPS.saveConfiguration();           // Save the current settings to flash and BBR
+      Serial.println("GPS serial connected, output set to NMEA");
+      myGPS.disableNMEAMessage(UBX_NMEA_GLL, COM_PORT_UART1);
+      myGPS.disableNMEAMessage(UBX_NMEA_GSA, COM_PORT_UART1);
+      myGPS.disableNMEAMessage(UBX_NMEA_GSV, COM_PORT_UART1);
+      myGPS.disableNMEAMessage(UBX_NMEA_VTG, COM_PORT_UART1);
+      myGPS.disableNMEAMessage(UBX_NMEA_RMC, COM_PORT_UART1);
+      myGPS.enableNMEAMessage(UBX_NMEA_GGA, COM_PORT_UART1);
+      Serial.println("Enabled/disabled NMEA sentences");
+      break;
+    }
+    delay(1000);
+  } while (1);
+}
+
+void loop()
+{
+  if (Serial1.available())
+  {
+    Serial.write(Serial1.read()); // print anything comes in from the GPS
+  }
+}

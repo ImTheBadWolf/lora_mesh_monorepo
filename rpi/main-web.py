@@ -302,6 +302,7 @@ def api_update_config():
       print("Restarting")
       sleep(1)
       os.execl(sys.executable, sys.executable, *sys.argv)
+    return("OK")
   except Exception as e:
     if config.DEBUG:
       print("Could not parse data, or save file ")

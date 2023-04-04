@@ -209,7 +209,7 @@ class NodeProcess():
               message_queue_item.update_message_state(MessageState.DELETED)
               message_queue_item.update_last_millis()
               message_queue_item.set_timeout(self.config.DELETE_WAIT_TIME*1000)
-              return
+
           #Received message is not in queue. Check if it isnt broadcast message, decrement maxHop/TTL and add it to queue
           if message.get_destination() == self.config.BROADCAST_ADDRESS:
             #It is broadcast message. Add it to user messages

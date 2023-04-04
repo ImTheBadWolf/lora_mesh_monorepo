@@ -86,10 +86,13 @@ def parse_messages(messageList, config):
       msg_type = message_queue_item.get_message_type()
       msg_instance = message_queue_item.get_message_instance()
       message_entity['msg_type'] = get_string_msg_type(msg_type)
-      if msg_type == MessageType.SENSOR_DATA:
-        message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
-      else:
-        message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
+      try:
+        if msg_type == MessageType.SENSOR_DATA:
+          message_entity['payload'] = msg_instance.get_sensor_data().decode("utf-8")
+        else:
+          message_entity['payload'] = msg_instance.get_text_message().decode("utf-8")
+      except:
+        message_entity['payload'] = hex_print(message_queue_item.get_message_bytes())
 
       if (msg_type == MessageType.TEXT_MSG or msg_type == MessageType.TEXT_MSG_W_ACK) and message_queue_item.get_sender() != config.MY_ADDRESS:
         message_entity['hop_count'] = msg_instance.get_initialMaxHop() - msg_instance.get_maxHop()

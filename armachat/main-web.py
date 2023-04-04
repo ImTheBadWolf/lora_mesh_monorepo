@@ -437,6 +437,12 @@ def api_remove_network(request: HTTPRequest):
     with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
       response.send(f"Could not parse data, or save file\n{str(e)}")
 
+@server.route("/api/clear")
+def delete_queue(request: HTTPRequest):
+  node_process.delete_queue()
+  with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
+    response.send(json.dumps(data))
+
 if wifi_connected and my_ip != None:
   #Start the server.
   server.start(str(my_ip))
@@ -444,9 +450,9 @@ if wifi_connected and my_ip != None:
   print(f"Listening on http://{my_ip}:80")
 
 while True:
-  if initialised:
-    node_process.tick()
   try:
+    if initialised:
+      node_process.tick()
     server.poll()
   except OSError as error:
     print(error)

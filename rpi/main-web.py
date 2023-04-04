@@ -51,7 +51,7 @@ else:
       print("low datarate off")
 
 if initialised:
-  node_process = NodeProcess(rfm9x, show_info_notification, config)
+  node_process = NodeProcess(rfm9x, show_info_notification, config, queue_hard_limit=1000)
   address_book = AddressBook("data/contacts.json", "data/sensors.json")
   try:
     address_book.add_contact("YOU", f"0x{config.MY_ADDRESS:04X}")
@@ -292,6 +292,11 @@ def api_config():
   }
   return(json.dumps(data))
 
+@server.route("/api/clear")
+def delete_queue():
+  node_process.delete_queue()
+  return("OK")
+
 @server.route("/api/config", methods=['PUT'])
 def api_update_config():
   data = request.json
@@ -311,8 +316,11 @@ def api_update_config():
 
 def process_loop(node_process):
   while True:
-    if initialised:
-      node_process.tick()
+    try:
+      if initialised:
+        node_process.tick()
+    except Exception as e:
+      print(e)
 
 if __name__ == '__main__':
   t = threading.Thread(target=process_loop, args=(node_process,))

@@ -230,6 +230,10 @@ Input: `NETWORK_ENTITY`
 Deletes WiFi network based on provided ssid.  
 Input: ssid
 
+## /api/clear [GET]
+
+Deletes every message currently in queue.
+
 ---
 
 ## State flow

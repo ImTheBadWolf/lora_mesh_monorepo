@@ -97,7 +97,7 @@ void createSensorMessage()
   for (int i = 0; i < sizeof(CONTACTS) / sizeof(uint16_t); i++)
   {
     uint32_t byteArraySize;
-    String message = "Hall effect sensor value: " + String(hallValue) + "\nFree heap: " + String(ESP.getFreeHeap()) + "B";
+    String message = "Hall effect sensor value: " + String(hallValue) + "\nFree heap: " + String(ESP.getFreeHeap()) + "B\nUptime: " + String(millis() / 1000/ 60) + " Minutes";
 
     byte *bytes = messageHandler.createSensorMessage(CONTACTS[i], byteArraySize, message);
     messageQueue.push_back(new QueueItem(0, RESEND_COUNT, bytes, byteArraySize));

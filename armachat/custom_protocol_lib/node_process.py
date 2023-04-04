@@ -4,13 +4,14 @@ from message_queue_item import *
 from base_utils import *
 
 class NodeProcess():
-  def __init__(self, rfm9x, notification_callback, config):
+  def __init__(self, rfm9x, notification_callback, config, queue_hard_limit=35):
     self.message_queue = {}
     self.message_counter = 0
     self.config = config
     self.rfm9x = rfm9x
     self.notification_callback = notification_callback
     self.latest_message = None
+    self.queue_hard_limit = queue_hard_limit
 
     self.received_counter = 0
     self.sent_counter = 0
@@ -20,13 +21,19 @@ class NodeProcess():
 
     if message_id not in self.message_queue:
       #Only add message to queue if it is not already in queue
-      #Check if the queue doesnt have too many messages, if yes delete the oldest one
+      #Check if the queue doesnt have too many messages, if yes delete the oldest one. First try to delete user messages. If there are no user messages delete any message
       #Check only messages that the user can see (text messages, sensor data, traceroute, raw_packet)
       filtered_messages = [(msgId, msg) for msgId, msg in self.message_queue.items() if (self.message_queue[msgId].get_message_type() >= 1 and self.message_queue[msgId].get_message_type() <= 3) or self.message_queue[msgId].get_message_type() == MessageType.TRACEROUTE or self.message_queue[msgId].get_message_type() == MessageType.RAW_PACKET]
       if len(filtered_messages) >= MESSAGE_QUEUE_SIZE:
         #filter messageid of the oldest message from queue based on message_counter get_message_counter()
         oldest_message_id, oldest_message = min(filtered_messages, key=lambda x: x[1].get_message_counter())
-        self.notification_callback(f"Removing oldset message id:{oldest_message_id} from queue")
+        self.notification_callback(f"Removing oldest message id:{oldest_message_id} from queue")
+        del self.message_queue[oldest_message_id]
+      #If there is still too many messages in queue, delete any message (mainly ACK messages)
+      all_messages = [(msgId, msg) for msgId, msg in self.message_queue.items()]
+      if len(all_messages) >= self.queue_hard_limit:
+        oldest_message_id, oldest_message = min(all_messages, key=lambda x: x[1].get_message_counter())
+        self.notification_callback(f"Removing oldest message id:{oldest_message_id} from queue")
         del self.message_queue[oldest_message_id]
       gc.collect()
 
@@ -104,7 +111,10 @@ class NodeProcess():
         return
 
       message = Message(self.config, self.rfm9x.last_snr, self.rfm9x.last_rssi)
-      message.construct_message_from_bytes(received_packet)
+      construction_state = message.construct_message_from_bytes(received_packet)
+      if not construction_state:
+        #Received packet has invalid format (message type is not supported)
+        return
 
       if message.get_destination() == self.config.MY_ADDRESS:
         if message.get_header().get_message_type() != MessageType.ACK:
@@ -309,3 +319,7 @@ class NodeProcess():
 
   def get_stats(self):
     return (self.received_counter, self.sent_counter)
+
+  def delete_queue(self):
+    self.message_queue = {}
+    gc.collect()

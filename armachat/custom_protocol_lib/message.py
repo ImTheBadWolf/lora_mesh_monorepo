@@ -112,6 +112,9 @@ class Message():
     self.w_ack = self.header.get_message_type() == MessageType.TEXT_MSG_W_ACK
     self.parse_message_from_payload()
 
+    if self.header.get_message_type() > MessageType.RAW_PACKET or self.header.get_message_type() < 0:
+      return False
+
     if self.header.get_message_type() == MessageType.TRACEROUTE:
       #Adding my address to the traceroute message
       my_address = f"{self.config.MY_ADDRESS:04x}"
@@ -127,6 +130,7 @@ class Message():
       except:
         #Error parsing the message id (happens probably only when CRC is not checked in LoRa)
         self.ack_message_id = -1
+    return True
 
   def parse_message_from_payload(self):
     if self.header.get_message_type() == MessageType.TEXT_MSG_W_ACK or self.header.get_message_type() == MessageType.TEXT_MSG or self.header.get_message_type() == MessageType.TRACEROUTE_REQUEST:
@@ -151,7 +155,7 @@ class Message():
           self.text_message = decrypted_message
         except:
           #Received message was encrypted using different aes key
-          self.text_message = bytes("&lt;ENCRYPTED&gt;", "utf-8")
+          self.text_message = bytes("&lt;ENCRYPTED/CORRUPTED&gt;", "utf-8")
 
       elif self.header.get_message_type() == MessageType.SENSOR_DATA:
         try:
@@ -159,7 +163,7 @@ class Message():
           self.sensor_data = decrypted_message
         except:
           #Received message was encrypted using different aes key
-          self.sensor_data = bytes("&lt;ENCRYPTED&gt;", "utf-8")
+          self.sensor_data = bytes("&lt;ENCRYPTED/CORRUPTED&gt;", "utf-8")
 
   def get_message_id(self):
     return self.message_id

@@ -32,8 +32,9 @@ class MessageQueueItem():
       self.maxhop = self.message_instance.get_maxHop()
 
   def decrement_maxhop(self):
-    self.message_bytes[HEADER_LENGTH] -= 1
-    self.maxhop -= 1
+    if self.message_bytes[HEADER_LENGTH] > 0:
+      self.message_bytes[HEADER_LENGTH] -= 1
+      self.maxhop -= 1
 
   def decrement_ttl(self, decrement_amount):
     seconds_decrement = decrement_amount / 1000

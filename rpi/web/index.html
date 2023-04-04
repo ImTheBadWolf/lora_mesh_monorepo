@@ -90,7 +90,7 @@
           }
 
           messagesElement.innerHTML = messagesElement.innerHTML + `
-            <div class="message ${message.msg_type === 'SENSOR' ? 'sns-message' : ''}">
+            <div class="message ${message.msg_type === 'SENSOR' ? 'sns-message' : ''} ${message.state ? 'my-message':''}">
               ${(message.state && message.msg_type === "WACK_TEXT" && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
                 <img class="fail-icon" src="web/icons/refresh-arrow.png" >
                 <span>Message failed</span>

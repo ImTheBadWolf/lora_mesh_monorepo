@@ -151,6 +151,8 @@ input:checked+.slider:before {
 
 .messages {
   height: 50vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .message {
@@ -158,6 +160,12 @@ input:checked+.slider:before {
   display: flex;
   flex-direction: column;
   position: relative;
+  align-self: flex-start;
+  min-width: 350px;
+}
+
+.my-message {
+  align-self: flex-end;
 }
 
 .message:last-child {
@@ -644,6 +652,10 @@ input:checked+.slider:before {
 
   .content {
     padding: 4px;
+  }
+
+  .message {
+    min-width: 250px;
   }
 
   .message__content {

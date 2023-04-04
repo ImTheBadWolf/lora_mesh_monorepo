@@ -58,12 +58,22 @@ void setSettings()
   LoRa.setGain(6);
 }
 
-void onTxDone(){
+void onTxDone() {
   txDoneFlag = true;
 }
 
-void initLoRa()
-{
+void onReceive(int packetSize) {
+  //Dont really need this, but it will be used to delay sending if the channel is busy
+  if (packetSize == 0)
+    return;
+
+  String incoming = "";
+  while (LoRa.available()) {                                // can't use readString() in callback, so
+    incoming += (char)LoRa.read(); // add bytes one by one
+  }
+}
+
+void initLoRa() {
   Serial.println("Initializing LoRa....");
 
   SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
@@ -87,7 +97,9 @@ void initLoRa()
   display.println("My Address: " + String(MY_ADDRESS, HEX));
   display.display();
   delay(500);
+  LoRa.onReceive(onReceive);
   LoRa.onTxDone(onTxDone);
+  LoRa.receive();
 }
 
 void createSensorMessage()
@@ -145,7 +157,8 @@ void loop()
         LoRa.write(byteArr, size);
         LoRa.endPacket(true);
         txDoneFlag = false;
-        delay(100);
+        delay(150);
+        LoRa.receive();
       }
       else{
         // Counter is 0, remove from queue

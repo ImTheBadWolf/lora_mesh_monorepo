@@ -1,3 +1,4 @@
+.vscode/
 latex/CzechThesisExample/Master*
 latex/CzechThesisExample/*xmpi
 !latex/CzechThesisExample/Master.tex

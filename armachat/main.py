@@ -1,33 +1,22 @@
-import os
 from adafruit_bitmap_font import bitmap_font
-from time import sleep
-import microcontroller
 from adafruit_simple_text_display import SimpleTextDisplay
-from adafruit_display_text import label
-from config import config
-import adafruit_matrixkeypad
-import displayio
-from digitalio import DigitalInOut
-import pwmio
-from adafruit_display_text import label
 from adafruit_st7789 import ST7789
-from digitalio import DigitalInOut, Pull
+from binascii import hexlify
+from config import config
+from time import sleep
+import adafruit_matrixkeypad
+import analogio
+import board
 import board
 import busio
-import terminalio
-import ulora
-import analogio
-from binascii import hexlify
+import busio
 import digitalio
+import digitalio
+import displayio
 import gc
-import aesio
-import random
+import microcontroller
 import sys
 import time
-import digitalio
-import board
-import busio
-#TODO sort imports, remove unused
 
 sys.path.append("custom_protocol_lib")
 import protocol_config
@@ -154,7 +143,7 @@ rfm9x.coding_rate = lora_config[1]
 rfm9x.spreading_factor = lora_config[2]
 
 rfm9x.tx_power = 23
-rfm9x.preamble_length = 8  #TODO has to be 50 for long range
+rfm9x.preamble_length = 8
 
 info_timeout = 0
 

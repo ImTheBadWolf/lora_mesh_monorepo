@@ -311,8 +311,6 @@
         scrollToEnd = true;
       }
       function resendMessage(messageId){
-        //TODO resend message with the same id
-        //TODO post to /resend_message, for testing purposes server will just set state to ACK for that message (or REBROADCASTED and it will wait for ACK)
         const message = sentMessages.get(messageId);
         const sendButton = document.getElementById('sendBtn');
         const traceRouteButton = document.getElementById('tracerouteBtn');

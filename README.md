@@ -230,19 +230,6 @@ Input: `NETWORK_ENTITY`
 Deletes WiFi network based on provided ssid.  
 Input: ssid
 
-## TODO config api
-
-* list all config variables
-* list saved wifi networs (preferably without passwords ?)
-* set device address => Until the address is set, everything else should be disabled. Home page, sensor, contacts page should redirect to config and display alert about mandatory address setting. Address can be changed only once.
-* set other config variables
-* add wifi network
-* remove wifi network
-
-## TODO other processing apis
-This APIs wont be used in webGUI but can be usefull for further development and debugging/testing
-* create sensor message api
-
 ---
 
 ## State flow

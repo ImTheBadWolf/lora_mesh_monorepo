@@ -214,10 +214,11 @@ def api_add_sensor():
       name = data.get('name')
       address_book.add_sensor(name, address)
       return("OK")
-    except:
+    except Exception as e:
       if config.DEBUG:
         print("Could not parse data, or save file")
-      return("Could not parse data, or save file")
+      print(e)
+      return("Could not parse data, or save file" + e)
 
 @server.route("/api/sensor", methods=['DELETE'])
 def api_del_sensor():

@@ -1,21 +1,28 @@
 #include "main.h"
 
-/*
-  Bw125Cr45Sf128
-  Bw500Cr45Sf128
-  Bw31_25Cr48Sf512
-  Bw125Cr48Sf4096
-*/
-uint16_t bandwidthOptions[4] = {125, 500, 31, 125};
-uint8_t codingRateOptions[4] = {5, 5, 8, 8};
-uint8_t spreadingFactorOptions[4] = {7, 7, 9, 12};
+#ifdef __cplusplus
+extern "C" {
+#endif
+uint8_t temprature_sens_read();
+#ifdef __cplusplus
+}
+#endif
+uint8_t temprature_sens_read();
 
-bool buttonFlag = false;
-bool newMessage = false;
-int newPacketSize = 0;
 
 Adafruit_SSD1306 display(128, 64, &Wire, OLED_RST);
 MessageHandler messageHandler = MessageHandler();
+Array<QueueItem *, 500> messageQueue;
+Array<uint8_t, 500> itemsToRemove;
+int32_t lastMillis = INT32_MIN;
+bool buttonFlag = true;
+bool txDoneFlag = true;
+
+union twoByte2
+{
+  uint16_t value;
+  unsigned char Bytes[2];
+} twoByteVal2;
 
 void resetDisplay()
 {
@@ -36,17 +43,14 @@ void initializeDisplay()
 
   display.setTextColor(WHITE);
   display.setTextSize(1);
-  display.setCursor(0, 0);
-  display.println("Welcome to LORA");
   display.display();
 }
 
-void setSettings(uint8_t config)
+void setSettings()
 {
-  double bandwidth = bandwidthOptions[config] * 1000;
-  LoRa.setSignalBandwidth(500E3);
-  LoRa.setSpreadingFactor(9);
-  LoRa.setCodingRate4(6);
+  LoRa.setSignalBandwidth(LORA_BW * 1000);
+  LoRa.setSpreadingFactor(LORA_SF);
+  LoRa.setCodingRate4(LORA_CR);
 
   // Default, do not change
   LoRa.setSyncWord(0x12);
@@ -54,15 +58,8 @@ void setSettings(uint8_t config)
   LoRa.setGain(6);
 }
 
-void receiveMessage(int packetSize)
-{
-  newMessage = true;
-  newPacketSize = packetSize;
-}
-
-void onTxDone()
-{
-  LoRa.receive();
+void onTxDone(){
+  txDoneFlag = true;
 }
 
 void initLoRa()
@@ -72,7 +69,7 @@ void initLoRa()
   SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
   LoRa.setPins(LORA_CS, LORA_RST, LORA_IRQ);
 
-  int result = LoRa.begin(LORA_BAND);
+  int result = LoRa.begin(868E6);
   if (result != 1)
   {
     display.setCursor(0, 10);
@@ -80,61 +77,30 @@ void initLoRa()
     for (;;)
       ;
   }
-  //ctraes128.setKey(key, 16);
-  //ctraes128.setIV(key, 16);
 
-  setSettings(DEFAULT_CONFIG);
+  setSettings();
 
   Serial.println("LoRa initialized");
   display.display();
   delay(500);
-  display.setCursor(0, 15);
-  display.println("LoRa network OK!");
+  display.setCursor(0, 0);
+  display.println("My Address: " + String(MY_ADDRESS, HEX));
   display.display();
-
-  LoRa.onReceive(receiveMessage);
+  delay(500);
   LoRa.onTxDone(onTxDone);
-  LoRa.receive();
 }
 
-void checkForMessage(){
-  if (newMessage){
-    byte data[newPacketSize];
-    for (int i = 0; i < newPacketSize; i++){
-      data[i] = LoRa.read();
-    }
+void createSensorMessage()
+{
+  int hallValue = hallRead();
+  // For each contact in CONTACTS[] create sensor message
+  for (int i = 0; i < sizeof(CONTACTS) / sizeof(uint16_t); i++)
+  {
+    uint32_t byteArraySize;
+    String message = "Hall effect sensor value: " + String(hallValue) + "\nFree heap: " + String(ESP.getFreeHeap()) + "B";
 
-    float rssi = LoRa.packetRssi();
-    float snr = LoRa.packetSnr();
-    Message *receivedMessage = messageHandler.processNewMessage(data, newPacketSize, rssi, snr);
-    if (!receivedMessage->isValid()){
-      delete receivedMessage;
-      newMessage = false;
-      return;
-    }
-    if (DEBUG)
-    {
-      Serial.println("Received message:");
-      Serial.println("| DESTINATION \t | SENDER \t | MESSAGE ID \t | MAX HOP \t | RSSI \t | SNR \t | MESSAGE \t |");
-      Serial.println("##########################################################################################################");
-      Serial.println(receivedMessage->toString());
-    }
-
-    display.clearDisplay();
-    display.setCursor(0, 2);
-    display.print("Received:");
-    display.setCursor(0, 12);
-    display.print(receivedMessage->getMessage());
-    display.setCursor(0, 40);
-    display.print("RSSI:");
-    display.print(rssi);
-    display.setCursor(0, 50);
-    display.print("SNR:");
-    display.print(snr);
-    display.display();
-
-    newMessage = false;
-    delete receivedMessage;
+    byte *bytes = messageHandler.createSensorMessage(CONTACTS[i], byteArraySize, message);
+    messageQueue.push_back(new QueueItem(0, RESEND_COUNT, bytes, byteArraySize));
   }
 }
 
@@ -147,26 +113,61 @@ void setup()
   initLoRa();
   randomSeed(analogRead(0));
   pinMode(0, INPUT_PULLUP);
+  delay(1000);
 }
 
 void loop()
 {
-  checkForMessage();
+  // Call createSensorMessage() if button is pressed
   if (!digitalRead(0) && !buttonFlag){
     buttonFlag = true;
-
-    uint32_t byteArraySize;
-    byte *bytes = messageHandler.createTextMessage(0x0003, byteArraySize, "Hello from TTGO LoRa32 v1.0");
-    // TODO lookup table for "contacts". Instead of displaying hex addresses in received messages, display names
-    //table can contain aes keys also, if we want to encrypt messages uniquely for each contact
-    //TODO add message to rebroadcast queue and rebroadcast it X times or until ACK or rebroadcast from another node is received (which comes first)
-
-    LoRa.beginPacket();
-    LoRa.write(bytes, byteArraySize);
-    LoRa.endPacket(true);
+    createSensorMessage();
   }
   else if(digitalRead(0) && buttonFlag)
     buttonFlag = false;
 
-  delay(1);
+  // Call createSensorMessage() if SEND_INTERVAL has passed
+  if (millis() - lastMillis > SEND_INTERVAL * 1000){
+    lastMillis = millis();
+    createSensorMessage();
+  }
+
+  for (int i = 0; i < messageQueue.size(); i++){
+    QueueItem *item = messageQueue[i];
+    if (txDoneFlag && millis() > item->getTimeout()) {
+      if (item->getResendCounter() > 0) {
+        item->decrementResendCounter();
+        item->setTimeout(millis() + RESEND_TIMEOUT * 1000);
+        byte *byteArr = item->getPayloadBytes();
+        u_int8_t size = item->getPayloadBytesSize();
+
+        LoRa.beginPacket();
+        LoRa.write(byteArr, size);
+        LoRa.endPacket(true);
+        txDoneFlag = false;
+        delay(100);
+      }
+      else{
+        // Counter is 0, remove from queue
+        itemsToRemove.push_back(i);
+      }
+    }
+  }
+  // Remove items from queue
+  // While loop in itemsToRemove is necessary because removing items from queue changes the size of the queue
+  while (itemsToRemove.size() > 0){
+    // Find the highest index to remove first
+    uint8_t highestIndex = 0;
+    for (int i = 0; i < itemsToRemove.size(); i++){
+      if (itemsToRemove[i] > itemsToRemove[highestIndex])
+        highestIndex = i;
+    }
+    QueueItem *item = messageQueue[itemsToRemove[highestIndex]];
+    byte *byteArr = item->getPayloadBytes();
+    messageQueue.remove(itemsToRemove[highestIndex]);
+    delete byteArr;
+    delete item;
+    itemsToRemove.remove(highestIndex);
+  }
+  itemsToRemove.clear();
 }

@@ -5,8 +5,8 @@
 SX1262 radio = new Module(RADIO_CS_PIN, RADIO_DIO1_PIN, RADIO_RST_PIN, RADIO_BUSY_PIN);
 
 MessageHandler messageHandler = MessageHandler();
-Array<QueueItem *, 30> messageQueue;
-Array<uint8_t, 30> itemsToRemove;
+Array<QueueItem *, 500> messageQueue;
+Array<uint8_t, 500> itemsToRemove;
 
 int transmissionState = RADIOLIB_ERR_NONE;
 volatile bool transmittedFlag = false;
@@ -41,7 +41,7 @@ void setup()
   delay(1500);
   Serial.print(F("[SX1262] Initializing ... "));
 
-  int state = radio.begin(868.0, 500, 9, 6, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, 10, 8);
+  int state = radio.begin(868.0, LORA_BW, LORA_SF, LORA_CR, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, 22, 8);
   if (state == RADIOLIB_ERR_NONE)
   {
     Serial.println(F("success!"));
@@ -54,11 +54,8 @@ void setup()
       ;
   }
 
-  // set the function that will be called
-  // when new packet is received or transmission is finished
   radio.setDio1Action(setFlag);
-  //transmissionState = radio.startTransmit("Hello Woadasdas asd asd asdas asd asrldssssss!");
-  //digitalWrite(BOARD_LED, LED_OFF);
+  digitalWrite(BOARD_LED, LED_OFF);
 }
 
 void loop()
@@ -71,8 +68,9 @@ void loop()
 
   for (int i = 0; i < messageQueue.size(); i++){
     QueueItem *item = messageQueue[i];
-    if (millis() > item->getTimeout() && transmittedFlag) {
+    if (transmittedFlag && millis() > item->getTimeout()){
       if (item->getResendCounter() > 0){
+        digitalWrite(BOARD_LED, LED_ON);
         item->decrementResendCounter();
         item->setTimeout(millis() + RESEND_TIMEOUT * 1000);
 
@@ -82,6 +80,7 @@ void loop()
         u_int8_t size = item->getPayloadBytesSize();
         int state = radio.startTransmit(byteArr, size);
         enableInterrupt = true;
+        digitalWrite(BOARD_LED, LED_OFF);
       }
       else {
         //Counter is 0, remove from queue
@@ -98,7 +97,11 @@ void loop()
       if (itemsToRemove[i] > itemsToRemove[highestIndex])
         highestIndex = i;
     }
+    QueueItem *item = messageQueue[itemsToRemove[highestIndex]];
+    byte *byteArr = item->getPayloadBytes();
     messageQueue.remove(itemsToRemove[highestIndex]);
+    delete byteArr;
+    delete item;
     itemsToRemove.remove(highestIndex);
   }
   itemsToRemove.clear();

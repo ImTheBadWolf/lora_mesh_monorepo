@@ -10,8 +10,7 @@
 
 #include "MessageHandler.h"
 
-//TODO move to pins.h
-// Define OLED PIN
+// Define OLED PINs
 #define OLED_SDA 4
 #define OLED_SCL 15
 #define OLED_RST 16
@@ -22,7 +21,3 @@
 #define LORA_SCK 5
 #define LORA_RST 14
 #define LORA_IRQ 26
-
-#define LORA_BAND 868E6
-
-#define DEFAULT_CONFIG 1 //TODO move the whole params setting elsewhere

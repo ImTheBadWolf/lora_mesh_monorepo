@@ -228,6 +228,12 @@ class NodeProcess():
           if (message.get_message_type() != MessageType.SENSOR_DATA and message.get_maxHop() > 0) or (message.get_message_type() == MessageType.SENSOR_DATA and message.get_ttl() > 0):
             self.add_message(message, self.get_timeout(self.rfm9x.last_snr), True)
 
+          #The message is not for current node, but monitoring is enabled so add raw packet to queue
+          if self.config.MONITORING_ENABLED and message.get_destination() != self.config.BROADCAST_ADDRESS:
+            message = Message(self.config, self.rfm9x.last_snr, self.rfm9x.last_rssi)
+            message.construct_raw_packet(received_packet)
+            self.add_message(message, 0, False, state=MessageState.DONE)
+
   def get_timeout(self, snr):
     #TODO implemenet timeout randomization when enabled in config
     # - this is used when packet cant reach destination because of network topology ( V shape...)
@@ -275,17 +281,9 @@ class NodeProcess():
           else:
             #Message failed due to exceeded number of resent attempts
             if message_queue_itm.get_sender() == self.config.MY_ADDRESS:
-              #Message was created by me, update state to failed or delete, if its W_ACK message set state to failed
-              if message_queue_itm.get_message_type() != MessageType.TEXT_MSG_W_ACK:
-                message_queue_itm.update_message_state(MessageState.DELETED)
-                message_queue_itm.update_last_millis()
-                message_queue_itm.set_timeout(self.config.DELETE_WAIT_TIME*1000)
-                gc.collect()
-                return
-              else:
-                #This is only for TEXT_MSG_W_ACK message, this means that message failed to be rebroadcasted by any other node
-                message_queue_itm.update_message_state(MessageState.FAILED)
-                self.notification_callback(f"Message {message_queue_itm.get_message_id()} failed to be sent")
+              #Message was created by me, update state to failed
+              message_queue_itm.update_message_state(MessageState.FAILED)
+              self.notification_callback(f"Message {message_queue_itm.get_message_id()} failed to be sent")
             else:
               #Message was created by someone else, delete it from queue
               message_queue_itm.update_message_state(MessageState.DELETED)

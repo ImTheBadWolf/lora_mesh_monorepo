@@ -91,14 +91,14 @@
 
           messagesElement.innerHTML = messagesElement.innerHTML + `
             <div class="message ${message.msg_type === 'SENSOR' ? 'sns-message' : ''}">
-              ${(message.state && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
+              ${(message.state && message.msg_type === "WACK_TEXT" && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
                 <img class="fail-icon" src="web/icons/refresh-arrow.png" >
                 <span>Message failed</span>
               </button>` : ''}
               <span class="message__header ${message.state ? 'my-header':''}">
                 ${message.from ? (`${addressTranslation(message.from, message.msg_type)} ⟶ ${addressTranslation(message.to, message.msg_type)} |`):'' } ${message.lora_info.snr ? (`SNR:${message.lora_info.snr} RSSI:${message.lora_info.rssi}`) : ''} ${message.lora_info.lora_config} ${isNaN(message.hop_count) ? '':`Hops: ${message.hop_count}`}
               </span>
-              <div ${gpsMessage ? "id="+randomId : ''} class="message__content ${message.msg_type === 'SENSOR' ? 'sns-content':''} ${message.msg_type === 'TRACEROUTE' ? 'trc-content':''} ${message.state ? 'my-content':''} ${message.state && isFailed(message.state) ? 'failed':''}">
+              <div ${gpsMessage ? "id="+randomId : ''} class="message__content ${message.msg_type === 'SENSOR' ? 'sns-content':''} ${message.msg_type === 'TRACEROUTE' ? 'trc-content':''} ${message.state ? 'my-content':''} ${message.state && message.msg_type === "WACK_TEXT" && isFailed(message.state) ? 'failed':''}">
                 ${message.msg_type === 'TRACEROUTE' ? translateTraceroute(message.payload):sanitize(message.payload)}
               </div>
               ${showStatusIcons(message) ? (message.state === 'ACK' ? '<img class="icon" src="web/icons/check.png">' :'<img class="icon" src="web/icons/check_empty.png">') : ''}

@@ -67,6 +67,9 @@
               if (response.ok) {
                 selectedId = null;
                 document.getElementById("removeBtn").disabled = true;
+                document.getElementById("contactNameInput").value = ""
+                document.getElementById("contactAddInput").value = ""
+                document.getElementById("addBtn").innerText = "ADD";
                 pullSensors();
               }
             })

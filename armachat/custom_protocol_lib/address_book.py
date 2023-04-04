@@ -34,6 +34,7 @@ class AddressBook():
       json.dump(self.sensors, f)
 
   def add_contact(self, name, address):
+    address = address[:2] + address[2:].upper()
     for contact in self.contacts:
       if contact['address'] == address:
         self.contacts.remove(contact)
@@ -44,6 +45,7 @@ class AddressBook():
     self.save_contacts()
 
   def add_sensor(self, name, address):
+    address = address[:2] + address[2:].upper()
     for sensor in self.sensors:
       if sensor['address'] == address:
         self.sensors.remove(sensor)

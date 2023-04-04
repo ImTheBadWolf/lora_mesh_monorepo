@@ -78,7 +78,8 @@ class Message():
 
       self.maxHop = max_hop
       self.message_id = self.header.get_message_id()
-      self.payload = self.__construct_message_payload(f"0x{sender_address:04x}", MessageType.TRACEROUTE)
+      my_address = f"{self.config.MY_ADDRESS:04x}"
+      self.payload = self.__construct_message_payload(f"0x{my_address.upper()}", MessageType.TRACEROUTE)
 
   def __construct_message_payload(self, message, message_type):
     encrypted_message = bytearray(len(message))
@@ -112,7 +113,8 @@ class Message():
 
     if self.header.get_message_type() == MessageType.TRACEROUTE:
       #Adding my address to the traceroute message
-      strMyAddress = f'{self.text_message.decode("utf-8")}=>0x{self.config.MY_ADDRESS:04x}'
+      my_address = f"{self.config.MY_ADDRESS:04x}"
+      strMyAddress = f'{self.text_message.decode("utf-8")}=>0x{my_address.upper()}'
       self.payload = list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(strMyAddress, "utf-8"))
       self.text_message = bytes(strMyAddress, "utf-8")
 

@@ -60,7 +60,8 @@ class ProtocolConfig():
   def MY_ADDRESS(self, value):
     if self.get_item_from_config("MY_ADDRESS") is not None:
       raise ValueError("MY_ADDRESS can be set only once")
-    self.update_item_in_config("MY_ADDRESS", value.upper())
+    value = value[:2] + value[2:].upper()
+    self.update_item_in_config("MY_ADDRESS", value)
 
   @property
   def RESEND_COUNT(self):
@@ -159,13 +160,18 @@ class ProtocolConfig():
     return self.reboot_required
 
   def get_config(self):
+    if self.MY_ADDRESS is not None:
+      my_address = f"{self.MY_ADDRESS:04x}"
+      my_address = f"0x{my_address.upper()}"
+    else:
+      my_address = None
     ret_dict = {
       'aes_key': self.AES_KEY,
       'resend_count': self.RESEND_COUNT,
       'resend_timeout': self.RESEND_TIMEOUT,
       'ack_wait': self.ACK_WAIT_TIME,
       'randomize_path': self.RANDOMIZE_PATH,
-      'my_address': f"0x{self.MY_ADDRESS:04x}" if self.MY_ADDRESS is not None else None,
+      'my_address': my_address,
       'monitoring_enabled': self.MONITORING_ENABLED,
       'lora_config': self.LORA_CONFIG
     }

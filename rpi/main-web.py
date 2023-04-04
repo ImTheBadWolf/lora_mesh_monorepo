@@ -105,7 +105,7 @@ def api_messages():
     except:
       page = 0
 
-    page_size = 5
+    page_size = 20
     num_pages = (len(parsed_messages)-1) // page_size + 1
 
     data = {
@@ -263,12 +263,12 @@ def api_dump():
     except:
       page = 0
 
-    page_size = 1
+    page_size = 20
     num_pages = (len(parsed_message_queue)-1) // page_size + 1
     received, sent = node_process.get_stats()
 
     data = {
-      'message': parsed_message_queue[page*page_size:(page+1)*page_size],
+      'messages': parsed_message_queue[page*page_size:(page+1)*page_size],
       'device_info': {
         'received': received,
         'sent': sent

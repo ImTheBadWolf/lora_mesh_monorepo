@@ -522,55 +522,223 @@ Vďaka tomu môžu byť uzly realizované prostredníctvom lacných a malých za
 Protokol bude možné používať na rôznych platformách. V tejto práci vznikne implementácia protokolu pre mikrokontroléry používajúce programovací jazyk C++ a 
 mikrokontroléry alebo jednodoskové počítače podporujúce CircuitPython.
 
+TODO nasa implementacia  je sifrovana AES
+
 TODO tu by sa hodila tabulka s porovnanim (napr multiplatformovy support, spotreba energie, mobilita uzlov, obstaravacie naklady, zavislost na centralnych uzloch)
 
-\chapter{TODO Vlastna implementacia}
-TODO
-Ak nie je destinácia v dosahu, tak by sme správu prišli. Tento problém vyriešime tak, že odosielateľ si bude odoslané správy ukladať a v prípade, že sa nepodarí správu doručiť, môže ju opätovne 
+\chapter{Vlastná implementácia}
+Ako sme už spomínali v predchádzajúcej kapitole, nami vytvorený protokol bude fungovať na základe multi hop flooding. Tento prístup so sebou ale nesie 
+niekoľko nevýhod, ktoré by sme mali zohľadniť pri navrhovaní implementácie.
+
+Jednou z nevýhod je, že ak pošleme niekam správu, a destinácia práve nie je v dosahu, tak by sme správu prišli. Tento problém vyriešime tak, 
+že odosielateľ si bude odoslané správy ukladať a v prípade, že sa nepodarí správu doručiť, môže ju opätovne 
 odoslať niekedy neskôr. To, že sa správu nepodarilo doručiť do destinácie, zistíme vďaka potvrdzovacím ACK správam. Tieto správy sa odosielajú v opačnom smere ako správa, ktorú potvrdzujeme. 
+
+Ďalším z problémov môže byť potenciálne zahltenie siete správami. Keby každý uzol v sieti preposielal ďalej každú správu, ktorú príjme, tak by sme sa rýchlo dostali 
+do stavu kedy by množstvo uzlov preposielalo rovnaké správy a sieť by sa tym pádom zahltila.
+Riešenie tohto problému bude spočívať v niekoľkých procesoch ako stavu zahltenia predchádzať. Tieto procesy si bližšie popíšeme v nasledujúcej kapitole.
+%TODO proces nieje spravne slovo, najst dake lepsie. Also nezabudnut referencovat na tuto vetu a popisat v dalsej kapitole ako som to vyriesil (rebroadcast iba spravy ktoru som nevidel, maxhop,ttl, stav DELETED, 
+% overenie ci maxhop je mensi ako currentmaxhop predtym, ako spravu zahodim atd....)
+
+Implementácia sa bude deliť na dve verzie. Jedna verzia, implementovaná v CircuitPython, bude určená pre výkonnejšie zariadenia. Táto implementácia bude obsahovať aj webové rozhranie na 
+obsluhu, posielanie a prijímanie sprav. Webové rozhranie avšak pôjde využiť len na zariadeniach, ktoré podporujú WiFi prípadne ethernet.
+
 Implementácia v C++ bude určená pre menej výkonne zariadenia. Táto implementácia bude len zjednodušená verzia kompletnej implementácie a 
-bude určená pre mikrokontroléry TTGO. Z dôvodu výkonnosti a pamäti bude táto implementácia obsahovať iba základné funkcie protokolu, potrebné na odosielanie správ s 
-údajmi so senzorov.
-Mikrokontroléry TTGO tak budu v sieti fungovať iba ako jednoduché uzly, ktoré budú v určitých časových intervaloch odosielať dáta.
-\section{Navrh packetu}
-header, vysvetlenie jednotlivych poli, crc, hoplimit,
-\subsection{Typy sprav XXXX}
-popis typov sprav
-textova sprava, sensor data sprava, ping sprava, ACK sprava
+bude určená pre mikrokontroléry TTGO. Z dôvodu výkonnosti a obmedzenej pamäti bude táto implementácia obsahovať iba základné funkcionality protokolu, potrebné na odosielanie správ s 
+údajmi so senzorov. Mikrokontroléry TTGO tak budu v sieti fungovať iba ako jednoduché uzly, ktoré budú v určitých časových intervaloch odosielať dáta.
 
-\section{Funkcionalita protokolu}
-dlhy popis funkcionality protokolu, ako funguje, priebeh odoslania spravy, priebeh sirenia spravy cez ostatne node,
-vysvetlenie statov sprav (sent, rebroadcasted, acked atd)
-vysvetlenie message queue, timeouty, retry atd
-alternativne scenare, napr final node mimo dosahu, zla topologia siete atd
+\section{Typy a stavy správ}
+Predom sme si stanovili, že v našom protokole bude možné odosielať rôzne typy správ. Na základe typov správ, sa potom správy spracovávajú odlišne.
 
-\section{Navrh a implementacia web gui}
-popis co bude vo webgui, popis funkci, na rpi bude aj monitorovacia zalozka
-mozno poriesit cachovanie dat v localstoragi -- to asi prinesie viac problemov ako vyhod...
-popis implementacie, kedze webgui bude aj na slabych ttgo zariadeniach, bude treba dost optimalizovat kod webu
+Okrem typov správ, je nutné si definovať aj určité stavy, v ktorých sa správa môže nachádzať. Tieto stavy potom budú určovať, ako sa správa spracováva.
+\subsection{Typy správ}
+Rozhodli sme sa v našom protokole implementovať dokopy sedem typov správ. Každý typ správy má svoju úlohu a využitie.
+Sú nasledovné:
 
-\section{implementacia na micropythone}
-jak prebiehala implementacia, ukazky kodu atd.
+ACK správa bude slúžiť na potvrdenie doručenia správy. Keď odosielateľ pôvodnej správy niekedy neskôr príjme ACK správu, ktorá 
+potvrdzuje doručenie správy, tak môžme pôvodnú správu považovať za doručenú.
 
-\section{implementacia na pythone}
-rozsirenie a uprava implementacie na micropythonupythone, ukazky kodu atd.
-ak bude cas rozbehat na rpi grafanu na zobrazenie monitorovacich dat
+Textová správa je správa, ktorá bude obsahovať textový reťazec. Rozšírením tejto správy je správa s potvrdením o doručení.
+Obsah textových správ bude šifrovaný.
 
-\section{implementacia c++++}
-jak prebiehala implementacia, ukazky kodu atd.
-porovnanie voci micro/pythonu + rozdiely, problemy ktore sa vyskytli, ako sa to riesilo, mozno porovnanie rychlosti kodu ?
-poriesit kde a akobude ulozeny kod webu... dlhy string ??
+Správa typu senzorové dáta bude určená na prenos dát z rôznych senzorov. Obsah správy bude taktiež vo forme textového 
+reťazca, ktorý bude obsahovať dáta z senzorov. Tento typ sprav avšak oproti obyčajnej textovej správe ponuka možnosť nastaviť 
+časový interval -- TTL, po ktorého uplynutí sa správa nebude ďalej šíriť sieťou. Obsah správy bude taktiež šifrovaný.
 
-\section{Testovanie funkcnosti + medziplatformova komunikacia}
-test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
+Sprava žiadosť o traceroute sa bude používať len v krajných prípadoch, kedy by nás zaujímalo akou cestou sa správa preposiela sieťou. 
+Ked nejaký uzol príjme správu typu žiadosť o traceroute, tak vytvorí novu správu typu odpoveď na traceroute a vloží do nej svoju adresu. 
+Adresátom tejto novej správy bude odosielateľ pôvodnej správy. Ked sa bude tato odpoveď na traceroute šíriť sieťou, 
+tak každý uzol, ktorý danú správu preposlal ďalej, pridá do nej svoju vlastnú adresu.
+Takto sa vytvorí reťazec, ktorý bude obsahovať adresy všetkých uzlov, cez ktoré bola správa preposlaná.
+Aby mohli ostatné uzly v sieti do správy postupne pridávať svoje adresy, tak obsah tejto správy nebude šifrovaný.
 
-\chapter{Testovanie vykonnosti + test voci existujucim protokolom?}
-Test bude mozny asi len voci meshtasticu a to len na ttgo zariadeniach. Tie mam len dve takze to bude slaby test
-meshtastic ponuka simulator kde by mohlo byt mozne zmenit kod nody a simulovat vnom moj protokol
-V meshtasticu nebude fungovat mesh siet ak bude mat tvar V, moj protokol to ale ma vyriesene tak to spomenut
-meranie casu dorucenia spravy pri rovnakych podmienkach, parametroch atd
+Posledným typom správy je nespracovaný paket. Tento typ správy bude využívaný iba v prípade, že ma používateľ zapnutý monitorovací režim.
+V tomto režime sa všetky správy, ktoré sa v sieti prenášajú, budú zaznamenávať. V tomto režime môžme zachytiť aj pakety, 
+ktoré niesu súčasťou nášho protokolu a ich štruktúra nebude zodpovedať našim špecifikáciám. Z toho dôvodu ich nie je možné spracovať.
+Uložia sa teda ako typ správy nespracovaný paket, a budu obsahovať iba holé prijaté dáta vo forme bajtov.
 
-Ak bude cas rozsirit armachat o moj protokol. Upravit armachat shitcode bude ale casovo narocne a vo vysledku pride armachat o moznost pouzit ho s meshtasticom.
+\subsection{Stavy správ}
+%TODO pisat do zatvoriek nazov toho stavu tak je to je v kode ?
+%TODO dat sem obrazky stateflowu? rozkusovat to do viacero obrazkov?
+Na správnu funkčnosť je potrebné aby správy existovali v určitých stavoch. Správy budu časom svoj stav aktualizovať a prechádzať medzi nimi. 
+Tieto stavy budú definované nasledovne:
+
+Stav nová správa (NEW). Tento stav bude mať správa, ktorá bola práve vytvorená. Nebola ešte ani raz odoslaná aktuálnym uzlom, a čaká na svoje 
+prvé odoslanie. Po prvom odoslaní sa správa presunie do stavu odoslaná (SENT).
+
+Zo stavu odoslaná sa môže sprava presunúť do stavu neúspešná (FAILED), hotová (DONE), preposlaná (REBROADCASTED) alebo zmazaná (DELETED). 
+Ak aktuálny uzol príjme tu istú správu, odoslanú iným uzlom, znamená to, že dana správa sa šíri ďalej v sieti. Aktuálny uzol teda správu 
+presunie do stavu preposlaná alebo do stavu zmazaná. 
+To či sa správa presunie do stavu zmazaná alebo preposlaná je závisle od toho, či je aktuálny uzol zároveň aj autorom danej správy. V prípade, že je autorom, 
+správa sa presunie do stavu preposlaná.
+
+Správy v stave preposlaná, pri ktorých nepotrebujeme sledovať, či správa dorazila do destinácie, sa následne presunú do stavu hotová.
+
+Pokiaľ aktuálny uzol vyčerpá všetky pokusy o odoslanie správy, prípadne pri správe typu senzorové dáta dôjde časový limit, správa sa presunie do stavu neúspešná alebo zmazaná.
+To či sa presunie do stavu neúspešná alebo zmazaná je znovu závisle na tom, či je aktuálny uzol autorom danej správy alebo nie.
+
+Správam, ktoré su v stave preposlané sa odpočítava časový limit na prijatie potvrdenia. Pokiaľ v tomto časovom intervale nedorazí potvrdzovacia ACK správa, tak sa 
+správa presunie do stavu nepotvrdená (NAK). V opačnom prípade sa presunie do stavu potvrdená (ACK).
+
+Stav zmazaná značí, že správu považujeme za vymazanú. Ďalej s ňou už nebudeme pracovať a po uplynutí určitého intervalu sa reálne vymaže z pamäte.
+
+\section{Návrh paketu}
+Paket bude obsahovať hlavičku a dátový rámec. Štruktúra dátového rámcu bude závisieť od typu správy.
+Navrhnutú štruktúru hlavičky paketu môžme vidieť v tabuľke \ref{tab:packetHeader}
+
+\begin{table}[!h]
+	\centering
+  \caption{Štruktúra hlavičky paketu a dĺžka jednotlivých polí v bajtoch.}
+  \begin{tabular}{|c|c|c|c|c|c|c|}
+    \toprule
+    2B & 2B & 4B & 2B & 1B & 1B & 0 -- 240B \\
+    \midrule
+    Destinácia & Odosielateľ & ID správy & Kontrolný súčet & Typ správy & Priorita & Dátový rámec \\
+    \midrule
+  \end{tabular}
+  \label{tab:packetHeader}
+\end{table}
+
+Pre adresy odosielateľa a destinácie budeme používať dvoj bajtové adresy. Štvor bajtový identifikátor správy bude náhodne generovaný pri každom vytvorení novej správy.
+
+Z adresy destinácie, adresy odosielateľa a identifikátoru správy sa vytvorí dvoj bajtový kontrolný súčet. Tento kontrolný súčet bude používaný na overenie, či prijatá správa 
+patrí do nášho protokolu. Overovať integritu dát na základe kontrolného súčtu nie je za potreby, pretože táto kontrola je už zahrnutá na fyzickej vrstve LoRa technológie.
+
+V položke typ správy bude číslo, ktoré definuje typ danej správy. Číslo bude reprezentovať jeden z typov spomínaných v predošlej sekcii.
+
+Správam môžme v hlavičke paketu určiť vyššiu prioritu. Na túto prioritu sa následne bude dbať pri spracovávaní správ a správy s vyššou prioritou budu odbavené prioritne.
+
+Dátové rámce sa budú líšiť na základe typu správy. V tabuľkách \ref{tab:textFrame}, \ref{tab:trReqFrame}, \ref{tab:trFrame}, \ref{tab:ackFrame}, \ref{tab:sensorFrame} 
+je uvedená štruktúra dátových rámcov pre jednotlivé typy správ. 
+
+
+\begin{table}[!h]
+	\centering
+  \caption{Štruktúra dátového rámcu pre textové správy.}
+  \begin{tabular}{|c|c|c|}
+    \toprule
+    1B & 1B & 0 -- 238B \\
+    \midrule
+    Počet skokov & Pôvodný počet skokov & Textové dáta \\
+    \midrule
+  \end{tabular}
+  \label{tab:textFrame}
+\end{table}
+
+\begin{table}[!h]
+	\centering
+  \caption{Štruktúra dátového rámcu pre správy typu žiadosť o traceroute.}
+  \begin{tabular}{|c|c|}
+    \toprule
+    1B & 1B \\
+    \midrule
+    Počet skokov & Pôvodný počet skokov \\
+    \midrule
+  \end{tabular}
+  \label{tab:trReqFrame}
+\end{table}
+
+\begin{table}[!h]
+	\centering
+  \caption{Štruktúra dátového rámcu pre správy typu odpoveď na traceroute.}
+  \begin{tabular}{|c|c|}
+    \toprule
+    1B & 0 -- 239B \\
+    \midrule
+    Počet skokov & Navštívené adresy \\
+    \midrule
+  \end{tabular}
+  \label{tab:trFrame}
+\end{table}
+
+V dátových niektorých rámcoch môžme vidieť položku počet skokov. Do tejto položky bude pri vytvorení novej správy zapísaný maximálny počet skokov, ktoré môže správa vykonať 
+pri prenose sieťou. Každý uzol, predtým ako správu prepošle ďalej zmenší počet skokov o jedna. Ak sa počet skokov dostane na nulu tak správu ďalej nespracovávame.
+
+V rámcoch taktiež nájdeme položku pôvodný počet skokov. Do tejto položky bude taktiež pri vytvorení novej správy zapísaný maximálny počet skokov. Hodnota v tejto položke sa 
+ale už ďalej nemení. Bude slúžiť k tomu, aby prijímateľ dokázal zistiť, koľko preskokov správe zabralo, aby správa dorazila až k nemu. Túto informáciu bude možné 
+následne použiť na správne nastavenie maximálneho počtu skokov pre odoslanie potvrdzovacej správy, prípadne správy typu odpoveď na traceroute.
+
+\begin{table}[!h]
+	\centering
+  \caption{Štruktúra dátového rámcu pre potvrdzovacie ACK správy.}
+  \begin{tabular}{|c|c|}
+    \toprule
+    1B & 4B \\
+    \midrule
+    Počet skokov & ID potvrdzovanej správy \\
+    \midrule
+  \end{tabular}
+  \label{tab:ackFrame}
+\end{table}
+
+\begin{table}[!h]
+	\centering
+  \caption{Štruktúra dátového rámcu pre senzorové dáta.}
+  \begin{tabular}{|c|c|}
+    \toprule
+    2B & 0 -- 238B \\
+    \midrule
+    TTL & Textové dáta \\
+    \midrule
+  \end{tabular}
+  \label{tab:sensorFrame}
+\end{table}
+
+% \section{Funkcionalita protokolu}
+% dlhy popis funkcionality protokolu, ako funguje, priebeh odoslania spravy, priebeh sirenia spravy cez ostatne node,
+% vysvetlenie statov sprav (sent, rebroadcasted, acked atd)
+% vysvetlenie message queue, timeouty, retry atd
+% alternativne scenare, napr final node mimo dosahu, zla topologia siete atd
+
+% \section{Navrh a implementacia web gui}
+% popis co bude vo webgui, popis funkci, na rpi bude aj monitorovacia zalozka
+% mozno poriesit cachovanie dat v localstoragi -- to asi prinesie viac problemov ako vyhod...
+% popis implementacie, kedze webgui bude aj na slabych ttgo zariadeniach, bude treba dost optimalizovat kod webu
+
+% \section{implementacia na micropythone}
+% jak prebiehala implementacia, ukazky kodu atd.
+
+% \section{implementacia na pythone}
+% rozsirenie a uprava implementacie na micropythonupythone, ukazky kodu atd.
+% ak bude cas rozbehat na rpi grafanu na zobrazenie monitorovacich dat
+
+% \section{implementacia c++++}
+% jak prebiehala implementacia, ukazky kodu atd.
+% porovnanie voci micro/pythonu + rozdiely, problemy ktore sa vyskytli, ako sa to riesilo, mozno porovnanie rychlosti kodu ?
+% poriesit kde a akobude ulozeny kod webu... dlhy string ??
+
+% TODO popisat tu ze toto je lite verzia, urcena na lowend zariadenia. Moze sa hodit ked chceme do siete pridat primitivne lacne senzory, ktore len budu reportovat data
+
+% \section{Testovanie funkcnosti + medziplatformova komunikacia}
+% test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
+
+% \chapter{Testovanie vykonnosti + test voci existujucim protokolom?}
+% Test bude mozny asi len voci meshtasticu a to len na ttgo zariadeniach. Tie mam len dve takze to bude slaby test
+% meshtastic ponuka simulator kde by mohlo byt mozne zmenit kod nody a simulovat vnom moj protokol
+% V meshtasticu nebude fungovat mesh siet ak bude mat tvar V, moj protokol to ale ma vyriesene tak to spomenut
+% meranie casu dorucenia spravy pri rovnakych podmienkach, parametroch atd
+
+% Ak bude cas rozsirit armachat o moj protokol. Upravit armachat shitcode bude ale casovo narocne a vo vysledku pride armachat o moznost pouzit ho s meshtasticom.
 
 % Seznam literatury
 \printbibliography[title={Literatura}, heading=bibintoc]

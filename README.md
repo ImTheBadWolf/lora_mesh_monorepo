@@ -239,3 +239,41 @@ Deletes every message currently in queue.
 ## State flow
 
 ![State flow](state_flow.png)
+
+
+## Known problems
+
+* Wifi functionality on rpi pico can behave unexpectedly. The wifi core module in circuitpython is still in beta. 
+  * When the wifi is set to AP mode, it can't be changed to station mode without powercycling the device. And vice versa for station mode. For this reason, the best practice is as following:
+    * Leave only one AP = True wifi network in the `settings.json`
+    * After the device boots, it should create AP. Next connect to that AP and in config add your own WiFi network (or don't and use it always in AP mode, but this can result in slow resposivity of web gui).
+    * After adding your own wifi network, **remove the old AP one**. Powercycle the device.
+    * Device shoul boot and connec to your wifi
+  * Another problem regarding the wifi functionality is frozen state of the whole device if you try to connect to the webserver immediately after it starts.
+  To alleviate this unwanted behavior, wait a few seconds after the server starts (*Listening on <ip\>* will be printed on the screen ), and only then connect to it using web browser.
+* RFM9x library used on Pi Picos can delay the main process loop for 20 seconds when receiving
+  * Circuitpython doesn't support interrupts, so when the RFM library starts receiving lora packet, it will wait until timeout passes or the whole packet is received. This can lead to situations where RFM library reads incoming packet for 20 seconds (the default timeout is 20 seconds) and hold everything else for that time. This can only happen if someone is spamming the lora frequency (on the same SF, BW, CR) with bunch of data though.
+
+## Setup
+
+### RPI Pico (non WiFi version)
+
+* Copy everything from [armachat_dumps/non-Wifi, circuitpython 7.3.0/](armachat_dumps/non-Wifi, circuitpython 7.3.0/) into Pi Pico.
+* Edit `data/settings.json`, change `MY_ADDRESS` to hex address of that device.
+  * Address has to be in string, in 0xNNNN format. (e.g.  "MY_ADDRESS": "0xAB2C")
+* Power up the device, it should start and be ready.
+
+### RPI Pico W
+
+* Copy everything from [armachat_dumps/wifi, circuitpython 8.0.3/](armachat_dumps/wifi, circuitpython 8.0.3/) into Pi Pico W.
+* Power up the device. It should create WiFi access point
+  * SSID: ARMACHAT
+  * PASSWORD: huhuhuhuhu
+* Connect to the AP, go to the displayed IP address from web browser and add custom WiFi network/s if desired.
+  * **If wifi networks were added, the AP network has to be be removed**
+* Powercycle the device
+  * Device should try to connect to any network from added networks
+* After the device connects to your wifi, go to the displayed IP from web browser and configure your address.
+  * Address can be configured only once !
+* Device will reboot after address has been configured.
+* Device should be now ready to function

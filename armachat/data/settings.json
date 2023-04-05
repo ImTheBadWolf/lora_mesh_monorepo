@@ -1,0 +1,29 @@
+{
+  "MY_ADDRESS": null,
+  "AES_KEY": "SuperTajne heslo",
+  "MONITORING_ENABLED": false,
+  "RESEND_COUNT": 5,
+  "RESEND_TIMEOUT": 8,
+  "ACK_WAIT_TIME": 60,
+  "DEFAULT_MAX_HOP": 5,
+  "RANDOMIZE_PATH": false,
+  "LORA_CONFIG": [500, 6, 9],
+  "WIFI_NETWORKS": [
+    {
+      "SSID": "ssid",
+      "PASSWORD": "password",
+      "AP": false
+    },
+    {
+      "SSID": "ARMACHAT",
+      "PASSWORD": "huhuhuhuhu",
+      "AP": true
+    },
+    {
+      "SSID": "ssid2",
+      "PASSWORD": "password2",
+      "AP": false
+    }
+  ],
+  "CONTACTS": ["0x0005", "0x0002"]
+}

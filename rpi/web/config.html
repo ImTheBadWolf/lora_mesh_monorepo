@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoRa protocol</title>
+    <link rel="stylesheet" href="web/style.css">
+    <script>
+      function randomAddress() {
+        let address = Math.floor(Math.random() * 65536);
+        address = address.toString(16).padStart(4, '0');
+        address = "0x" + address.toUpperCase();
+        document.getElementById('myAddressInput').value = address;
+      }
+
+      async function pullConfig(){
+        const response = await fetch('/api/config');
+        const {config} = await response.json();
+
+        if (config) {
+          if (config.my_address){
+            document.getElementById("myAddressInput").value = config.my_address;
+            document.getElementById("address-config-item").classList.add("disabled-item");
+            document.getElementById("myAddressInput").disabled = true;
+            document.getElementById("randomizeBtn").disabled = true;
+            const addressWarn = document.getElementById("address-warn")
+            if (addressWarn) {
+              addressWarn.remove()
+            }
+          }
+          document.getElementById("aesKey").value = config.aes_key
+          document.getElementById("resendCount").value = config.resend_count;
+          document.getElementById("resendTimeout").value = config.resend_timeout;
+          document.getElementById("ackWait").value = config.ack_wait;
+          document.getElementById("randomizePath").checked = config.randomize_path;
+          document.getElementById("monitoringEnabled").checked = config.monitoring_enabled;
+          document.getElementById("saveCfgBtn").disabled = false;
+
+          loraConfig = config.lora_config;
+          document.getElementById("loraSelect0").value = loraConfig[0]
+          document.getElementById("loraSelect1").value = loraConfig[1]
+          document.getElementById("loraSelect2").value = loraConfig[2]
+        }
+        else {
+          document.getElementById("saveCfgBtn").disabled = false;
+        }
+      }
+
+      function updateConfig() {
+        document.getElementById("saveCfgBtn").disabled = true;
+
+        const addressValue = document.getElementById("myAddressInput").value;
+        const aesKey = document.getElementById("aesKey").value;
+        const resendCount = document.getElementById("resendCount").value;
+        const resendTimeout = document.getElementById("resendTimeout").value;
+        const ackWait = document.getElementById("ackWait").value;
+        const randomize = document.getElementById("randomizePath").checked
+        const monitoring = document.getElementById("monitoringEnabled").checked
+
+        if (!addressValue.match(/^0x[0-9a-fA-F]{4}$/)) {
+          alert('Invalid address');
+          document.getElementById("saveCfgBtn").disabled = false;
+          return;
+        }
+        if (aesKey.length !== 16) {
+          alert('AES key has to have 16 characters');
+          document.getElementById("saveCfgBtn").disabled = false;
+          return;
+        }
+        if (resendCount < 1 || resendCount > 20) {
+          alert('Resend count has to be between 1 and 20');
+          document.getElementById("saveCfgBtn").disabled = false;
+          return;
+        }
+        if (resendTimeout < 1 || resendTimeout > 20) {
+          alert('Resend timeout has to be between 1 and 20');
+          document.getElementById("saveCfgBtn").disabled = false;
+          return;
+        }
+        if (ackWait < 1 || ackWait > 300) {
+          alert('Ack wait has to be between 1 and 300');
+          document.getElementById("saveCfgBtn").disabled = false;
+          return;
+        }
+
+        const requestOptions = {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            "config":{
+              "randomize_path": randomize,
+              'monitoring_enabled': monitoring,
+              "aes_key": aesKey,
+              "resend_count": resendCount,
+              "resend_timeout": resendTimeout,
+              "ack_wait": ackWait,
+              "my_address": addressValue,
+              "lora_config": [parseInt(document.getElementById("loraSelect0").value), parseInt(document.getElementById("loraSelect1").value), parseInt(document.getElementById("loraSelect2").value)]
+            }
+          })
+        };
+        fetch('/api/config', requestOptions)
+          .then(response => {
+            if (response.ok) {
+              pullConfig();
+            }
+          })
+      }
+
+      function handleLoraSelect(loraConfigId) {
+        if (loraConfigId == 2) {
+          selectedValue = document.getElementById("loraSelect2").value;
+          if (selectedValue == 12) {
+            document.getElementById("loraSelect0").value = 125;
+            document.getElementById("loraSelect0").disabled = true;
+          }
+          else {
+            document.getElementById("loraSelect0").disabled = false;
+          }
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", async function(event) {
+        await pullConfig();
+      });
+    </script>
+  </head>
+  <body>
+    <div class="menu">
+      <ul>
+        <li><a href="/">HOME</a></li>
+        <li><a href="/sensors">SENSORS</a></li>
+        <li><a href="/contacts">CONTACTS</a></li>
+        <li><a href="#" class="underlined">CONFIG</a></li>
+      </ul>
+    </div>
+    <div class="content">
+      <div class="config-container">
+        <div class="config-left">
+          <div class="config-item" id="address-config-item">
+            <span class="info-label">My Address:</span>
+            <input id="myAddressInput" type="text" maxlength="6">
+            <button class="btn" id="randomizeBtn" onclick="randomAddress()">RANDOM</button>
+          </div>
+          <div class="config-item">
+            <span class="info-label">AES Key:</span>
+            <input id="aesKey" type="text" maxlength="16">
+          </div>
+          <div class="config-item">
+            <span class="info-label">Resend count:</span>
+            <input id="resendCount" type="number" min=1 max=20>
+          </div>
+          <div class="config-item">
+            <span class="info-label">Resend timeout(S):</span>
+            <input id="resendTimeout" type="number" min=1 max=20>
+          </div>
+          <div class="config-item">
+            <span class="info-label">ACK wait timeout(S):</span>
+            <input id="ackWait" type="number" min=1 max=300>
+          </div>
+          <div class="config-item">
+            <span class="info-label">Randomize enabled:</span>
+            <label class="switch">
+              <input type="checkbox" id="randomizePath">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="config-item">
+            <span class="info-label">Monitoring mode:</span>
+            <label class="switch">
+              <input type="checkbox" id="monitoringEnabled">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <p class="info-label">LoRa config</p>
+          <div class="config-item">
+            <span class="info-label">Bandwidth:</span>
+            <select id="loraSelect0" onchange="handleLoraSelect(0)">
+              <option value="500">500 kHz</option>
+              <option value="250">250 kHz</option>
+              <option value="125">125 kHz</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <span class="info-label">Coding rate:</span>
+            <select id="loraSelect1" onchange="handleLoraSelect(1)">
+              <option value="5">4/5</option>
+              <option value="6">4/6</option>
+              <option value="7">4/7</option>
+              <option value="8">4/8</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <span class="info-label">Spreading factor:</span>
+            <select id="loraSelect2" onchange="handleLoraSelect(2)">
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          </div>
+        </div>
+        <div class="config-right">
+          <div class="config-info">
+            <span class="warning red" id="address-warn" >You need to set your address first</span>
+            <ul>
+              <li>My Address - Can be set only once. <span class="red">System will restart updating the address.</span></li>
+              <li>Resend count - How many times should we try to re-send each message until it is considered failed</li>
+              <li>Resend timeout - How long to wait between each re-send (In seconds). Short timeout may result in undelivered messages.</li>
+              <li>ACK wait timeout - How long to wait for ACK packet until the message is considered failed (In seconds)</li>
+              <li>Randomize path - Experimental setting. Will result in randomization of packets path. Only use if the messages cant be sucessfully delivered to the destination. This setting is not saved and will reset after next reboot.</li>
+              <li>Monitoring enabled - If enabled, you will also receive packets which do not belong to this protocol. These raw packet wont be parsed or decrypted, you will only see the raw received bytes.</li>
+              <li>LoRa config - LoRa configuration parameters. Configuration affects the usable range and reliability.<br><span class="red">Each node in the network has to use the same parameters. System will restart after updating the LoRa config.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="saveCfgBtn" onclick="updateConfig()">SAVE CONFIG</button>
+    </div>
+  </body>
+</html>

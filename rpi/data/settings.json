@@ -1,0 +1,11 @@
+{
+  "MY_ADDRESS": "0xA1BC",
+  "AES_KEY": "SuperTajne heslo",
+  "MONITORING_ENABLED": false,
+  "RESEND_COUNT": 5,
+  "RESEND_TIMEOUT": 8,
+  "ACK_WAIT_TIME": 60,
+  "DEFAULT_MAX_HOP": 5,
+  "RANDOMIZE_PATH": false,
+  "LORA_CONFIG": [500, 6, 9]
+}

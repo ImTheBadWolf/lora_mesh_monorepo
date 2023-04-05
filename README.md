@@ -258,14 +258,14 @@ Deletes every message currently in queue.
 
 ### RPI Pico (non WiFi version)
 
-* Copy everything from [armachat_dumps/non-Wifi, circuitpython 7.3.0/](armachat_dumps/non-Wifi, circuitpython 7.3.0/) into Pi Pico.
+* Copy everything from [armachat_dumps/non-Wifi, circuitpython 7.3.0/](https://github.com/ImTheBadWolf/lora_mesh_monorepo/tree/master/armachat%20dumps/non-Wifi%2C%20circuitpython%207.3.0) into Pi Pico.
 * Edit `data/settings.json`, change `MY_ADDRESS` to hex address of that device.
   * Address has to be in string, in 0xNNNN format. (e.g.  "MY_ADDRESS": "0xAB2C")
 * Power up the device, it should start and be ready.
 
 ### RPI Pico W
 
-* Copy everything from [armachat_dumps/wifi, circuitpython 8.0.3/](armachat_dumps/wifi, circuitpython 8.0.3/) into Pi Pico W.
+* Copy everything from [armachat_dumps/wifi, circuitpython 8.0.3/](https://github.com/ImTheBadWolf/lora_mesh_monorepo/tree/master/armachat%20dumps/wifi%2C%20circuitpython%208.0.3) into Pi Pico W.
 * Power up the device. It should create WiFi access point
   * SSID: ARMACHAT
   * PASSWORD: huhuhuhuhu
@@ -277,3 +277,7 @@ Deletes every message currently in queue.
   * Address can be configured only once !
 * Device will reboot after address has been configured.
 * Device should be now ready to function
+
+
+## Screenshots
+![Web](web.png)

@@ -2,23 +2,20 @@ from adafruit_bitmap_font import bitmap_font
 from adafruit_simple_text_display import SimpleTextDisplay
 from adafruit_st7789 import ST7789
 from config import config
+from custom_protocol_lib.base_utils import *
+from custom_protocol_lib.node_process import *
 from time import sleep
 import adafruit_matrixkeypad
 import analogio
 import board
 import busio
+import custom_protocol_lib.protocol_config as protocol_config
+import custom_protocol_lib.rfm9x_lora as rfm9x_lora
 import digitalio
-import displayio
 import gc
 import microcontroller
 import sys
 import time
-
-sys.path.append("custom_protocol_lib")
-import protocol_config
-from base_utils import *
-from node_process import *
-import rfm9x_lora
 
 key_set = 0
 keypad = adafruit_matrixkeypad.Matrix_Keypad(config.rows, config.cols, config.keys1)
@@ -27,7 +24,6 @@ received_counter = 0
 sent_counter = 0
 
 VSYS_voltage = analogio.AnalogIn(board.VOLTAGE_MONITOR)
-
 
 sensor_report_interval = 60 #Seconds
 last_sensor_report = 0
@@ -101,7 +97,6 @@ display = ST7789(display_bus, rotation=270, width=320, height=240, backlight_pin
 splash = displayio.Group()
 display.show(splash)
 
-
 screen = SimpleTextDisplay(
     display=display,
     font=font,
@@ -136,7 +131,6 @@ screen[5].text = ""
 screen[6].text = ""
 
 screen.show()
-
 
 rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=True)
 lora_config = config.LORA_CONFIG

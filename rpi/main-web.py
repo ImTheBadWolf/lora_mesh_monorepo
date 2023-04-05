@@ -1,31 +1,27 @@
-import os
+from custom_protocol_lib.address_book import *
+from custom_protocol_lib.base_utils import *
+from custom_protocol_lib.node_process import *
+from flask import Flask, json, send_from_directory, request
 from time import sleep
 import board
+import custom_protocol_lib.protocol_config as protocol_config
+import custom_protocol_lib.rfm9x_lora as rfm9x_lora
 import digitalio
 import gc
 import json
-import sys
-from flask import Flask, json, render_template, send_from_directory, request
-import threading
-
-sys.path.append("custom_protocol_lib")
-import protocol_config
-from base_utils import *
-from node_process import NodeProcess
-from address_book import AddressBook
-import rfm9x_lora
+import os
 import spidev
+import sys
+import threading
 
 config = protocol_config.ProtocolConfig('data/settings.json')
 initialised = config.is_initialised()
-
 
 spi_lora = spidev.SpiDev()
 spi_lora.open(0, 0)
 spi_lora.max_speed_hz = 500000
 
 RESET = digitalio.DigitalInOut(board.D22)
-
 
 rfm9x = rfm9x_lora.RFM9x(spi_lora, 868.0, crc=True)
 lora_config = config.LORA_CONFIG

@@ -3,33 +3,25 @@ from adafruit_httpserver.request import HTTPRequest
 from adafruit_httpserver.response import HTTPResponse
 from adafruit_httpserver.server import HTTPMethod
 from adafruit_httpserver.server import HTTPServer
-from binascii import hexlify
+from custom_protocol_lib.address_book import *
+from custom_protocol_lib.base_utils import *
+from custom_protocol_lib.node_process import *
 from time import sleep
 import board
-import board
 import busio
-import busio
-import digitalio
+import custom_protocol_lib.protocol_config as protocol_config
+import custom_protocol_lib.rfm9x_lora as rfm9x_lora
 import digitalio
 import gc
 import json
-import microcontroller
 import microcontroller
 import socketpool
 import sys
 import wifi
 
-sys.path.append("custom_protocol_lib")
-import protocol_config
-from base_utils import *
-from node_process import NodeProcess
-from address_book import AddressBook
-import rfm9x_lora
-
 ssid = None
 wifi_connected = False
 my_ip = None
-
 
 spi_lora = busio.SPI(board.GP10, MOSI=board.GP11, MISO=board.GP12)
 CS = digitalio.DigitalInOut(board.GP13)
@@ -51,8 +43,6 @@ rfm9x.preamble_length = 8
 def show_info_notification(text):
   if config.DEBUG:
     print(text)
-
-
 
 symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )
 if symbolDuration > 16:
@@ -122,6 +112,7 @@ if initialised:
     address_book.add_sensor("YOU", f"0x{config.MY_ADDRESS:04X}")
     address_book.add_sensor("ALL", f"0x{config.BROADCAST_ADDRESS:04X}")
   except:
+    # Already added or readonly FS
     pass
 
 else:
@@ -441,7 +432,7 @@ def api_remove_network(request: HTTPRequest):
 def delete_queue(request: HTTPRequest):
   node_process.delete_queue()
   with HTTPResponse(request, content_type=MIMEType.TYPE_TXT) as response:
-    response.send(json.dumps(data))
+    response.send("OK")
 
 if wifi_connected and my_ip != None:
   #Start the server.

@@ -1,6 +1,3 @@
-import random
-from binascii import hexlify
-
 def calculate_checksum(data):
   #Calculates CRC-16/CCITT-FALSE checksum of first 8 bytes of data
   crc = 0xFFFF

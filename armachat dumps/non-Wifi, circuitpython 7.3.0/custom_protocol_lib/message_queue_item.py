@@ -1,6 +1,6 @@
 import time
-from message import Message
-from base_utils import *
+from custom_protocol_lib.message import Message
+from custom_protocol_lib.base_utils import *
 
 class MessageQueueItem():
   def __init__(self, message_instance:Message, message_counter, config, timeout=0):

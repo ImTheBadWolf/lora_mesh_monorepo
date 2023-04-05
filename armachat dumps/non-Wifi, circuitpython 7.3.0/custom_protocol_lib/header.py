@@ -1,4 +1,5 @@
-from base_utils import *
+from custom_protocol_lib.base_utils import *
+import random
 
 """ Message header consisting of
 2 Bytes destination address

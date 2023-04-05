@@ -1,7 +1,8 @@
+import random
 import gc
-from message import *
-from message_queue_item import *
-from base_utils import *
+from custom_protocol_lib.message import *
+from custom_protocol_lib.message_queue_item import *
+from custom_protocol_lib.base_utils import *
 
 class NodeProcess():
   def __init__(self, rfm9x, notification_callback, config, queue_hard_limit=35):

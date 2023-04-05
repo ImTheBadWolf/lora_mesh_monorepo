@@ -29,7 +29,7 @@ sent_counter = 0
 VSYS_voltage = analogio.AnalogIn(board.VOLTAGE_MONITOR)
 
 
-sensor_report_interval = 60 #Seconds
+sensor_report_interval = 30 #Seconds
 last_sensor_report = 0
 
 config = protocol_config.ProtocolConfig('data/settings.json')

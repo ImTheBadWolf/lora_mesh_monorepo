@@ -93,8 +93,12 @@ void initLoRa() {
   Serial.println("LoRa initialized");
   display.display();
   delay(500);
-  display.setCursor(0, 0);
-  display.println("My Address: " + String(MY_ADDRESS, HEX));
+  display.clearDisplay();
+  display.setTextSize(3);
+  display.setCursor(0, 25);
+  String myAddress = String(MY_ADDRESS, HEX);
+  myAddress.toUpperCase();
+  display.println("0x" + myAddress);
   display.display();
   delay(500);
   LoRa.onReceive(onReceive);

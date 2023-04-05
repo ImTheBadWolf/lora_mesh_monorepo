@@ -1,7 +1,7 @@
 .vscode/
-latex/CzechThesisExample/Master*
-latex/CzechThesisExample/*xmpi
-!latex/CzechThesisExample/Master.tex
-!latex/CzechThesisExample/Master.pdf
+latex/Master*
+latex/*xmpi
+!latex/Master.tex
+!latex/Master.pdf
 __pycache__/
 armachat/lib/

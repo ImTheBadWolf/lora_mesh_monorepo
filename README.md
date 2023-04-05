@@ -238,6 +238,8 @@ Deletes every message currently in queue.
 
 ## State flow
 
+!**OUTDATED**!
+
 ![State flow](state_flow.png)
 
 

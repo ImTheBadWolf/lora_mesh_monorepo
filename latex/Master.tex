@@ -562,7 +562,7 @@ Textová správa je správa, ktorá bude obsahovať textový reťazec. Rozšíre
 Obsah textových správ bude šifrovaný.
 
 Správa typu senzorové dáta bude určená na prenos dát z rôznych senzorov. Obsah správy bude taktiež vo forme textového 
-reťazca, ktorý bude obsahovať dáta z senzorov. Tento typ sprav avšak oproti obyčajnej textovej správe ponuka možnosť nastaviť 
+reťazca, ktorý bude obsahovať dáta zo senzorov. Tento typ správ avšak oproti obyčajnej textovej správe ponuka možnosť nastaviť 
 časový interval -- TTL, po ktorého uplynutí sa správa nebude ďalej šíriť sieťou. Obsah správy bude taktiež šifrovaný.
 
 Sprava žiadosť o traceroute sa bude používať len v krajných prípadoch, kedy by nás zaujímalo akou cestou sa správa preposiela sieťou. 
@@ -628,8 +628,8 @@ V položke typ správy bude číslo, ktoré definuje typ danej správy. Číslo 
 
 Správam môžme v hlavičke paketu určiť vyššiu prioritu. Na túto prioritu sa následne bude dbať pri spracovávaní správ a správy s vyššou prioritou budu odbavené prioritne.
 
-Dátové rámce sa budú líšiť na základe typu správy. V tabuľkách \ref{tab:textFrame}, \ref{tab:trReqFrame}, \ref{tab:trFrame}, \ref{tab:ackFrame}, \ref{tab:sensorFrame} 
-je uvedená štruktúra dátových rámcov pre jednotlivé typy správ. 
+Dátové rámce sa budú líšiť na základe typu správy. V tabuľkách \ref{tab:textFrame}, \ref{tab:trFrames} a \ref{tab:frames} 
+sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
 
 
 \begin{table}[!h]
@@ -645,66 +645,131 @@ je uvedená štruktúra dátových rámcov pre jednotlivé typy správ.
   \label{tab:textFrame}
 \end{table}
 
-\begin{table}[!h]
-	\centering
-  \caption{Štruktúra dátového rámcu pre správy typu žiadosť o traceroute.}
-  \begin{tabular}{|c|c|}
-    \toprule
-    1B & 1B \\
-    \midrule
-    Počet skokov & Pôvodný počet skokov \\
-    \midrule
-  \end{tabular}
-  \label{tab:trReqFrame}
+\begin{table}[h!]
+  \centering
+  \subfloat[\centering Správa typu žiadosť o traceroute.]{{
+    \begin{tabular}{|c|c|}
+      \toprule
+      1B & 1B \\
+      \midrule
+      Počet skokov & Pôvodný počet skokov \\
+      \midrule
+    \end{tabular}
+  }}
+  \qquad
+  \subfloat[\centering Správa typu odpoveď na traceroute.]{{
+    \begin{tabular}{|c|c|}
+      \toprule
+      1B & 0 -- 239B \\
+      \midrule
+      Počet skokov & Navštívené adresy \\
+      \midrule
+    \end{tabular}
+  }}
+  \caption{Štruktúra dátového rámcu pre správy typu traceroute.}
+  \label{tab:trFrames}
 \end{table}
 
-\begin{table}[!h]
-	\centering
-  \caption{Štruktúra dátového rámcu pre správy typu odpoveď na traceroute.}
-  \begin{tabular}{|c|c|}
-    \toprule
-    1B & 0 -- 239B \\
-    \midrule
-    Počet skokov & Navštívené adresy \\
-    \midrule
-  \end{tabular}
-  \label{tab:trFrame}
-\end{table}
+V niektorých dátových rámcoch môžme vidieť položku počet skokov. Do tejto položky bude pri vytvorení novej správy zapísaný maximálny počet skokov, ktoré môže správa vykonať 
+pri prenose sieťou. Každý uzol, predtým ako správu prepošle ďalej, zmenší počet skokov o jedna. Ak sa počet skokov dostane na nulu tak správu ďalej nespracovávame a nastaví sa jej 
+adekvátny stav.
 
-V dátových niektorých rámcoch môžme vidieť položku počet skokov. Do tejto položky bude pri vytvorení novej správy zapísaný maximálny počet skokov, ktoré môže správa vykonať 
-pri prenose sieťou. Každý uzol, predtým ako správu prepošle ďalej zmenší počet skokov o jedna. Ak sa počet skokov dostane na nulu tak správu ďalej nespracovávame.
-
-V rámcoch taktiež nájdeme položku pôvodný počet skokov. Do tejto položky bude taktiež pri vytvorení novej správy zapísaný maximálny počet skokov. Hodnota v tejto položke sa 
-ale už ďalej nemení. Bude slúžiť k tomu, aby prijímateľ dokázal zistiť, koľko preskokov správe zabralo, aby správa dorazila až k nemu. Túto informáciu bude možné 
+V rámcoch tiež nájdeme položku pôvodný počet skokov. Do tejto položky bude tak isto pri vytvorení novej správy zapísaný maximálny počet skokov. Hodnota v tejto položke sa 
+však už ďalej nemení. Bude slúžiť k tomu, aby prijímateľ dokázal zistiť, koľko preskokov správe zabralo, kym správa dorazila až k nemu. Túto informáciu bude možné 
 následne použiť na správne nastavenie maximálneho počtu skokov pre odoslanie potvrdzovacej správy, prípadne správy typu odpoveď na traceroute.
 
-\begin{table}[!h]
-	\centering
-  \caption{Štruktúra dátového rámcu pre potvrdzovacie ACK správy.}
-  \begin{tabular}{|c|c|}
-    \toprule
-    1B & 4B \\
-    \midrule
-    Počet skokov & ID potvrdzovanej správy \\
-    \midrule
-  \end{tabular}
-  \label{tab:ackFrame}
+\begin{table}[h!]
+  \centering
+  \subfloat[\centering Potvrdzovacie ACK správy.]{{
+    \begin{tabular}{|c|c|}
+      \toprule
+      1B & 4B \\
+      \midrule
+      Počet skokov & ID potvrdzovanej správy \\
+      \midrule
+    \end{tabular}
+  }}
+  \qquad
+  \subfloat[\centering Správy pre senzorové dáta.]{{
+    \begin{tabular}{|c|c|}
+      \toprule
+      2B & 0 -- 238B \\
+      \midrule
+      TTL & Senzorové dáta \\
+      \midrule
+    \end{tabular}
+  }}
+  \caption{Štruktúra dátového rámcu pre ACK a senzorové správy.}
+  \label{tab:frames}
 \end{table}
 
-\begin{table}[!h]
-	\centering
-  \caption{Štruktúra dátového rámcu pre senzorové dáta.}
-  \begin{tabular}{|c|c|}
-    \toprule
-    2B & 0 -- 238B \\
-    \midrule
-    TTL & Textové dáta \\
-    \midrule
-  \end{tabular}
-  \label{tab:sensorFrame}
-\end{table}
+V dátovom rámci, používanom na senzorové dáta, používame namiesto maximálneho počtu preskokov TTL. TTL vyjadruje časový interval, po ktorý môže byť daná správa 
+spracovávaná a preposielaná v sieti. Táto hodnota sa pri vytvorení správy nastaví na predom určený časový interval v sekundách. Každý uzol, ktorý bude danú správu preposielať, 
+si overí ako dlho už bola správa uložená u neho v pamäti a na základe toho odčíta hodnotu z TTL. Po odčítaní hodnoty z TTL, uzol správu ďalej prepošle.
 
-% \section{Funkcionalita protokolu}
+Pri odčítavaní TTL sa berie do úvahy iba čas, ktorý daná správa strávila na určitom uzle. Nebudeme brať do úvahy čas, ktorý správe zabralo preniesť sa rádiovými vlnami z jedného uzlu 
+na ďalší. A to z toho dôvodu, že nie sme schopní presne určiť, aku vzdialenosť prekonala vysielaná správa rádiovými vlnami. Existujúce spôsoby merania vzdialenosti, 
+ktorú správa prešla vzduchom, produkujú len hrubé odhady a su veľmi závisle od aktuálnych atmosférických podmienok. Preto sme sa rozhodli, že v našom riešení budeme 
+počítať iba s časom, ktorý správa strávila na určitom uzle. Mimo toho, keby sme počítali s maximálnou možnou vzdialenosťou medzi dvoma uzlami, ktorá sa pri LoRa 
+udáva okolo 15 kilometrov v otvorenom priestranstve, a rýchlosťou ktorou sa šíria rádiové vlny, ktorá je vo vákuu rovná rýchlosti svetla, tak by sme zistili, 
+že prenos správy medzi týmito dvoma uzlami by v ideálnom prípade trval okolo 50 mikrosekúnd. Táto hodnota je v porovnaní s časom, ktorý správa strávi na určitom uzle, 
+zanedbateľná.
+
+\section{Funkcionalita protokolu}
+Protokol bude fungovať tak, že novo prijatú správu si každý uzol u seba uloží. Následne sa uložené správy budu spracovávať v hlavnom cykle programu. 
+Každú správu, ktorú uzol príjme, sa bude následne snažiť znovu preposlať ďalej, pokiaľ teda nebola daná správa určená práve tomu uzlu.
+
+Uzol bude každú správu odosielať určitý počet krát a medzi každým odoslaním konkrétnej správy bude uzol čakať predom stanovený časový interval predtým ako ju môže znova odoslať.
+Toto viacnásobne odosielanie každej správy nám zabezpečí vyššiu spoľahlivosť v doručení. Keby sa každá správa preposielala iba jeden krát, mohlo by sa stať, že na ten prvý raz 
+by tuto vyslanú správu nezachytil žiaden ďalší uzol a správa by sa tak nedoručila ďalej.
+
+Medzi tým ako sa budu správy spracovávať a preposielať bude uzol zároveň počúvať na novo príchodzie správy od iných uzlov. Ak by náhodou uzol 
+prijal správu, ktorá už bola prijatá a uložená u neho tak to berie ako potvrdenie, že sa správa šíri ďalej v sieti. Uzol teda u seba danú správu zahodí a už ju 
+ďalej nebude posielať.
+
+Ak by došlo k situácií, kedy uzol jednu správu opakovane prepošle maximálny možný počet pokusov, a medzitým nepríjme danú správu preposlanú iným uzlom, 
+tak považujeme tuto situáciu ako neúspešne odoslanie správy. Správe sa nastaví adekvátny stav a nebude sa ďalej spracovávať.
+
+Každý uzol prijatej správe zníži hodnotu maximálneho počtu preskokov. Pokiaľ sa však jedná o správy typu senzorové dáta, tak sa neznižuje hodnota maximálneho počtu preskokov 
+ale hodnota TTL, a to pred každým znovu odoslaním danej správy. Pokiaľ by uzol prijal správu, ktorej hodnota maximálneho počtu skokov dosiahla nulu, tak túto 
+správu nebude u seba ani ukladať. Ak by sa počas spracovávania správ na uzle dostala hodnota TTL nejakej senzorovej správy na nulu, tak tuto situáciu tak isto považujeme 
+za neúspešne odoslanie správy. Správe sa nastaví adekvátny stav a nebude sa ďalej spracovávať.
+
+Obsah textových a senzorových správ bude vždy šifrovaný. Na šifrovanie bude použitý šifrovací algoritmus AES, ktorý šifruje bloky dát za pomoci kľúča.
+Jedna sa o symetrickú šifru, takže zašifrované dáta môžme rovnakým kľúčom neskôr dešifrovať. To ponúka možnosť aby si určitá skupina používateľov vytvorila vlastný 
+šifrovací kľúč a iba oni budú môcť dešifrovať správy, ktoré budú vytvorené za použitia tohto kľúča. Ostatní účastníci siete obsah správ nebudú schopní dešifrovať.
+
+\section{Implementácia protokolu}
+Hlavnou súčasťou nami navrhnutého protokolu bude list správ. Do tohto listu sa budú pridávať novo vytvorené, 
+prípadne novo prijaté správy. Následne sa bude v hlavnom cykle programu prechádzať tento list správ a každá správa sa bude spracovávať.
+
+Na to aby sme správy mohli ukladať do tohoto listu, bolo potrebné vytvoriť istú dátovú štruktúru, do ktorej sa budú ukladať jednotlivé správy.
+Správy v liste budu so sebou držať rôzne informácie. Okrem tých základných informácií o správe akými su napríklad jej identifikátor, odosielateľ a prijímateľ, obsah správy atď., 
+bolo potrebné držať spolu so správou aj dodatočné informácie, ktoré boli potrebné na jej následne spracovávanie. Do týchto dodatočných informácií patri napríklad 
+čas, kedy bola správa naposledy spracovávaná aktuálnym uzlom. Táto informácia sa využíva pri kontrole či uz nadišiel čas správu znovu preposlať ale aj 
+na to aby sme vedeli koľko času treba odčítať z hodnoty TTL pri senzorových správach.
+
+Pri prechádzaní listu správ sa pri každej správe skontroluje jej stav a to či časový limit už dosiahol požadovanej hodnoty. Opakované znovu odosielanie 
+správy, vykonávame iba pri správach v stave nová a odoslaná. Spomínali sme, že je možne určiť správe vyššiu prioritu. Tato vyššia priorita zabezpečí to, že sa pri správe, 
+ktorá má nastavenú vyššiu prioritu, bude vykonávať opakované znovu odosielanie správy, aj keď jej časový limit ešte nebol dosiahnutý. Tým dosiahneme toho, že správa sa 
+skôr odošle a do destinácie by mala v ideálnom prípade doraziť skôr ako správa s nižšou prioritou.
+
+Spomínali sme, že môže dôjsť k problému zahltenia siete, keby každý uzol v sieti preposielal všetky správy, ktoré príjme. Spôsob akým sme vzniku tohto problému zabránili 
+je práve to, že keď uzol príjme správu, ktorú už ma u seba uloženú, tak u seba tuto správu označí ako zmazanú ( stav zmazaná ) a nebude ju ďalej posielať. 
+Správy v zmazanom stave niesu ale ihneď vymazané z pamäti. Miesto toho sa im nastavuje časový interval a až po tom čo uplynie tento interval su správy skutočne vymazané z pamäti. 
+Vďaka tomu, že si držíme v pamäti správy aj keď su považované za zmazané, môžme overiť či novo prijatá správa nie je náhodou jedná z tých zmazaných. Ak áno tak novú 
+správu nebudeme znovu ukladať. K tejto situácii môže bežne dochádzať a neošetrenie tohto problému by mohlo viesť k zacykleniu, kedy by sa jedna a ta istá správa neustále 
+preposielala medzi dvoma uzlami až kým by jej nedošiel limit skokov prípadne TTL.
+
+Aby bolo v mesh sieti dosiahnuté čo najlepšieho dosahu, je nutné nejak zabezpečiť, aby sa odosielané správy dostali k čo najvzdialenejším uzlom a aby tieto 
+najvzdialenejšie uzly boli tie ktoré propagujú prenášanú správu ďalej. To zabezpečíme tak, že každej novo prijatej správe sa nastaví prvotné časové oneskorenie na základe 
+toho s akou hodnotou SNR bola daná správa prijatá. Hodnota SNR vyjadruje pomer signálu k šumu. Čím je hodnota SNR vyššia, tým je signál silnejší oproti okolitému šumu.
+Vďaka tomu, dokážeme približne odhadnúť, ktorý uzol je vzdialenejší. Uzly ktoré su vzdialenejšie budu mať nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
+To povedie k tomu, že vzdialenejšie uzly odvysielajú správu skôr, ako uzly ktoré su bližšie. Ostatné uzly toto vysielanie príjmu, a u seba označia danú správu ako zmazanú, 
+keďže už nie je potrebné aby ju oni preposielali.
+
+
+
 % dlhy popis funkcionality protokolu, ako funguje, priebeh odoslania spravy, priebeh sirenia spravy cez ostatne node,
 % vysvetlenie statov sprav (sent, rebroadcasted, acked atd)
 % vysvetlenie message queue, timeouty, retry atd
@@ -739,6 +804,13 @@ následne použiť na správne nastavenie maximálneho počtu skokov pre odoslan
 % meranie casu dorucenia spravy pri rovnakych podmienkach, parametroch atd
 
 % Ak bude cas rozsirit armachat o moj protokol. Upravit armachat shitcode bude ale casovo narocne a vo vysledku pride armachat o moznost pouzit ho s meshtasticom.
+
+% \section{Problemy, limitacie}
+% tu popisat to cez zariadenia maju malo pamate, padalo to na nedostatok pamati ked zariadenie prijalo vacsie mnzostvo sprav, tak sa spravili limity na dlzku queueu
+% a spravy sa potom mazu. popisat ze to moze viest ku stratam sprav pri rychlom spamovani spravami
+
+% dalej popisat obmedzenia rfm libky, wifi libky atd. daky popis uz je v readme na githube.
+
 
 % Seznam literatury
 \printbibliography[title={Literatura}, heading=bibintoc]

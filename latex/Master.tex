@@ -1,5 +1,4 @@
 \documentclass[slovak,master]{diploma}
-
 \usepackage{subfig}
 \usepackage[autostyle=true,czech=quotes]{csquotes} % korektni sazba uvozovek, podpora pro balik biblatex
 \usepackage[backend=biber, style=iso-numeric, alldates=iso]{biblatex} % bibliografie
@@ -872,21 +871,44 @@ V informačnej správe môžme vidieť, že v dobe vyhotovenia fotografie sa aku
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.6\textwidth]{Figures/armRec2.jpg}
+	\includegraphics[width=0.5\textwidth]{Figures/armRec2.jpg}
 	\caption{Zariadenie Armachat prijalo spravu s jedným preskokom}
 	\label{fig:armRec2}
 \end{figure}
 
 Následne sme vyskúšali, pri rovnakom rozmiestnení zariadení, odoslať zo zariadenia 0x0002 žiadosť o traceroute na zariadenie 0xA1BC. Na obrázku \ref{fig:armTraceroute} môžme 
 vidieť, ako zariadenie 0x0002 prijalo odpoveď na žiadosť o traceroute. V obsahu správy vidíme zoznam adries, cez ktoré správa putovala.
+
+V tabuľke \ref{tab:packet} môžme vidieť vygenerovaný paket vo forme bajtov, ktorý bol odoslaný zo zariadenia 0xA1BC na zariadenie 0x0002. Obsah správy bol v tomto prípade, 
+textový reťazec \uv{Ahoj}. V prvých 12 bajtoch, vidíme hlavičku paketu. V ďalších 6 vidíme počet preskokov, pôvodný počet preskokov a šifrovaný obsah správy.
+
 \begin{figure}[!h]
 	\centering
-	\includegraphics[width=0.6\textwidth]{Figures/armTraceroute.jpg}
+	\includegraphics[width=0.7\textwidth]{Figures/armTraceroute.jpg}
 	\caption{Zariadenie Armachat prijalo traceroute správu}
 	\label{fig:armTraceroute}
 \end{figure}
 
+\begin{table}[!h]
+  \small
+  \setlength\tabcolsep{2pt}
+	\centering
+  \caption{Ukážka bajtov odoslaného paketu}
+  \begin{tabular}{ c c c c c c c c c c c c | c c | c c c c }
+    0x00 & 0x02 & 0xA1 & 0xBC & 0xEF & 0x42 & 0x5D & 0xC2 & 0xF2 & 0x64 & 0x01 & 0x00 & 0x02 & 0x03 & 0xA4 & 0x4A & 0x33 & 0x56 \\
+    \midrule
+    \multicolumn{2}{c |}{\rotatebox[origin=c]{ 90}{Destinácia}} & \multicolumn{2}{c |}{\rotatebox[origin=c]{ 90}{Odosielateľ}} &
+    \multicolumn{4}{c |}{ID správy} & \multicolumn{2}{c |}{\rotatebox[origin=c]{ 90}{Kontrólny súčet}} &
+    \multicolumn{1}{c |}{\rotatebox[origin=c]{ 90}{Typ správy}} & \multicolumn{1}{c |}{\rotatebox[origin=c]{ 90}{Priorita správy}} &
+    \multicolumn{1}{c|}{\rotatebox[origin=c]{ 90}{Max hop}} & \multicolumn{1}{c|}{\rotatebox[origin=c]{ 90}{Initial max hop}} & \multicolumn{4}{c}{Šifrovaný obsah správy}\\
+  \end{tabular}
+  \label{tab:packet}
+\end{table}
+
 \newpage
+
+
+
 \section{Implementácia API pre webové rozhranie}
 TODO popisat apicko, ake su tam routy, co robia atd
 \section{Implementácia webového rozhrania}

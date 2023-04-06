@@ -740,6 +740,7 @@ Jedna sa o symetrickú šifru, takže zašifrované dáta môžme rovnakým kľ�
 šifrovací kľúč a iba oni budú môcť dešifrovať správy, ktoré budú vytvorené za použitia tohto kľúča. Ostatní účastníci siete obsah správ nebudú schopní dešifrovať.
 
 \section{Implementácia protokolu}
+%TODO tieto veci trsoku upravit, a pripadne presunut o kapitolu vyssie lebo to je skor popius ako implementacia
 Hlavnou súčasťou nami navrhnutého protokolu bude list správ. Do tohto listu sa budú pridávať novo vytvorené, 
 prípadne novo prijaté správy. Následne sa bude v hlavnom cykle programu prechádzať tento list správ a každá správa sa bude spracovávať.
 
@@ -767,6 +768,129 @@ toho s akou hodnotou SNR bola daná správa prijatá. Hodnota SNR vyjadruje pome
 Vďaka tomu, dokážeme približne odhadnúť, ktorý uzol je vzdialenejší. Uzly ktoré su vzdialenejšie budu mať nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
 To povedie k tomu, že vzdialenejšie uzly odvysielajú správu skôr, ako uzly ktoré su bližšie. Ostatné uzly toto vysielanie príjmu, a u seba označia danú správu ako zmazanú, 
 keďže už nie je potrebné aby ju oni preposielali.
+
+Ďalší z potrebných aspektov správneho fungovania nášho protokolu je zabezpečiť aby nedošlo k situácií kedy by dva alebo viac uzlov v sieti začalo vysielať signály v rovnakom čase.
+K tomu sme využili takzvaného prístupu listen before talk, kedy sa uzol predtým ako začne vysielať presvedčí, či náhodou práve nevysiela niekto iný. Ak áno tak tak sa vyslanie správy pozdrží 
+a skúsi sa odoslať neskôr.
+
+Rozhodli sme sa implementáciu protokolu začať na zariadeniach Armachat. Keďže sme zatiaľ nemali vytvorené žiadne užívateľské rozhranie, tak veľké farebné displeje na zariadeniach Armachat 
+boli vhodné na zobrazovanie informácií o prebiehajúcich procesoch a komunikácií v sieti. Na programovanie zariadení Armachat sa používa CircuitPython, ktorý ma ale rovnakú syntax ako 
+programovací jazyk Python.
+
+Ako prvé bolo potrebné vytvoriť vhodnú dátovú štruktúru, ktorá by uchovávala v sebe správu. K tomu sme vytvorili triedu Message. Trieda obsahuje všetky potrebné informácie o správe. 
+Taktiež obsahuje metódy na vytváranie rôznych typov a obsahov správ. Tieto metódy budú slúžiť na prvotné vytvorenie nových správ, na autorskom uzle. Okrem týchto metód je 
+ale potrebné mať aj metódy, ktoré dokážu z prijatých dát vytvoriť správu. Pri prijatí nového paketu v LoRa, dostaneme dáta vo forme bajtového poľa. Tieto dáta sú potom predané 
+do metódy, ktorá z nich vytvorí správu.
+
+Po implementácií triedy Message, sme teda boli schopní vytvoriť novu správu alebo prijať bajtové pole z LoRa, z ktorého sa následne poskladala správa. Na to aby sme 
+mohli správy ukladať do listu bolo ale potrebné vytvoriť ešte akýsi kontajner, ktorý by v sebe uchovával správu plus dodatočne informácie potrebne k ďalšiemu spracovávaniu.
+K tomu sme vytvorili triedu MessageQueueItem. Tá v sebe drží inštanciu triedy Message, počítadlo opakovaných odoslaní, časový odpočet, časové razítko, ktoré zachytáva čas, kedy bola 
+správa naposledy spracovávaná, aktuálny stav správy a ďalšie užitočné informácie. Okrem toho obsahuje trieda metódy, ktoré budu využívane pri spracovávaní správ. Sem patria metódy na zníženie maximálneho počtu preskokov alebo 
+TTL, metóda na zmenu stavu správy, metóda na aktualizovanie časového razítka, ktorá časové razítko nastaví na aktuálny čas a mnoho ďalších.
+
+Po implementácii triedy MessageQueueItem sme mohli začať implementovať samotný proces funkcionality nášho protokolu. List správ sme realizovali ako slovník, 
+kde kľúčom je identifikátor správy, a hodnota pod daným kľúčom je inštancia triedy MessageQueueItem. To nám umožní rýchlo vyhľadávať správy na základe jej identifikátora. 
+Tento slovník sme pomenovali message queue.
+
+Hlavný proces protokolu bude pozostávať z cyklu, v ktorom sa najskôr skontroluje či sme náhodou neprijali nový LoRa paket a následne sa prejdú všetky správy z message queue a ak je to 
+potrebné tak sa spracujú. K tomu vznikli dve hlavné funkcie. Funkcia receive(), ktorá skontroluje či sme neprijali nový LoRa paket a funkcia tick(), v ktorej sa prejdú všetky správy.
+
+Funkcia receive() prečíta novo prijatý paket z LoRa a následne overí, či daný paket spĺňa dĺžku aspoň 12 bajtov. Vychádza to z toho, že všetky správy nášho protokolu obsahujú predom definovanú 
+hlavičku paketu (viď. Tab. \ref{tab:packetHeader} ), ktorá ma veľkosť 12 bajtov. Ak je paket kratší ako 12 bajtov, môžme s istotou povedať, že nejde o správu nášho protokolu a teda ho nemusíme ďalej spracovávať. Po kontrole dĺžky paketu, následuje overenie 
+kontrolného súčtu. Funkcia zoberie prvých 8 bajtov paketu a vypočíta sa z nich kontrolný súčet. Ak sa vypočítaný kontrolný súčet zhoduje s kontrolným súčtom, ktorý je v pakete, tak správu považujeme za 
+súčasť nášho protokolu. Na výpočet kontrolného súčtu bola použitá funkcia cyklicky redundantného súčtu typu CRC-16/CCITT-FALSE. Overovanie, či paket prisluhuje do nášho protokolu je pomerné dôležité, 
+pretože na rovnakých LoRa parametroch môžu byť vysielané aj pakety iných protokolov a tieto pakety by sa nam nepodarilo správne spracovať keďže by nespĺňali našu štruktúru paketu.
+
+Potom čo sa vo funkcii receive() overí, že paket spĺňa naše požiadavky, bude z neho vytvorená nova inštancia triedy Message. Využijeme k tomu metódu triedy Message určenú na vytvorenie správy z 
+poľa bajtov. Pri novo prijatej správe nás zaujíma či je správa určená nám. Ak je správa určená nám, je potrebné zistiť o aky typ správy sa jedna. Pokiaľ sme prijali správu typu ACK, tak je 
+nutné vyhľadať v message queue korešpondujúcu spravu a zmeniť jej stav na ACK. Pokiaľ sa nejedná o ACK správu, následuje kontrola, či sa daná správa už nenachádza v message queue a ak nie tak je tam pridaná.
+
+Je dôležité, aby uzol po prijatí správy, odoslal naspäť ACK správu. A to aj v prípade, že sa nejedná o typ správy, ktorý vyžaduje potvrdenie o doručení. Dôvodom je, že ak by 
+uzol neposlal naspäť ACK správu, tak by predošlý uzol pokračoval v opakovanom vysielaní správy, a tieto vysielania by zbytočne obsadzovali prenos v sieti. Uzol teda po prijatí vyšle ACK správu. 
+V prípade, že prijatá správa nevyžadovala potvrdenie o doručení, tak môže uzol ACK správe nastaviť maximálny počet preskokov na 0. 
+Tým pádom sa správa neposunie ďalej v sieti ako k najbližšiemu uzlu. Ak by sa ale jednalo o správu vyžadujúcu potvrdenie o doručení, tak sa maximálny počet preskokov nastaví na 
+hodnotu, ktorá bola uložená v prijatej správe pod položkou pôvodný počet skokov. 
+Tym zaručíme, že správa bude mať dostatočný počet dostupných skokov aby sa dostala naspäť k uzlu, ktorý pôvodnú správu poslal.
+
+V prípadnom scenári, že by prijatá správa nebola určená nám, skontrolujeme či sa rovnaká správa už nenachádza v message queue, ak nie tak ju tam pridáme za predpokladu, že má ešte dostupný 
+nejaký počet skokov alebo TTL. Správe zároveň nastavíme prvotné časové pozdržanie na základe hodnoty SNR, s ktorou sme ju prijali.
+
+V opačnom prípade, kedy sa sprava už nachádza v message queue, je nutné znova vykonať sériu overení a na základe nich zmeniť stav správy.
+Prvé z overení je, či daná správa bola vytvorená nami. To či bola vytvorená nami, zistime z adresy odosielateľa správy. Adresa sa bude zhodovať s tou našou ak bola vytvorená nami. 
+V tom prípade nastala situácia kedy našu správu preposlal nejaký iny uzol. Môžme teda správe zmeniť stav na hotovo, prípadne na stav preposlaná ak sa jednalo o správu s potrebným 
+potvrdením o doručení.
+
+Ak by sa ukázalo, že správa nebola vytvorená nami ale niekým iným, tak sa správa presunie do stavu zmazaná. Do tohto stavu sa ale presunie iba v prípade overenia, že je hodnota počtu preskokov alebo TTL 
+z prijatej správy nižšia ako hodnota správy v message queue. %TODO tu mozno vysvetlit preco sa to tak robi
+
+Po dokončení funkcie receive(), následuje funkcia tick(). V tejto funkcii sa postupne prechádza všetkými spravami z message queue. Pri každej správe sa pozrieme na jej stav 
+a ak je v stave preposlaná alebo zmazaná tak sa následne skontroluje, či jej už nevypršal časový limit. Pokiaľ limit vypršal, tak sa správa 
+skutočne vymaže z message queue ak bola v stave zmazaná. Ak bola v stave preposlaná, tak sa jej stav zmení na nepotvrdená -- NAK.
+
+V prípade, že by bol stav správy nová alebo odoslaná, tak sa pokračuje v jej spracovávaní, ktoré pozostáva z následujúcich krokov.
+Ako prvé sa overí, či už nadišiel čas danú správu spracovať. To zistíme tak, že sa pozrieme či správe už vypršal časový limit. Ak áno, znamená to, že správa je pripravená na spracovávanie 
+a môžme pokračovať ďalej. Ak nie tak sa daná správa preskočí a prejdeme na ďalšiu správu.
+
+Ak nadišiel čas správu spracovať, tak skontrolujeme, či ma ešte dostupné nejaké pokusy o odoslanie a v prípade senzorových správ aj či má ešte dostupný TTL.
+Ak sa stane, že správa už vyčerpala všetky pokusy o odoslanie alebo jej TTL došlo na nulu, tak sa správa presunie do stavu neúspešná alebo zmazaná ak to nebola 
+správa vytvorená nami. Keby správe ešte zostali nejaké pokusy o odoslanie, tak správu odošleme cez LoRa. Keď sa jednalo o správu typu senzorové dáta, tak sa správe pred 
+odoslaním zmenší TTL.
+
+Po odoslaní správe aktualizujeme aktuálne časové razítko, znížime počítadlo dostupných pokusov o odoslanie a nastavíme nový časový limit pre správu. Tento 
+limit bude závisieť od konfiguračnej premennej, ktorá určuje, ako často sa ma správa znovu odosielať. Pokiaľ bola správa pred odoslaním v stave nová, tak jej stav aktualizujeme 
+na odoslaná.
+
+Pri pokuse o odoslanie môže dôjsť k situácií, kedy práve niekto iný vysiela signál a tak je nutné pozdržanie odoslania. To realizujeme tak, že správe nastavíme 
+časové pozdržanie na hodnotu konfiguračnej premennej a aktualizujeme jej časové razítko. Výsledkom bude, že táto správa sa bude znovu pokúšať o odoslanie až po uplynutí 
+časového intervalu.
+
+Po dokončení implementácie hlavnej funkcionality sme ju mohli otestovať. Na zariadeniach Armachat sme vytvorili jednoduché rozhranie, 
+ktoré zobrazuje na displeji informácie o novo prijatej správe. Taktiež môžme využiť klávesnicu zariadenia, na napísanie vlastnej správy a jej odoslanie.
+Ako toto rozhranie vyzeralo, je možné vidieť na obrázku \ref{fig:armRec}.
+Na obrázku môžme vidieť, že zariadenia prijalo správu od odosielateľa s adresou 0xA1BC, ktoré bolo v tomto prípade druhé Armachat zariadenie.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\textwidth]{Figures/armRec.jpg}
+	\caption{Rozhranie zariadenia Armachat}
+	\label{fig:armRec}
+\end{figure}
+\newpage
+Okrem obsahu správy, môžme vidieť hodnoty SNR a RSSI, s ktorými zariadenie správu prijalo, hodnotu max hop, ktorá predstavuje počet preskokov a hodnotu initial max hop, 
+ktorá predstavuje pôvodný maximálny počet preskokov. Na základe rovnosti týchto dvoch hodnôt, môžme usúdiť, že správa prešla medzi dvoma zariadeniami bez toho aby prešla 
+cez nejaké iné tretie zariadenie. Na spodku displeja môžme vidieť identifikátor prijatej správy.
+
+Na ďalšom obrázku \ref{fig:armRec2} môžme vidieť, že rozdiel medzi hodnotami max hop a initial max hop je 1. Indikuje to, že správa spravila preskok cez ďalšie zariadenie predtým ako 
+bola doručená na cieľové zariadenie. Tento test sme vykonali tak, že sme tri zariadenia rozmiestnili s určitou vzdialenosťou medzi nimi, tak aby sme docielili preskok cez jedno zariadenie. 
+Zariadenia mali nastavené adresy 0x0001, 0x0002 a 0xA1BC. Správa bola odoslaná zo zariadenia 0xA1BC na zariadenie 0x0001.
+
+Taktiež si môžme všimnúť zmenu v podobe skrátenia názvov atribútov max hop a initial max hop, z dôvodu, že sa na displeji nezmestili do jedného riadku.
+Okrem toho je na obrázku vidieť informačnú správu v podobe žltého textu na samom spodku displeja. V tejto informačnej správe sa zobrazujú 
+rôzne informačné hlášky počas behu programu. Zariadenie 0x0002 prijalo správu od zariadenia 0xA1BC a následne vytvorilo ACK správu, ktorej ID bolo 1787352650.
+V informačnej správe môžme vidieť, že v dobe vyhotovenia fotografie sa akurát táto ACK správa pridávala do message queue.
+\newpage
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\textwidth]{Figures/armRec2.jpg}
+	\caption{Zariadenie Armachat prijalo spravu s jedným preskokom}
+	\label{fig:armRec2}
+\end{figure}
+
+Následne sme vyskúšali, pri rovnakom rozmiestnení zariadení, odoslať zo zariadenia 0x0002 žiadosť o traceroute na zariadenie 0xA1BC. Na obrázku \ref{fig:armTraceroute} môžme 
+vidieť, ako zariadenie 0x0002 prijalo odpoveď na žiadosť o traceroute. V obsahu správy vidíme zoznam adries, cez ktoré správa putovala.
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.6\textwidth]{Figures/armTraceroute.jpg}
+	\caption{Zariadenie Armachat prijalo traceroute správu}
+	\label{fig:armTraceroute}
+\end{figure}
+
+\newpage
+\section{Implementácia API pre webové rozhranie}
+TODO popisat apicko, ake su tam routy, co robia atd
+\section{Implementácia webového rozhrania}
+
 
 
 

@@ -168,13 +168,13 @@ while True:
         screen[6].text = f'From: 0x{msg_instance.get_sender():04x}, ttl: {msg_instance.get_ttl()}, sensor_data'
         screen[7].text = f'{msg_instance.get_sensor_data().decode("utf-8")}'
       elif msg_instance.get_message_type() == MessageType.TRACEROUTE_REQUEST:
-        screen[6].text = f'From: 0x{msg_instance.get_sender():04x}, maxhop: {msg_instance.get_maxHop()}, initial maxhop: {msg_instance.get_initialMaxHop()}'
+        screen[6].text = f'From: 0x{msg_instance.get_sender():04x}, mhop: {msg_instance.get_maxHop()}, i-hop: {msg_instance.get_initialMaxHop()}'
         screen[7].text = "Traceroute request received"
       elif msg_instance.get_message_type() == MessageType.TRACEROUTE:
         screen[6].text = f'From: 0x{msg_instance.get_sender():04x}, maxhop: {msg_instance.get_maxHop()}'
         screen[7].text = f'Traceroute: {msg_instance.get_text_message().decode("utf-8")}'
       else:
-        screen[6].text = f'From: 0x{msg_instance.get_sender():04x}, maxhop: {msg_instance.get_maxHop()}, initial maxhop: {msg_instance.get_initialMaxHop()}'
+        screen[6].text = f'From: 0x{msg_instance.get_sender():04x}, mHop: {msg_instance.get_maxHop()}, i-hop: {msg_instance.get_initialMaxHop()}'
         screen[7].text = f'{msg_instance.get_text_message().decode("utf-8")}'
       screen[15].text = f'Msg ID:{msg_instance.get_message_id()}'
 

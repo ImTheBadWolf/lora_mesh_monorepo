@@ -1,5 +1,7 @@
 \documentclass[slovak,master]{diploma}
 \usepackage{subfig}
+\usepackage{wrapfig}
+\usepackage{listings}
 \usepackage[autostyle=true,czech=quotes]{csquotes} % korektni sazba uvozovek, podpora pro balik biblatex
 \usepackage[backend=biber, style=iso-numeric, alldates=iso]{biblatex} % bibliografie
 
@@ -907,55 +909,238 @@ textový reťazec \uv{Ahoj}. V prvých 12 bajtoch, vidíme hlavičku paketu. V �
 
 \newpage
 
-
-
 \section{Implementácia API pre webové rozhranie}
-TODO popisat apicko, ake su tam routy, co robia atd
+Pri používaní nášho protokolu má používateľ možnosť využiť webové rozhranie, cez ktoré môže ovládať zariadenie a 
+pracovať s naším LoRa protokolom. Používateľ ma možnosť vytvárať alebo prijímať nove správy, ktoré sa zobrazujú na webovej stránke.
+Okrem toho môže cez webové rozhranie konfigurovať rôzne nastavenia týkajúce sa nášho protokolu, ako napríklad adresu zariadenia 
+alebo nastavenie LoRa parametrov.
+
+K tomu aby bolo možné cez webové rozhranie ovládať zariadenie a protokol, je nutné najskôr implementovať nejaké API. 
+Cez API budeme komunikovať so zariadením z webového rozhrania. Toto API bude bežať na serveri, ktorý bude bežať na zariadení 
+spolu s naším protokolom. API bude realizované prostredníctvom klasických HTTP požiadavkov.
+
+Najpodstatnejšími časťami API sú funkcie, ktoré nám umožnia prijímať alebo odosielať správy. K tomu vznikli dve 
+API prístupové body -- routy \uv{/api/messages} a \uv{/api/send text message}.
+
+Prvá routa slúži na získanie správ, ktoré boli prijaté na zariadení. Je volaná prostredníctvom HTTP GET požiadavku a 
+vracia zoznam obsahujúci entity jednotlivých správ. Každá správa je reprezentovaná JSON objektom, ktorý obsahuje 
+iba potrebné informácie o správe, k tomu aby bolo možné zobrazovať správy na webovej stránke. Štruktúru tohto JSON 
+objektu môžme vidieť na ukážke \ref{fig:messageObj}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.9\textwidth]{Figures/msgObject.png}
+	\caption{Štruktúra JSON objektu reprezentujúceho správu}
+	\label{fig:messageObj}
+\end{figure}
+
+Druhá routa slúži na odoslanie správy prostredníctvom HTTP POST požiadavku. Táto routa prijíma JSON objekt, ktorý reprezentuje novú správu.
+V JSON objekte musia byť uvedené všetky potrebné informácie o správe, ktoré sú potrebné na jej správne odoslanie. 
+Sú nimi destinácia, maximálny počet skokov, priorita, obsah správy a príznak, či chceme potvrdenie o doručení. 
+API po prijatí požiadavku na vytvorenie novej správy validuje vstupné údaje a ak sú všetky údaje v poriadku, tak vytvorí novú správu. V 
+opačnom prípade vráti chybovú hlášku. Z dôvodu, limitácie LoRa paketov na maximálnu dĺžku 256 bajtov, je potrebné overiť či textová správa 
+nie je príliš dlhá a prípadne ju orezať na maximálnu povolenú dĺžku.
+
+Maximálna povolená dĺžka v tomto prípade nie je 256 bajtov ale len 238. Toto je výsledkom toho, 
+že použitá LoRa knižnica povoľuje maximálnu dĺžku paketu 252 bajtov z dôvodu kompatibility s inými knižnicami.
+Pri našom protokole je okrem toho v každom LoRa pakete potrebné nejaké miesto ešte rezervovať pre hlavičku paketu a informácie o počte skokov.
+Z toho nám ostáva maximálna dĺžka správy 238 bajtov.
+
+Ďalším potrebným API prístupovým bodom je routa na získavanie a zmenu aktuálnej konfigurácie. 
+Vznikla na to routa \uv{/api/config}. Táto routa môže byť volaná prostredníctvom HTTP GET požiadavku, kedy vráti aktuálnu konfiguráciu 
+alebo prostredníctvom HTTP PUT požiadavku, kedy nastaví novú konfiguráciu z poskytnutého JSON objektu, zachytávajúceho nové nastavenia.
+
+Používateľ má možnosť nastaviť rôzne parametre, ktoré ovplyvňujú správanie protokolu. Nastavené hodnoty parametrov sa budú ukladať do 
+JSON súboru na zariadení. Tieto nastavenia si bližšie popíšeme v časti implementácie 
+konfiguračného rozhrania.
+
+
+\section{Návrh webového rozhrania}
+Pred samotnou implementáciou webového rozhrania bolo nutné vytvoriť nejaký návrh, 
+ako bude webové rozhranie vyzerať. Na vytvorenie návrhov webových stránok bol použitý dizajnérsky nástroj Figma.
+
+Bolo potrebné navrhnúť dokopy štyri web stránky, kde prvou bude úvodná stránka na ktorej používateľ uvidí prijaté a odoslané správy. 
+Taktiež tam bude mať možnosť odoslať novú správu.
+
+Rozhodli sme sa pridať aj možnosť ukladať si kontakty do adresára, ktorý bude používateľovi umožňovať vidieť namiesto 
+hexadecimálnych adries v správach, názov kontaktu. Tieto kontaktné adresáre budu rozdelené pre kontakty na iných používateľov a kontakty 
+ne senzorové uzly. Z toho dôvodu boli potrebne dve ďalšie stránky, kde používateľ bude môcť spravovať svoje kontakty.
+
+Poslednou stránkou bola stránka na konfiguračné rozhranie. Táto stránka bude obsahovať všetky možnosti, ktoré používateľ bude môcť nastavovať.
+
+Výsledne návrhy môžeme vidieť na následujúcich obrázkoch. Stránky pre správu kontaktov ( Obr. \ref{fig:figma2} ) na používateľov a kontaktov na senzorové uzly budú vyzerať 
+rovnako.
+
+Na obrázku \ref{fig:figmaHome} zachytávajúcom návrh úvodnej stránky si môžme všimnúť, že niektoré adresy sú zobrazené ako mená z kontaktov.
+
+Pri tvorbe návrhu stránky na konfiguráciu nastavení ( Obr. \ref{fig:figma2} ), nebolo ešte známe, aké všetky nastavenia 
+bude môcť používateľ meniť a tak sú tam iba nastavenia adresy, šifrovacieho kľúča a LoRa parametrov.
+\newpage
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Figures/figmaHome.png}
+  \caption{Návrh úvodnej stránky}
+  \label{fig:figmaHome}
+\end{figure}
+
+Keďže sme pridali novú funkciu v podobe pridávania kontaktov, bolo potrebné vytvoriť novú API routu, ktorá bude 
+vraciať zoznam kontaktov. Okrem toho bola vytvorená ďalšia routa, slúžiaca na pridávanie nových alebo mazanie starých kontaktov. 
+Ako databázu kontaktov sme použili JSON súbor, do ktorého sa budu kontakty ukladať priamo na zariadení.
+
+\begin{figure}[h!]
+  \centering
+  \subfloat[\centering Kontakty]{{\includegraphics[width=0.47\textwidth]{Figures/figmaContacts.png} }}
+  \qquad
+  \subfloat[\centering Nastavenia]{{\includegraphics[width=0.45\textwidth]{Figures/figmaSettings.png} }}
+  \caption{Návrhy stránok kontaktov a nastavení}
+  \label{fig:figma2}
+\end{figure}
+
 \section{Implementácia webového rozhrania}
+Na implementáciu webového rozhrania bola použitá kombinácia HTML, CSS a JavaScriptu. Na komunikáciu s API bol použitý fetch API, 
+ktorý je súčasťou JavaScriptu. Ako také volanie API za použitia fetch API môžeme vidieť v nasledujúcom kóde.
+
+\begin{lstlisting}[language=Python, label={lst:fetch}]
+  const newMessage = {
+    "destination":"0xA1F4",
+    "message":"Ahoj",
+    "max_hop":"3",
+    "priority":"0",
+    "wack":false
+  };
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newMessage)
+  };
+  fetch('/api/send_text_message', requestOptions)
+\end{lstlisting}
+
+Webové stránky sme implementovali podľa pripravených návrhov. Avšak pri implementácii sme sa rozhodli, že 
+niektoré veci trochu pozmeníme a pridáme. Ukážku finálnej implementácie webového rozhrania bude možné vidieť v časti testovania.
+
+Jednou z hlavných zmien bolo pridanie statusu, ku jednotlivým správam. 
+Tento status vo forme ikonky sa bude zobrazovať pri nami odoslaných správach a bude indikovať, či bola správa prijatá alebo nie. 
+Na obrázku \ref{fig:messageStates} vidíme ukážku, ako tieto jednotlive stavy budú vyzerať. Môžme si tiež všimnúť, že nad správu 
+pribudla dodatočná informácia o použitých LoRa parametroch. Taktiež môžme vidieť nove tlačítko, ktoré sa zobrazuje pri 
+neúspešných správach.
+
+\begin{figure}[h!]
+  \centering
+  \subfloat{{
+    \subfloat[\centering Správa bez potvrdenia o doručení]{{\includegraphics[width=0.4\textwidth]{Figures/nonWackMsg.png} }}
+    \subfloat[\centering Správa čakajúca na potvrdenie o doručení]{{\includegraphics[width=0.4\textwidth]{Figures/ackWaiting.png} }}
+  }}
+  \newline
+  \subfloat{{
+    \subfloat[\centering Správa prijala potvrdenie o doručení]{{\includegraphics[width=0.45\textwidth]{Figures/ackDone.png} }}
+    \subfloat[\centering Správa neprijala potvrdenie o doručení]{{\includegraphics[width=0.5\textwidth]{Figures/ackFailed.png} }}
+  }}
+  \caption{Informačná ikonka pri správach}
+  \label{fig:messageStates}
+\end{figure}
+
+Tlačítko zobrazujúce sa pri neúspešných správach, pridáva možnosť neúspešnú správu skúsiť znovu odoslať. K tomu aby to fungovalo, 
+bolo potrebné pridať ďalšiu API routu. Táto routa príjme ako parameter ID správy, ktorú chceme odoslať znovu a správa sa znova odošle.
+
+Stránku nastavení sme voči návrhu rozšírili o ďalšie nastavenia a spolu s tym sme rozšírili aj popis jednotlivých nastavení a čo robia.
+Obmedzili sme možnosť nastavenia vlastnej adresy na jednorázové nastavenie. Týmto sa snažíme zamedziť tomu, aby si používateľ kedykoľvek 
+upravoval svoju adresu a tým sa mohol vydávať za iného používateľa. Finálnu stránku nastavení vidíme na obrázku \ref{fig:webConfig}.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Figures/webConfig.png}
+  \caption{Stránka nastavení}
+  \label{fig:webConfig}
+\end{figure}
+
+Všetky nastaviteľné položky su validované predtým, ako sa novo upravené nastavenia odošlú na server. Táto validácia je potom redundantne 
+vykonávaná aj na strane serveru.
+
+Na stránku nastavení sme pridali možnosť pridávať alebo odstraňovať WiFi siete. Na tieto siete sa bude snažiť zariadenie pripojiť pri spustení a 
+následne sa rozbehne server. Je možné definovať si aj vlastnú sieť typu access point. Pri použití tejto možnosti sa zariadenia pri spúštaní 
+nebude pripájať na žiadnu WiFi sieť, ale vytvorí svoju vlastnú.
 
 
+\begin{wrapfigure}{r}{0.5\textwidth}
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{Figures/mobileWeb.png}
+  \end{center}
+  \caption{Stránka na mobilnom zariadení}
+  \label{fig:mobileWeb}
+\end{wrapfigure}
 
+V našej LoRa mesh sieti sa môžu vyskytovať senzorové uzly, ktoré obsahujú GPS modul. Z toho dôvodu sme pridali do webového rozhrania funkciu, 
+ktorá zobrazí na mape aktuálnu polohu zariadenia. Správy, ktoré chceme aby sa zobrazili ako poloha na mape, musia dodržať určitý formát 
+a to taký, že správa musí obsahovať prefix \uv{GPS:} a následne musia nasledovať GPS súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
+Ako takáto správa s mapou vyzerá, môžme vidieť na obrázku \ref{fig:mobileWeb}. Na integráciu mapy do webového rozhrania bola použitá knižnica Leaflet.js\footnotemark[1].
 
-% dlhy popis funkcionality protokolu, ako funguje, priebeh odoslania spravy, priebeh sirenia spravy cez ostatne node,
-% vysvetlenie statov sprav (sent, rebroadcasted, acked atd)
-% vysvetlenie message queue, timeouty, retry atd
-% alternativne scenare, napr final node mimo dosahu, zla topologia siete atd
+Pri implementácií sme dbali na to, aby bolo možné webové rozhranie plnohodnotne používať aj na mobilných zariadeniach s malými displejmi. Preto sme 
+spravili webové rozhranie responzívne na veľkosť obrazovky. Okrem toho, že sa pri menšej veľkosti obrazovky zmenšujú veľkosti jednotlivých prvkov v rozhraní, 
+mení sa aj celkové usporiadanie prvkov na stránke tak, aby bolo používanie rozhrania prívetivejšie. 
 
-% \section{Navrh a implementacia web gui}
-% popis co bude vo webgui, popis funkci, na rpi bude aj monitorovacia zalozka
-% mozno poriesit cachovanie dat v localstoragi -- to asi prinesie viac problemov ako vyhod...
-% popis implementacie, kedze webgui bude aj na slabych ttgo zariadeniach, bude treba dost optimalizovat kod webu
+Aby sme odlíšili nami odoslané správy od správ, ktoré sme prijali od nejakého iného uzlu, sme pridali farebné odlíšenie jednotlivých správ. Správy, ktoré sme 
+prijali od iného používateľa su zobrazené v sivej farbe. Správy ktoré sme prijali od senzorových uzlov, su zobrazené v žltej farbe. A správy, ktoré sme odoslali 
+my, su modré. Toto farebné odlíšenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy sú zobrazené v zelenej farbe.
 
-% \section{implementacia na micropythone}
-% jak prebiehala implementacia, ukazky kodu atd.
+\footnotetext[1]{Leaflet.js - https://leafletjs.com/ }
 
-% \section{implementacia na pythone}
-% rozsirenie a uprava implementacie na micropythonupythone, ukazky kodu atd.
-% ak bude cas rozbehat na rpi grafanu na zobrazenie monitorovacich dat
+\section{Optimalizácia}
+Po sfunkčnení celej aplikácie sme narazil na problém, v podobe nepostačujúceho miesta na zariadeniach. Dochádzalo k tomu, že ak zariadenie prijalo 
+väčšie množstvo správ, tak mu došla pamäť a beh programu sa ukončil.
+
+V zoznam správ sa držali všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny, a časom ako 
+uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a volná pamäť zariadenia sa postupne znižovala.
+
+Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahne určeného limitu, tak sa z neho odstráni naj poslednejšia správa.
+Po tejto úprave už nedochádzalo k spomínanému problému.
+
+Ďalším problémom, ku ktorému dochádzalo taktiež z nedostatku pamäti bolo, že pri volaní API na získanie správ zariadeniu došla pamäť a program sa ukončil.
+Dochádzalo k tomu preto, že funkcia na získanie správ sa snažila celý zoznam správ transformovať do JSON formátu, ktorý by následne poslala nazad. Pri tejto transformácií 
+na JSON, sa všetky dáta z jednotlivých správ kopírovali do nového JSON objektu. Keďže bolo v zozname správ veľa položiek, tak ich kopírovanie do JSON objektu zabralo 
+nadmerné množstvo pamäti.
+
+API na získanie správ sme preto upravili tak, že používa takzvané stránkovanie. Toto stránkovanie funguje tak, že API rozdelí zoznam správ na menšie časti -- stránky a 
+vracia iba jednu stránku. Pri volaní API sa pridáva parameter špecifikujúci, ktorú stránku má API vrátiť. Tento prístup má za následok, že 
+webová stránka bude volať API na získanie správ nie raz, ale viac krát, až kym nezíska všetky stránky.
+
+Vďaka tejto optimalizácií už nedochádzalo k problému s pamäťou.
+
+\section{Implementácia pre Raspberry Pi 2B}
+Implementácia pre Raspberry Pi 2B bola z väčšej časti rovnaká ako tá, pre zariadenia Armachat. Bolo potrebné na Raspberry Pi nainštalovať podporu pre 
+CircuitPython, a následne sme mohli použiť rovnakú implementáciu ako pre Armachat.
+
+Todo Raspberry Pi avšak neobsahuje WiFi modul. Miesto toho ponúka ethernetový port. Preto sme museli upraviť implementáciu tak, 
+aby sa nepripájala na WiFi sieť, ale použila vstavané ethernetové pripojenie. A tým pádom bolo tiež potrebné, z webovej stránky nastavení, odstrániť možnosť 
+pridávania WiFi siete.
+
+Keďže Raspberry Pi má väčšiu pamäť, tak sme mohli zvýšiť limit dĺžky zoznamu správ.
+
+CircuitPython na Raspberry Pi nemá podporu pre všetky knižnice, ktoré používame v implementácií pre Armachat zariadenia. Bolo nutné nájsť vhodnú náhradu pre 
+knižnice, ktoré nemali podporu. Jednalo sa o knižnicu na šifrovanie pomocou AES šifry a knižnicu na webový server.
 
 % \section{implementacia c++++}
-% jak prebiehala implementacia, ukazky kodu atd.
-% porovnanie voci micro/pythonu + rozdiely, problemy ktore sa vyskytli, ako sa to riesilo, mozno porovnanie rychlosti kodu ?
-% poriesit kde a akobude ulozeny kod webu... dlhy string ??
-
 % TODO popisat tu ze toto je lite verzia, urcena na lowend zariadenia. Moze sa hodit ked chceme do siete pridat primitivne lacne senzory, ktore len budu reportovat data
 
-% \section{Testovanie funkcnosti + medziplatformova komunikacia}
+% \section{Testovanie funkcnosti}
 % test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
+% screenshoty z aplikacie
+%test vykonnosti, packet loss, ping, dosah atd
 
-% \chapter{Testovanie vykonnosti + test voci existujucim protokolom?}
-% Test bude mozny asi len voci meshtasticu a to len na ttgo zariadeniach. Tie mam len dve takze to bude slaby test
-% meshtastic ponuka simulator kde by mohlo byt mozne zmenit kod nody a simulovat vnom moj protokol
-% V meshtasticu nebude fungovat mesh siet ak bude mat tvar V, moj protokol to ale ma vyriesene tak to spomenut
-% meranie casu dorucenia spravy pri rovnakych podmienkach, parametroch atd
-
-% Ak bude cas rozsirit armachat o moj protokol. Upravit armachat shitcode bude ale casovo narocne a vo vysledku pride armachat o moznost pouzit ho s meshtasticom.
 
 % \section{Problemy, limitacie}
 % tu popisat to cez zariadenia maju malo pamate, padalo to na nedostatok pamati ked zariadenie prijalo vacsie mnzostvo sprav, tak sa spravili limity na dlzku queueu
 % a spravy sa potom mazu. popisat ze to moze viest ku stratam sprav pri rychlom spamovani spravami
-
 % dalej popisat obmedzenia rfm libky, wifi libky atd. daky popis uz je v readme na githube.
+
+% \chapter{Zaver, porovnanie voci inym rieseniam, moznosti rozsirenia}
+%co sme dosiahli, ze to funguje, porovnat v com je to lepsie oproti inym
+%tu mozem spomenut ze meshtastic ma problem s topologiou tvaru V, ja tento problem riesim cez randomize path prepinatko
+%spomenut ze niektore riesenia neponukaju mobilitu uzlov, ani ovladanie cez mobil atd.
+%rozsirenia: moznost zablokovat daku adresu aby som nevidel jej spravy, broadcast spravy by nemuseli byt sifrovane aby ich mohl precitat kazdy, rozdelovat dlhsie spravy na dve a viac ak sa nezmestia do pozadovaneho limitu
+
+
 
 
 % Seznam literatury

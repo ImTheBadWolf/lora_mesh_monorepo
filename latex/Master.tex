@@ -1118,27 +1118,84 @@ pridávania WiFi siete.
 Keďže Raspberry Pi má väčšiu pamäť, tak sme mohli zvýšiť limit dĺžky zoznamu správ.
 
 CircuitPython na Raspberry Pi nemá podporu pre všetky knižnice, ktoré používame v implementácií pre Armachat zariadenia. Bolo nutné nájsť vhodnú náhradu pre 
-knižnice, ktoré nemali podporu. Jednalo sa o knižnicu na šifrovanie pomocou AES šifry a knižnicu na webový server.
+knižnice, ktoré nemali podporu a prispôsobiť implementáciu náhradným knižniciam. Jednalo sa o knižnicu na šifrovanie pomocou AES šifry a knižnicu na webový server. 
 
-% \section{implementacia c++++}
-% TODO popisat tu ze toto je lite verzia, urcena na lowend zariadenia. Moze sa hodit ked chceme do siete pridat primitivne lacne senzory, ktore len budu reportovat data
+\section{Implementácia pre zariadenia TTGO}
+Z dôvodu menšieho výkonu a hlavne menšej pamäti sme sa rozhodli implementáciu pre TTGO zariadenia zjednodušiť. Keďže zariadenia TTGO nepodporujú 
+CircuitPython, bolo nutne vytvoriť kompletne novú implementáciu v jazyku C plus plus.
 
-% \section{Testovanie funkcnosti}
-% test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
-% screenshoty z aplikacie
-%test vykonnosti, packet loss, ping, dosah atd
+Určili sme, že zariadenia TTGO budu v našej mesh sieti reprezentovať jednoduché uzly, ktoré budu posielať nejaké senzorové dáta. Implementácia preto 
+nebude obsahovať žiadne užívateľské rozhranie, server ani webovú stránku. Implementácia bude obsahovať iba základné funkcie, ktoré sú potrebné pre 
+odosielanie senzorových správ. Senzorové uzly budu posielať správy iba jednosmerne, nie je potreba aby senzorové uzly nejaké správy prijímali. 
+Kvôli tomu, že senzorové uzly nebudú prijímať žiadne správy, nebudú schopné ani preposielať ďalej cudzie správy. Dosah mesh siete teda nie je možné 
+rozšíriť pomocou týchto uzlov.
 
+Rovnako ako pri predošlých verziách pre Armachat a Raspberry Pi, je možné konfigurovať určité nastavenia. Táto konfigurácia sa vykonáva upravovaním konfiguračných 
+premenných, predtým ako je program preložený a nahraný do zariadenia. Súčasťou konfigurácie je zoznam kontaktov, na ktoré bude senzorový uzol odosielať správy.
 
-% \section{Problemy, limitacie}
-% tu popisat to cez zariadenia maju malo pamate, padalo to na nedostatok pamati ked zariadenie prijalo vacsie mnzostvo sprav, tak sa spravili limity na dlzku queueu
-% a spravy sa potom mazu. popisat ze to moze viest ku stratam sprav pri rychlom spamovani spravami
-% dalej popisat obmedzenia rfm libky, wifi libky atd. daky popis uz je v readme na githube.
+Implementácia pozostáva z funkcií, ktoré postupne poskladajú hlavičku paketu a k nej pridajú obsah senzorovej správy. Tieto novo vytvorené správy sa uložia do zoznamu 
+a rovnako ako pri plnej verzii programu, sa zoznam správ cyklicky prechádza a správy z neho sa odosielajú, keď nadíde ich čas.
 
-% \chapter{Zaver, porovnanie voci inym rieseniam, moznosti rozsirenia}
-%co sme dosiahli, ze to funguje, porovnat v com je to lepsie oproti inym
-%tu mozem spomenut ze meshtastic ma problem s topologiou tvaru V, ja tento problem riesim cez randomize path prepinatko
-%spomenut ze niektore riesenia neponukaju mobilitu uzlov, ani ovladanie cez mobil atd.
-%rozsirenia: moznost zablokovat daku adresu aby som nevidel jej spravy, broadcast spravy by nemuseli byt sifrovane aby ich mohl precitat kazdy, rozdelovat dlhsie spravy na dve a viac ak sa nezmestia do pozadovaneho limitu
+Každá správa je taktiež odosielaná viackrát. Počet koľko krát sa ma správa odoslať je dané konfiguračnou premennou. Keďže táto zjednodušená implementácia nerieši prijaté správy, 
+každá správa sa bude opakovane posielať daný počet pokusov aj napriek tomu, že bola daná správa uz preposlaná ďalej nejakým iným uzlom. Po tom čo sa správa odošle 
+daný počet krát, sa správa zoznamu správ odstráni.
+
+Hlavný chod programu pozostáva z cyklu v ktorom sa prechádzajú správy zo zoznamu správ a funkcie, ktorá generuje senzorové dáta. Na zariadení TTGO T-Beam sme použili integrovaný 
+GPS modul, z ktorého získavame GPS súradnice a z nich tvoríme obsah senzorovej správy. Zariadenie TTGO LoRa32 ma zas integrovaný hall effect senzor, ktorý sníma 
+úroveň magnetického poľa. Na tomto zariadení generujeme senzorové správy, ktorých obsahom je úroveň magnetického poľa plus čas ako dlho je daný senzor v prevádzke.
+
+Funkcia na vygenerovanie novej senzorovej správy je volaná v určitých intervaloch. Tento interval je možne nastaviť konfiguračnou premennou. Výsledkom je tak 
+uzol v mesh sieti, ktorý periodicky vysiela hodnoty zo senzorov. Adresátmi týchto správ su uzly, ktorých adresy ma zariadenie uložené v konfiguračnej premennej kontaktov. 
+Ak do zoznamu kontaktov zadáme broadcast adresu -- 0xFFFF, tak správa bude doručená všetkým uzlom v sieti.
+
+Výsledná implementácia je veľmi odľahčená verzia nášho protokolu, ktorá je vhodná pre použitie na tých najjednoduchších zariadeniach. Pridáva to možnosť rozšíriť sieť 
+o rôzne monitorovacie senzorové zariadenia, ktorých obstarávacia cena je vďaka ich jednoduchosti pomerne nízka.
+
+\section{Testovanie funkčnosti}
+TODO
+
+test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
+
+screenshoty z aplikacie
+
+test vykonnosti, packet loss, ping, dosah atd
+
+\section{Problémy a limitácie}
+Najväčším problémom, na ktorý sme narazili pri implementácii, bol spomínaný nedostatok pamäti na zariadeniach. Tento problém sa nám podarilo 
+vyriešiť, ale nesie to so sebou istý kompromis v podobe obmedzeného počtu správ, ktoré môže jedno zariadenie u seba držať. Tento limit je pri 
+zariadení Armachat s WiFi modulom len 10 správ. Kvôli tomu, že na tomto zariadení nám musí bežať webový server, je pamäť zariadenia veľmi vyťažená. 
+
+Tento limit 10 správ, však nemusí znamenať až takým problémom. Pokiaľ ma používateľ otvorené webové rozhranie tak sa správy ukladajú aj na strane webovej aplikácie 
+bežiacej v prehliadači používateľa. Ak dôjde k dosiahnutiu maximálneho limitu správ tak sa z pamäte zariadenia odstráni najstaršia správa. V pamäti prehliadača na webovej aplikácii 
+ale táto správa ostane. Takže používateľ je schopný vidieť aj správy staršie ako posledných 10 správ.
+
+Veľkou limitáciou našej implementácie je, že CircuitPython nemá podporu pre externé prerušenia. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
+nepracuje veľmi efektívne. Keď aktuálne LoRa modul prijíma nejaký paket, tak sa pozdrží cely zvyšok bežiaceho programu, až kým sa paket nepríjme celý alebo nedôjde k vypršaniu 
+časového limitu. Toto nam spomaľuje beh programu zakaždým keď je v sieti vysielaný nejaký paket.
+
+Použitá knižnica na ovládanie LoRa modulu so sebou prináša ešte dodatočnú limitáciu. Táto knižnica nesprávne pracuje s LoRa modulom a nie je možné stabilne používať 
+LoRa prenos pokiaľ je nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky zníži. Pri 
+našom testovaní sa nám podarilo úspešne doručiť jednu správu z desiatich pokusov.
+
+Chybu v knižnici sme sa snažili bezvýsledne opraviť.
+
+Zariadenie Raspberry Pi pico s WiFi modulom, je pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií a ma veľa nedostatkov.
+Nie je možné prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nie je možné prepnúť modul do režimu station ak bol 
+už prepnutý do režimu AP. Jediný spôsob ako WiFi modul úspešne prepnúť medzi režimami je tvrdé resetovanie zariadenia. 
+
+Pôvodne sme mali v pláne implementovať štartovací proces zariadenia tak, že najskôr sa zariadenie pokúsi pripojiť k WiFi sieťam ktoré má uložené v zozname a ak sa mu nepodarí 
+pripojiť ku žiadnej z týchto sieti, tak vytvori svoju vlastnú WiFi sieť, na ktorú sa môže používateľ pripojiť. Kvôli chybnému správaniu WiFi knižnice však tento prístup nie je možné 
+realizovať. V momente kedy sa snaží WiFi modul pripojiť na nejakú zo zoznamu WiFi sieti, prepne sa do režimu station. Potom už nie je možné modul prepnúť do režimu AP ak sa nepodari pripojiť 
+k žiadnej zo sieti.
+
+\chapter{Záver}
+co sme dosiahli, ze to funguje, porovnat v com je to lepsie oproti inym, porovnanie voci inym rieseniam
+spomenut ze niektore riesenia neponukaju mobilitu uzlov, ani ovladanie cez mobil atd.
+
+tu mozem spomenut ze meshtastic ma problem s topologiou tvaru V, ja tento problem riesim cez randomize path prepinatko, pridať screeny z meshtastic simulatoru
+
+moznosti rozsirenia, moznost zablokovat daku adresu aby som nevidel jej spravy, broadcast spravy by nemuseli byt sifrovane aby ich mohl precitat kazdy,
+rozdelovat dlhsie spravy na dve a viac ak sa nezmestia do pozadovaneho limitu
 
 
 
@@ -1149,10 +1206,7 @@ knižnice, ktoré nemali podporu. Jednalo sa o knižnicu na šifrovanie pomocou 
 % Prilohy
 %\appendix
 %\input{Chapters/Appendix1.tex}
-%\input{Chapters/Appendix2.tex}
 
-% Priloha vlozena primo do hlavniho LaTeX souboru. Ne vsechny prilohy je nutne mit ve zvlastnich souborech.
-%\chapter{Dlouhý zdrojový kód}
 %\lstinputlisting[label=src:CppExternal,caption={Dlouhý zdrojový kód v jazyce C++ načtený s externího souboru}]{SourceCodes/ArraySortingAlgorithms.cpp}
 
 \end{document}

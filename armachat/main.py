@@ -19,17 +19,20 @@ import time
 
 key_set = 0
 keypad = adafruit_matrixkeypad.Matrix_Keypad(config.rows, config.cols, config.keys1)
-TMP_CONTACT = 0x0005
+TMP_CONTACT = 0x0000
+contact_index = 0
 received_counter = 0
 sent_counter = 0
 
 VSYS_voltage = analogio.AnalogIn(board.VOLTAGE_MONITOR)
 
-sensor_report_interval = 60 #Seconds
+sensor_report_interval = 10*60 #In Seconds => 10 Minutes
 last_sensor_report = 0
 
 config = protocol_config.ProtocolConfig('data/settings.json')
 initialised = config.is_initialised()
+contacts = config.CONTACTS
+TMP_CONTACT = contacts[contact_index]
 
 if not initialised:
   print("My address not set. Please edit data/settings.json and set MY_ADDRESS")
@@ -45,7 +48,6 @@ def show_info_notification(text):
     info_timeout = round(time.monotonic() * 1000)
 
 def send_sensor_message():
-  contacts = config.CONTACTS
   if contacts == None or len(contacts) == 0:
     show_info_notification("No contacts")
     return
@@ -62,15 +64,21 @@ def send_sensor_message():
 def handle_key_press(pressed_key):
   global message_to_send
   global sent_counter
+  global TMP_CONTACT
   if pressed_key == "alt":
     send_sensor_message()
     screen[0].text = f"I: 0x{config.MY_ADDRESS:04X} received:{received_counter} sent:{sent_counter}"
   elif pressed_key == "z":
-    node_process.new_traceroute_request(TMP_CONTACT)
+    node_process.new_traceroute_request(int(TMP_CONTACT, 16))
+  elif pressed_key == "x":
+    global contact_index
+    contact_index = (contact_index + 1) % len(contacts)
+    TMP_CONTACT = contacts[contact_index]
+    screen[3].text = f'Send to {TMP_CONTACT} (Press X to change):'
   elif pressed_key == "bsp":
     message_to_send = message_to_send[:-1]
   elif pressed_key == "ent":
-    node_process.new_text_message(TMP_CONTACT, message_to_send, w_ack = False)
+    node_process.new_text_message(int(TMP_CONTACT, 16), message_to_send, w_ack = False)
     sent_counter += 1
     screen[0].text = f"I: 0x{config.MY_ADDRESS:04X} received:{received_counter} sent:{sent_counter}"
   else:
@@ -125,7 +133,7 @@ screen = SimpleTextDisplay(
 screen[0].text = f"I: 0x{config.MY_ADDRESS:04X}"
 screen[1].text = f'LoRa config: {config.get_lora_config()}'
 screen[2].text = "ENT-send ALT-sensor Z-traceroute"
-screen[3].text = f'Message to send(to 0x{TMP_CONTACT:04X})'
+screen[3].text = f'Send to {TMP_CONTACT} (Press X to change):'
 screen[4].text = message_to_send
 screen[5].text = ""
 screen[6].text = ""

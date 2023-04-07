@@ -1165,9 +1165,11 @@ Najväčším problémom, na ktorý sme narazili pri implementácii, bol spomín
 vyriešiť, ale nesie to so sebou istý kompromis v podobe obmedzeného počtu správ, ktoré môže jedno zariadenie u seba držať. Tento limit je pri 
 zariadení Armachat s WiFi modulom len 10 správ. Kvôli tomu, že na tomto zariadení nám musí bežať webový server, je pamäť zariadenia veľmi vyťažená. 
 
-Tento limit 10 správ, však nemusí znamenať až takým problémom. Pokiaľ ma používateľ otvorené webové rozhranie tak sa správy ukladajú aj na strane webovej aplikácie 
+Tento limit 10 správ, však nemusí znamenať až taký problém. Pokiaľ ma používateľ otvorené webové rozhranie tak sa správy ukladajú aj na strane webovej aplikácie 
 bežiacej v prehliadači používateľa. Ak dôjde k dosiahnutiu maximálneho limitu správ tak sa z pamäte zariadenia odstráni najstaršia správa. V pamäti prehliadača na webovej aplikácii 
 ale táto správa ostane. Takže používateľ je schopný vidieť aj správy staršie ako posledných 10 správ.
+
+Na zariadeniach Armachat bez WiFi modulu je možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu nie je taký problém.
 
 Veľkou limitáciou našej implementácie je, že CircuitPython nemá podporu pre externé prerušenia. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
 nepracuje veľmi efektívne. Keď aktuálne LoRa modul prijíma nejaký paket, tak sa pozdrží cely zvyšok bežiaceho programu, až kým sa paket nepríjme celý alebo nedôjde k vypršaniu 

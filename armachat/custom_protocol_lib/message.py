@@ -30,7 +30,7 @@ class Message():
     self.text_message = bytes(message[:238], "utf-8")
     self.maxHop = max_hop
     self.initialMaxHop = max_hop
-    self.payload = self.__construct_message_payload(message, message_type)
+    self.payload = self.__construct_message_payload(message, message_type, destination_address)
     self.w_ack = w_ack
     self.message_id = self.header.get_message_id()
 
@@ -43,7 +43,7 @@ class Message():
     self.sensor_data = sensor_data[:238]
     self.ttl = ttl
     self.message_id = self.header.get_message_id()
-    self.payload = self.__construct_message_payload(str(sensor_data), MessageType.SENSOR_DATA)
+    self.payload = self.__construct_message_payload(str(sensor_data), MessageType.SENSOR_DATA, destination_address)
 
   def new_ack_message(self, destination_address, sender_address, message_id, max_hop=None, priority=Priority.NORMAL):
     if max_hop is None:
@@ -82,7 +82,7 @@ class Message():
       my_address = f"{self.config.MY_ADDRESS:04x}"
       self.payload = self.__construct_message_payload(f"0x{my_address.upper()}", MessageType.TRACEROUTE)
 
-  def __construct_message_payload(self, message, message_type):
+  def __construct_message_payload(self, message, message_type, destination = -1):
     encrypted_message = bytearray(len(message))
     cipher = aesio.AES(self.config.AES_KEY, aesio.MODE_CTR, self.config.AES_KEY)
     cipher.encrypt_into(bytes(message, "utf-8"), encrypted_message)
@@ -91,9 +91,16 @@ class Message():
       #ACK and TRACEROUTE messages are not encrypted
       return list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(message, "utf-8"))
     elif message_type == MessageType.SENSOR_DATA:
-      return list(bytes(self.ttl.to_bytes(2, 'big'))) + list(encrypted_message)
+      if destination == self.config.BROADCAST_ADDRESS:
+        #Broadcast message is not encrypted
+        return list(bytes(self.ttl.to_bytes(2, 'big'))) + list(bytes(message, "utf-8"))
+      else:
+        return list(bytes(self.ttl.to_bytes(2, 'big'))) + list(encrypted_message)
     else: #text_msg or text_msg_wack or traceroute_request
-      return list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(self.initialMaxHop.to_bytes(1, 'big'))) + list(encrypted_message)
+      if destination == self.config.BROADCAST_ADDRESS:
+        return list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(self.initialMaxHop.to_bytes(1, 'big'))) + list(bytes(message, "utf-8"))
+      else:
+        return list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(self.initialMaxHop.to_bytes(1, 'big'))) + list(encrypted_message)
 
   def construct_raw_packet(self, bytes_array):
     self.header = Header()
@@ -145,7 +152,15 @@ class Message():
       #ACK and TRACEROUTE messages are not encrypted
       self.text_message = self.payload[1:]
 
-    if self.get_destination() == self.config.MY_ADDRESS or self.get_destination() == self.config.BROADCAST_ADDRESS:
+    if self.get_destination() == self.config.BROADCAST_ADDRESS:
+      #Broadcast message is not encrypted
+      if self.header.get_message_type() == MessageType.SENSOR_DATA:
+        self.sensor_data = self.payload[2:]
+      else:
+        self.text_message = self.payload[2:]
+
+
+    elif self.get_destination() == self.config.MY_ADDRESS:
       cipher = aesio.AES(self.config.AES_KEY, aesio.MODE_CTR, self.config.AES_KEY)
       input = bytes(self.payload[2:])
       decrypted_message = bytearray(len(input))

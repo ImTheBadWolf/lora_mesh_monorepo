@@ -97,7 +97,10 @@ byte *MessageHandler::createSensorMessage(uint16_t destinationAddress, uint32_t 
   memcpy(wholePayload, header, HEADER_LENGTH);
   memcpy(&wholePayload[HEADER_LENGTH], messagePrefix, SENSOR_DATA_PREFIX_LENGTH);
 
-  memcpy(&wholePayload[HEADER_LENGTH + SENSOR_DATA_PREFIX_LENGTH], encryptedMessage, message.length());
+  if (destinationAddress != BROADCAST_ADDRESS)
+    memcpy(&wholePayload[HEADER_LENGTH + SENSOR_DATA_PREFIX_LENGTH], encryptedMessage, message.length());
+  else
+    memcpy(&wholePayload[HEADER_LENGTH + SENSOR_DATA_PREFIX_LENGTH], messageByteArr, message.length());
   byteArraySize = HEADER_LENGTH + SENSOR_DATA_PREFIX_LENGTH + message.length();
   return wholePayload;
 }

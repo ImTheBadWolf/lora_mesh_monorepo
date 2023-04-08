@@ -30,29 +30,11 @@ RESET = digitalio.DigitalInOut(board.GP17)
 config = protocol_config.ProtocolConfig('data/settings.json')
 initialised = config.is_initialised()
 
-rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=True)
-print("\n\n\n")
-lora_config = config.LORA_CONFIG
-rfm9x.signal_bandwidth = lora_config[0] * 1000
-rfm9x.coding_rate = lora_config[1]
-rfm9x.spreading_factor = lora_config[2]
 
-rfm9x.tx_power = 23
-rfm9x.preamble_length = 8
 
 def show_info_notification(text):
   if config.DEBUG:
     print(text)
-
-symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )
-if symbolDuration > 16:
-    rfm9x.low_datarate_optimize = 1
-    if config.DEBUG:
-      print("low datarate on")
-else:
-    rfm9x.low_datarate_optimize = 0
-    if config.DEBUG:
-      print("low datarate off")
 
 networks = config.get_networks()
 for network in networks:
@@ -106,6 +88,25 @@ except:
   microcontroller.reset()
 
 if initialised:
+  rfm9x = rfm9x_lora.RFM9x(spi_lora, CS, RESET, 868.0, baudrate=1000000, crc=True)
+  lora_config = config.LORA_CONFIG
+  rfm9x.signal_bandwidth = lora_config[0] * 1000
+  rfm9x.coding_rate = lora_config[1]
+  rfm9x.spreading_factor = lora_config[2]
+
+  rfm9x.tx_power = 23
+  rfm9x.preamble_length = 8
+
+  symbolDuration = 1000 / ( rfm9x.signal_bandwidth / (1 << rfm9x.spreading_factor) )
+  if symbolDuration > 16:
+      rfm9x.low_datarate_optimize = 1
+      if config.DEBUG:
+        print("low datarate on")
+  else:
+      rfm9x.low_datarate_optimize = 0
+      if config.DEBUG:
+        print("low datarate off")
+
   node_process = NodeProcess(rfm9x, show_info_notification, config)
   address_book = AddressBook("data/contacts.json", "data/sensors.json")
   try:

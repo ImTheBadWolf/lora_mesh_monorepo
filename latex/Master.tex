@@ -154,7 +154,8 @@ Ukážku môžme vidieť na Obr. \ref{fig:loraModulation}.
 \end{figure}
 
 \section{LoRa paket}
-Štruktúra LoRa paketu môže byť závislá od daného použitia. Bežné sa ale stretávame s LoRa paketom, zloženým z preambuly, dát a kontrolného súčtu.
+Štruktúra LoRa paketu môže byť závislá od daného použitia. Bežné sa ale stretávame s LoRa paketom, zloženým z preambuly, dát a kontrolného súčtu. Maximálna 
+povolená dĺžka dát je 255 bajtov.
 
 Preambula slúži na synchronizáciu prijímacieho zariadenia. Je tvorená niekoľkými opakovaniami prázdneho chirp signálu, ktorý predstavuje symbol s hodnotou 0. 
 Dĺžka preambuly, tzn. počet opakovaní prázdneho chirp signálu, je stanovená konfiguráciou zariadenia. Bežne sa stretávame s dĺžkou preambuly 8.
@@ -938,11 +939,11 @@ Druhá routa slúži na odoslanie správy prostredníctvom HTTP POST požiadavku
 V JSON objekte musia byť uvedené všetky potrebné informácie o správe, ktoré sú potrebné na jej správne odoslanie. 
 Sú nimi destinácia, maximálny počet skokov, priorita, obsah správy a príznak, či chceme potvrdenie o doručení. 
 API po prijatí požiadavku na vytvorenie novej správy validuje vstupné údaje a ak sú všetky údaje v poriadku, tak vytvorí novú správu. V 
-opačnom prípade vráti chybovú hlášku. Z dôvodu, limitácie LoRa paketov na maximálnu dĺžku 256 bajtov, je potrebné overiť či textová správa 
+opačnom prípade vráti chybovú hlášku. Z dôvodu limitácie LoRa paketov na maximálnu dĺžku 255 bajtov pre posielané dáta, je potrebné overiť či textová správa 
 nie je príliš dlhá a prípadne ju orezať na maximálnu povolenú dĺžku.
 
-Maximálna povolená dĺžka v tomto prípade nie je 256 bajtov ale len 238. Toto je výsledkom toho, 
-že použitá LoRa knižnica povoľuje maximálnu dĺžku paketu 252 bajtov z dôvodu kompatibility s inými knižnicami.
+Maximálna povolená dĺžka v tomto prípade nie je 255 bajtov ale len 238. Toto je výsledkom toho, 
+že použitá LoRa knižnica povoľuje maximálnu dĺžku paketu 252 bajtov kvôli kompatibilite s inými knižnicami.
 Pri našom protokole je okrem toho v každom LoRa pakete potrebné nejaké miesto ešte rezervovať pre hlavičku paketu a informácie o počte skokov.
 Z toho nám ostáva maximálna dĺžka správy 238 bajtov.
 
@@ -1190,13 +1191,18 @@ pripojiť ku žiadnej z týchto sieti, tak vytvori svoju vlastnú WiFi sieť, na
 realizovať. V momente kedy sa snaží WiFi modul pripojiť na nejakú zo zoznamu WiFi sieti, prepne sa do režimu station. Potom už nie je možné modul prepnúť do režimu AP ak sa nepodari pripojiť 
 k žiadnej zo sieti.
 
+K WiFi knižnici sa viaže ešte jeden problém a to taký, že pokiaľ sa snaží používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojí na WiFi sieť, 
+zariadenie sa dostane do zamrznutého stavu a prestane reagovať na čokoľvek. Na obnovenie funkcionality je potrebný tvrdý reštart zariadenia. 
+Tomuto problému sa snažíme vyhýbať tak, že zariadenie zobrazí informáciu o spustenom web serveri až po určitom oneskorení a spoliehame sa na to, že používateľ 
+sa bude pripájať na webový server až po zobrazení tejto informácie.
+
 \chapter{Záver}
 co sme dosiahli, ze to funguje, porovnat v com je to lepsie oproti inym, porovnanie voci inym rieseniam
 spomenut ze niektore riesenia neponukaju mobilitu uzlov, ani ovladanie cez mobil atd.
 
 tu mozem spomenut ze meshtastic ma problem s topologiou tvaru V, ja tento problem riesim cez randomize path prepinatko, pridať screeny z meshtastic simulatoru
 
-moznosti rozsirenia, moznost zablokovat daku adresu aby som nevidel jej spravy, broadcast spravy by nemuseli byt sifrovane aby ich mohl precitat kazdy,
+moznosti rozsirenia, moznost zablokovat daku adresu aby som nevidel jej spravy,
 rozdelovat dlhsie spravy na dve a viac ak sa nezmestia do pozadovaneho limitu
 
 

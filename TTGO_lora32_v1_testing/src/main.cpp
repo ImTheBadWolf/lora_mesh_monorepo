@@ -64,12 +64,13 @@ void onTxDone() {
 
 void onReceive(int packetSize) {
   //Dont really need this, but it will be used to delay sending if the channel is busy
+  //Listen before talk
   if (packetSize == 0)
     return;
 
   String incoming = "";
-  while (LoRa.available()) {                                // can't use readString() in callback, so
-    incoming += (char)LoRa.read(); // add bytes one by one
+  while (LoRa.available()) {
+    incoming += (char)LoRa.read();
   }
 }
 

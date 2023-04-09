@@ -1,9 +1,12 @@
 \documentclass[slovak,master]{diploma}
 \usepackage{subfig}
+\usepackage{makecell}
+\usepackage[symbol]{footmisc}
 \usepackage{wrapfig}
 \usepackage{listings}
 \usepackage[autostyle=true,czech=quotes]{csquotes} % korektni sazba uvozovek, podpora pro balik biblatex
 \usepackage[backend=biber, style=iso-numeric, alldates=iso]{biblatex} % bibliografie
+\renewcommand{\thefootnote}{\arabic{footnote}}
 
 \ThesisAuthor{Matúš Ozaniak}
 
@@ -28,10 +31,15 @@
 \EnglishKeywords{LoRa; Mesh; Raspberry Pi; communication protocol; master thesis}
 
 \AddAcronym{IoT}{Internet of Things - Internet vecí}
-\AddAcronym{SF}{Spreading factor}
-\AddAcronym{BW}{Bandwidth}
+\AddAcronym{SF}{Spreading factor - rozprestierací faktor}
+\AddAcronym{BW}{Bandwidth - širka pásma}
 \AddAcronym{DR}{Data rate - rýchlosť prenosu}
-\AddAcronym{CR}{Coding rate}
+\AddAcronym{CR}{Coding rate - kódovací pomer}
+\AddAcronym{TDMA}{Time Division Multiple Access - Metóda zdielaného prístupu k prenosovemu médiu, ktorá rozdeluje prístup na časové sloty}
+\AddAcronym{TTL}{Time To Live - Čas životnosti paketu}
+\AddAcronym{SNR}{Signal to Noise ratio - Pomer signálu k šumu}
+\AddAcronym{RSSI}{Received Signal Strength Indicator - Miera sily signálu}
+\AddAcronym{API}{Aplication Programming Interface - Rozhranie aplikácie}
 
 
 \addbibresource{biblatex.bib}
@@ -278,7 +286,7 @@ nízku spotrebu energie. Moduly pre gateway dokážu prijímať a odosielať na 
 
 V tejto časti sa budeme zaoberať dostupnými modulmi pre koncové zariadenia.
 Keďže je technológia LoRa patentovaná výrobcom Semtech \cite{semtech}, tak všetky dostupné LoRa čipy su práve od tohto výrobcu a moduly od iných výrobcov 
-sú založené na používaní týchto čipov.
+sú založené na používaní týchto čipov. Kompletné porovnanie parametrov najpouživanejších modulov je možné vidieť v tabuľke \ref{tab:semtechModules}.
 
 \section{SX127x/SX126x}
 Výrobca Semtech \cite{semtech}, prináša LoRa čipy série SX127x a SX126x. Ponúkajú vysoký výkon za pomerne nízku cenu a ako sme už spomínali, ostatné LoRa moduly 
@@ -328,6 +336,7 @@ Ten je pri modemoch série SX126x výrobcom udávaný na 170 dBm, takže sú opt
     SX1268 & 410--810 MHz & 5--12 & 7,80--500 & -148 dBm & 4.6 mA & SPI & 22 dbm & 7€ \\
     \midrule
   \end{tabular}
+  \label{tab:semtechModules}
 \end{table}
 \footnotetext[1]{Spotreba počas prijímania (mA)}
 \footnotetext[2]{Maximálny vysielací výkon}
@@ -360,9 +369,7 @@ Rovnako používa SX1276 LoRa modem no okrem spomínaných modulov obsahuje aj G
 
 Mikrokontrolér ma na zadnej strane držiak na batériu, z ktorej môže byť napájaný a taktiež aj nabíjací modul 
 pre bezpečné nabíjanie a ochranu lítiových batérií.
-V režime spánku ma spotrebu 0,2 mA.
-
-Podporuje pripojenie dodatočného displeju, avšak nami používaný mikrokontrolér tento displej nemá.
+V režime spánku ma spotrebu 0,2 mA. Podporuje pripojenie dodatočného displeju, avšak nami používaný mikrokontrolér tento displej nemá.
 
 Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
 \begin{figure}[h!]
@@ -373,6 +380,7 @@ Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
   \caption{Mikrokontroléry TTGO}
   \label{fig:ttgo-moduly}
 \end{figure}
+\newpage
 
 \subsection{Raspberry Pi Pico RP2040}
 Mikrokontrolér od známej organizácie Raspberry Pi, založený na dvoj-jadrovom Arm procesore. 
@@ -408,7 +416,20 @@ Vďaka tomu, že CircuitPython je možne spojazdniť aj na Raspberry Pi, bude mo
 
 \chapter{Existujúce riešenia}
 Téma mesh sietí je v tejto dobe veľmi aktuálna a vývojári sa snažia vytvoriť rôzne riešenia, ktoré by boli vhodné pre rôzne účely.
-Existujú rozvinuté projekty ako napríklad Meshtastic, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť za použitia lacných zariadení.
+
+Výskumu od Ochoa et al. \cite{8115793} sa zaoberal porovnaním energetickej spotreby LoRa topológii typu hviezda, 
+voči topológii typu mesh. Z tohto výskumu môžme usúdiť, že topológia typu mesh dosahuje menšiu energetickú spotrebu pri 
+použití v rozsiahlejších sieťach 
+
+Vo výskume od Ochoa et al. \cite{8115793} porovnávali spotrebu energie medzi 
+topológiou typu mesh a hviezdicovou topológiou v sieti LoRa. A z týchto štúdií možno vyvodiť záver, že je viac
+efektívnejšie, z hľadiska spotreby energie, použiť topológiu mesh pre rozsiahlejšie siete. 
+
+Okrem toho je možné optimalizovať výber rádiových nastavení v súlade s hustotou siete tak, 
+aby sa ešte viac optimalizovala energia v sieťach typu mesh.
+
+Existujú rozvinuté projekty ako napríklad Meshtastic, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť 
+za použitia lacných zariadení.
 
 Ďalším zaujímavým projektom je Armachat \cite{armachat}, ktorý ponúka možnosť komunikácie v prípade nedostupnosti ostatných sieti, napríklad po nejakej prírodnej alebo inej katastrofe.
 Súčasťou projektu Armachat sú plošné spoje, z ktorých si používateľ poskladá finálne zariadenie.
@@ -453,15 +474,15 @@ tak rozšíriť dosah siete.
 Ďalší multi-hop protokol, ktorý požíva časovú synchronizáciu medzi uzlami. Časová synchronizácia definuje sloty, v ktorých môže uzol pristupovať ku prenosovému médiu a 
 vysielať svoje dáta. Správy sa sieťou šíria pomocou multi-hop flooding.
 
-Sieť sa skladá z jedného uzlu, ktorý plní rolu takzvaného datasinku (gateway alebo brána) a ostatných uzlov. Uzly siete posielajú dáta do datasinku alebo data z neho prijímajú.
+Sieť sa skladá z jedného uzlu, ktorý plní rolu takzvaného datasinku (gateway alebo brána) a ostatných uzlov. Uzly siete posielajú dáta do datasinku alebo dáta z neho prijímajú.
 
 V určitých intervaloch datasink vyšle tzv. beacon signál. Tento signál slúži na časovú synchronizáciu medzi uzlami a značí začiatok novej epochy. 
-Každá epocha obsahuje N slotov, v ktorých môžu uzly vysielať data. Beacon správa obsahuje hop count, ktorá udáva vzdialenosť ku datasinku.
+Každá epocha obsahuje N slotov, v ktorých môžu uzly vysielať dáta. Beacon správa obsahuje hop count, ktorá udáva vzdialenosť ku datasinku.
 Ked nejaký uzol príjme beacon signál, vyšle svoj vlastný beacon signál v ďalšom volnom slote, ktorý vyberá na základe vzdialenosti od datasinku (hop count).
 
 Ked uzol potrebuje poslať nejaké dáta, tak vyberie najskorší volný slot a v nom vysiela svoje dáta. Ak tieto dáta príjme uzol, ktorý nie je datasink a 
 hop count daného uzlu ku sinku je menší ako hop count vysielacieho uzlu, tak dáta v ďalšom volnom slote znovu prepošle. Toto sa opakuje, až 
-kým data nedosiahnu datasink.
+kým dáta nedosiahnu datasink.
 
 Takto tvorená sieť avšak vyžaduje existenciu nejakého hlavného uzlu (datasinku), ktorý je potrebný na riadenie siete prostredníctvom časovej synchronizácie.
 
@@ -475,6 +496,14 @@ Aby sa zabránilo takýmto situáciám, je použitá metóda Listen Before Talk,
 vysielal. Pokiaľ áno, tak sa posielaná správa vyšle neskôr.
 
 PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na inom zariadení by vyžadovalo väčšie úpravy zdrojového kódu.
+
+Na smerovanie paketov v sieti využíva kombináciu dvoch prístupov. Ak chce uzol vyslať nejaký paket a destinácia toho paketu je v dosahu daného uzla, tak sa paket priamo odošle. 
+Pokiaľ ale destinácia nie je v dosahu, uzol najskôr vyšle požiadavok na vytvorenie trasy ku destinácií všetkým svojím susedom. Títo susedia to prepošlú ďalej svojím susedom. 
+Takto sa bude paket preposielať, až kým sa nedostane ku uzlu, ktorého susedom je hľadaná destinácia prípadne destinácia samotná. Následne sa nájde najkratšia cesta ku destinácii a táto cesta sa uloží do smerovacích 
+tabuliek uzlov. Následne môže uzol vyslať pôvodný paket do destinácie.
+
+
+%TODO trochu viac popisat ako funguje
 
 \section{Synchronous LoRa Mesh}
 Tento projekt\cite{synchronouslorameshnetwork} vznikol z potreby získavania real-time dát z podzemných kanalizácií. Tieto dáta sú potrebné k monitorovaniu a predikcií kritických situácií akými 
@@ -502,9 +531,10 @@ správa na aktualizovanie smerovacej tabuľky.
 	\label{fig:synchronouslora}
 \end{figure}
 
+
 \section{Porovnanie voči nášmu riešeniu}
 Niektoré zo spomenutých riešení využívajú smerovacie tabuľky na efektívnejší prenos dát v rámci siete. Smerovacie tabuľky môžu byť však limitáciou pokiaľ 
-chceme dosiahnuť mobility uzlov. V prípade, že by sme chceli podporovať mobilitu uzlov, je potrebné zabezpečiť dostatočné časté aktualizácie smerovacích tabuliek.
+chceme dosiahnuť vyššej mobility uzlov. V prípade, že by sme chceli spolu so smerovacími tabuľkami podporovať mobilitu uzlov, je potrebné zabezpečiť dostatočné časté aktualizácie smerovacích tabuliek.
 To pridáva do siete zaťaženie v podobe dodatočných dátových prenosov.
 
 Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime. To môže byť 
@@ -524,9 +554,36 @@ Vďaka tomu môžu byť uzly realizované prostredníctvom lacných a malých za
 Protokol bude možné používať na rôznych platformách. V tejto práci vznikne implementácia protokolu pre mikrokontroléry používajúce programovací jazyk C++ a 
 mikrokontroléry alebo jednodoskové počítače podporujúce CircuitPython.
 
-TODO nasa implementacia  je sifrovana AES
+Obsah správ v sieti bude šifrovaný šifrovacím algoritmom AES.
 
-TODO tu by sa hodila tabulka s porovnanim (napr multiplatformovy support, spotreba energie, mobilita uzlov, obstaravacie naklady, zavislost na centralnych uzloch)
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\begin{table}[!h]
+	\centering
+  \small
+  \setlength\tabcolsep{3pt}
+	\caption[Porovnanie LoRa mesh protokolov]{Porovnanie LoRa mesh protokolov}
+  \begin{tabular}{c|c|c|c|c|c|c}
+    \toprule %TODO preformulovat komunikácia hocikedy
+    Protokol  & \makecell{LoRa \\ mesher} & Meshtastic & LoRaBlink & Pymesh & \makecell{Synchronous\\ LoRa Mesh} & Náš protokol\\
+    \midrule
+    Centrálne uzly & Nie & Nie & Áno & Áno & Áno & Nie \\
+    \hline
+    Mobilita uzlov & Áno\footnotemark[7] & Áno & Áno\footnotemark[1] & Áno\footnotemark[7] & Áno\footnotemark[1] & Áno\\
+    \hline
+    Smerovanie & \makecell{Distance \\ Vector} & Flooding & Flooding & \makecell{Distance \\ Vector} & Flooding & Flooding\\
+    \hline
+    Ad-hoc komunikácia & Áno & Áno & Nie & Áno & Nie & Áno \\
+    \hline
+    TODO  & nejake & dalsie  & atributy & \\
+    \midrule
+  \end{tabular}
+  \label{tab:compar}
+\end{table}
+\footnotetext[1]{Po zmene polohy mobilného uzla, je potrebné čakať pokým nastane ďalšia epocha}
+\footnotetext[7]{Po zmene polohy mobilného uzla, je potrebné nájsť a aktualizovať cestu k nemu v smerovacích tabuľkách}
+\renewcommand{\thefootnote}{\arabic{footnote}}
+%TODO overit ci synchronous lora mesh je flooding
 
 \chapter{Vlastná implementácia}
 Ako sme už spomínali v predchádzajúcej kapitole, nami vytvorený protokol bude fungovať na základe multi hop flooding. Tento prístup so sebou ale nesie 
@@ -737,9 +794,11 @@ ale hodnota TTL, a to pred každým znovu odoslaním danej správy. Pokiaľ by u
 správu nebude u seba ani ukladať. Ak by sa počas spracovávania správ na uzle dostala hodnota TTL nejakej senzorovej správy na nulu, tak tuto situáciu tak isto považujeme 
 za neúspešne odoslanie správy. Správe sa nastaví adekvátny stav a nebude sa ďalej spracovávať.
 
-Obsah textových a senzorových správ bude vždy šifrovaný. Na šifrovanie bude použitý šifrovací algoritmus AES, ktorý šifruje bloky dát za pomoci kľúča.
+Obsah textových a senzorových správ bude vždy šifrovaný, pokiaľ nie je správa posielaná na broadcast adresu. Na šifrovanie bude použitý šifrovací algoritmus AES, ktorý šifruje bloky dát za pomoci kľúča.
 Jedna sa o symetrickú šifru, takže zašifrované dáta môžme rovnakým kľúčom neskôr dešifrovať. To ponúka možnosť aby si určitá skupina používateľov vytvorila vlastný 
 šifrovací kľúč a iba oni budú môcť dešifrovať správy, ktoré budú vytvorené za použitia tohto kľúča. Ostatní účastníci siete obsah správ nebudú schopní dešifrovať.
+
+V protokole bude možné odosielať správy na broadcast adresu. Tieto správy budú prijaté každým uzlom.
 
 \section{Implementácia protokolu}
 %TODO tieto veci trsoku upravit, a pripadne presunut o kapitolu vyssie lebo to je skor popius ako implementacia
@@ -848,16 +907,15 @@ Pri pokuse o odoslanie môže dôjsť k situácií, kedy práve niekto iný vysi
 
 Po dokončení implementácie hlavnej funkcionality sme ju mohli otestovať. Na zariadeniach Armachat sme vytvorili jednoduché rozhranie, 
 ktoré zobrazuje na displeji informácie o novo prijatej správe. Taktiež môžme využiť klávesnicu zariadenia, na napísanie vlastnej správy a jej odoslanie.
-Ako toto rozhranie vyzeralo, je možné vidieť na obrázku \ref{fig:armRec}.
-Na obrázku môžme vidieť, že zariadenia prijalo správu od odosielateľa s adresou 0xA1BC, ktoré bolo v tomto prípade druhé Armachat zariadenie.
-
+Na obrázku \ref{fig:armRec} môžme vidieť, že zariadenie prijalo správu od odosielateľa s adresou 0xA1BC, ktoré bolo v tomto prípade druhé Armachat zariadenie.
+\newpage
 \begin{figure}
 	\centering
 	\includegraphics[width=0.6\textwidth]{Figures/armRec.jpg}
 	\caption{Rozhranie zariadenia Armachat}
 	\label{fig:armRec}
 \end{figure}
-\newpage
+
 Okrem obsahu správy, môžme vidieť hodnoty SNR a RSSI, s ktorými zariadenie správu prijalo, hodnotu max hop, ktorá predstavuje počet preskokov a hodnotu initial max hop, 
 ktorá predstavuje pôvodný maximálny počet preskokov. Na základe rovnosti týchto dvoch hodnôt, môžme usúdiť, že správa prešla medzi dvoma zariadeniami bez toho aby prešla 
 cez nejaké iné tretie zariadenie. Na spodku displeja môžme vidieť identifikátor prijatej správy.

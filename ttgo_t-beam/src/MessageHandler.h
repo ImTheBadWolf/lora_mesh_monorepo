@@ -30,7 +30,7 @@ class MessageHandler {
 
   public:
     MessageHandler();
-    byte* createSensorMessage(uint16_t destinationAddress, uint32_t& byteArraySize, String message);
+    byte* createSensorMessage(uint16_t destinationAddress, uint32_t& byteArraySize, String message, uint16_t ttlIn = DEFAULT_TTL);
     byte* createHeader(uint16_t destinationAddress, uint16_t senderAddress);
 };
 

@@ -20,7 +20,8 @@
 
 \ThesisAssignmentFileName{ThesisSpecification_OZA0016.pdf}
 
-\Acknowledgement{TODO podakovanie}
+\Acknowledgement{Rád by som sa poďakoval svojmu vedúcemu diplomovej práce pánovi Mgr. Ing. Michalovi Krumniklovi, Ph.D. za 
+odborné vedenie, konzultácie a podnety k diplomovej práci.}
 
 \CzechAbstract{TODO Tohle je český abstrakt, zbytek odstavce je tvořen výplňovým textem. Naší si rozmachu potřebami s posílat v poskytnout ty má plot. Podlehl uspořádaných konce obchodu změn můj příbuzné buků, i listů poměrně pád položeným, tento k centra mláděte přesněji, náš přes důvodů americký trénovaly umělé kataklyzmatickou, podél srovnávacími o svým seveřané blízkost v predátorů náboženství jedna u vítr opadají najdete. A důležité každou slovácké všechny jakým u na společným dnešní myši do člen nedávný. Zjistí hází vymíráním výborná.}
 
@@ -40,6 +41,8 @@
 \AddAcronym{SNR}{Signal to Noise ratio - Pomer signálu k šumu}
 \AddAcronym{RSSI}{Received Signal Strength Indicator - Miera sily signálu}
 \AddAcronym{API}{Aplication Programming Interface - Rozhranie aplikácie}
+\AddAcronym{LPWAN}{Low Power Wide Area Network}
+\AddAcronym{FEC}{Forward Error Correction}
 
 
 \addbibresource{biblatex.bib}
@@ -58,7 +61,7 @@
 V dnešnej dobe sa čoraz viac stretávame s pojmom IoT alebo internet vecí. Jedna sa o lokálne siete, zložené z fyzických zariadení, ktoré tvoria uzly siete.
 Zariadenia môžu byť jednoduché senzory na monitorovanie nejakej fyzikálnej veličiny, domáce spotrebiče, vozidla, prípadne 
 zariadenia, ktoré je možné ovládať na diaľku. Zariadenia tvoria sieť, v ktorej si môžu medzi sebou posielať 
-dáta a informácie.
+dáta.
 
 K realizácií tejto siete je potrebné mať niečo, čo by zariadenia spájalo a umožňovalo im komunikáciu. Veľmi používanou technológiou
 v tejto oblasti je práve technológia LoRa, ktorá umožňuje bezdrôtovú komunikáciu na veľmi veľké vzdialenosti.
@@ -97,13 +100,13 @@ Technológii využívajúcich LPWAN siete je viacero. Medzi tie najznámejšie p
 
 \section {LoRa}
 LoRa je proprietárna technológia na bezdrôtový prenos dát za pomoci rádiových vĺn.
-Používa bez-licenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou, a poskytuje rádiový prenos na veľkú vzdialenosť s nízkou spotrebou energie.
-V otvorenom priestranstve môže mať rádiový prenos dosah až 10--15 km. LoRa má však veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
-Rýchlosti prenosu sa pohybujú medzi 0,3 až 37,5 kbps.
+Používa bez-licenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou \cite{loraRegionalParameters}, a poskytuje rádiový prenos na veľkú vzdialenosť s nízkou spotrebou energie.
+V otvorenom priestranstve môže mať rádiový prenos dosah až 10--15 km \cite{loraDoc}. LoRa má však veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
+Rýchlosti prenosu sa pohybujú medzi 0,3 až 37,5 kbps v závislosti na vybraných parametroch.
 
 Vďaka týmto aspektom je vhodná pre použitie v IoT senzorových sieťach, kde sa často vyskytujú senzory poháňané batériami a je potrebné aby vydržali dlhú dobu 
-bez výmeny batérií. Okrem toho senzory väčšinou odosielajú veľmi malý obsah dát a dáta posielajú iba v určitých intervaloch (napr. raz za hodinu), 
-takže nízka prenosová rýchlosť v tomto prípade nie je až tak veľkým problémom.
+bez výmeny batérií. Okrem toho senzory väčšinou odosielajú veľmi malý obsah dát a dáta posielajú iba v určitých časových intervaloch (napr. raz za hodinu), 
+takže nízka prenosová rýchlosť v tomto prípade nie je až tak veľkou limitáciou.
 
 Na prenos dát v LoRa, je použitá proprietárna frequency hopping chirp spread-spectrum modulácia -- modulácia rozprestreného spektra s preskokom frekvencií, pri ktorej sú prenášané dáta kódovane do symbolov 
 a každý vysielaný symbol je prenášaný takzvaným chirp signálom, do ktorého sa daný symbol moduluje.
@@ -111,7 +114,7 @@ a každý vysielaný symbol je prenášaný takzvaným chirp signálom, do ktor�
 Chirp signál ma konštantnú amplitúdu ale mení svoju frekvenciu lineárne s časom. 
 Frekvencia sa mení v rozmedzí od spodnej hranice frekvenčného pásma, po hornú hranicu frekvenčného pásma.
 Po dosiahnutí hraničnej frekvencie sa frekvencia vráti na opačnú hranicu a proces sa opakuje.
-Frekvenčné pásmo, v ktorom sa chirp signál prenáša je určené vybranou šírkou pásma -- bandwidth.
+Frekvenčné pásmo, v ktorom sa chirp signál prenáša je určené vybranou šírkou pásma.
 Graf frekvenčnej charakteristiky a postupné zvyšovanie frekvencie chirp signálu môžme vidieť na Obr. \ref{fig:loraSymbols}.
 \begin{figure}
 	\centering
@@ -162,7 +165,7 @@ Ukážku môžme vidieť na Obr. \ref{fig:loraModulation}.
 \end{figure}
 
 \section{LoRa paket}
-Štruktúra LoRa paketu môže byť závislá od daného použitia. Bežné sa ale stretávame s LoRa paketom, zloženým z preambuly, dát a kontrolného súčtu. Maximálna 
+Štruktúra LoRa paketu môže byť závislá od daného použitia. Bežné sa ale stretávame s LoRa paketom, zloženým z preambuly, dát a kontrolného súčtu. Pričom maximálna 
 povolená dĺžka dát je 255 bajtov.
 
 Preambula slúži na synchronizáciu prijímacieho zariadenia. Je tvorená niekoľkými opakovaniami prázdneho chirp signálu, ktorý predstavuje symbol s hodnotou 0. 
@@ -172,7 +175,7 @@ Na Obr. \ref{fig:loraModulation} môžme vidieť, že na preambulu boli použit�
 Prijímacie zariadenie číta prijaté symboly v určitom časovom intervale -- okne. Tento interval sa ale nemusí zhodovať s intervalom, ktorý bol použitý pri vysielaní daných symbolov.
 Je preto potreba synchronizovať prijímacie zariadenie aby hodnoty symbolov boli správne interpretované.
 
-Zariadenie po prijatí nového paketu očakáva, že na začiatku bude preambula definovanej dĺžky. Ak z paketu prečíta počet symbolov rovnakej hodnoty, zhodný 
+Zariadenie po prijatí nového paketu očakáva, že na začiatku paketu bude preambula definovanej dĺžky. Ak z paketu prečíta počet symbolov rovnakej hodnoty, zhodný 
 s definovanou dĺžkou preambuly, predpokladá že sa jedná o preambulu a synchronizuje čítacie okno tak aby bolo zarovnané so symbolmi preambuly. Tzn. tak, aby symboly preambuly boli 
 prečítané ako symbol 0. 
 
@@ -226,7 +229,7 @@ Avšak niektoré LoRa modemy umožňujú nastaviť aj nižšie hodnoty rozpresti
 
 Používanie rozprestieracích faktorov prináša výhodu v podobe ortogonality správ vysielaných s rôznymi rozprestieracími faktormi. 
 To znamená, že prijímač dokáže správne prijať a dekódovať správu poslanú s rozprestieracím faktorom X aj 
-keď sa vysielaná správa časovo prekrýva s inou vysielanou správou s iným rozprestieracím faktorom.
+keď sa vysielaná správa časovo prekrýva s inou vysielanou správou s iným rozprestieracím faktorom Y.
 
 LoRa obsahuje korekciu chýb spôsobených rušením. Využíva k tomu samo-opravný kód -- forward error correction (FEC), pri ktorom 
 sa ku prenášaným dátam pridávajú korekčné bity. Tieto bity sú potom na prijímacej strane použité na detekciu a prípadnú opravu chyby ak k nejakej došlo vplyvom rušenia.
@@ -254,9 +257,9 @@ Rýchlosť prenosu dát (Data rate -- DR) môžme vyjadriť vzťahom:
 Technológia LoRa je definovaná len na fyzickej vrstve. Na používanie LoRa v IoT sieťach sú však potrebné aj vyššie vrstvy sieťového modelu.
 K tomu vznikol protokol LoRaWAN, ktorý je spravovaný organizáciou LoRa Alliance \cite{lora}.
 
-LoRaWAN definuje komunikačný protokol a architektúru sieti. Siete používajú hviezdicovú topológiu, prípadne topológiu hviezdu hviezd, kde 
+LoRaWAN definuje komunikačný protokol a architektúru IoT sieti. Siete používajú hviezdicovú topológiu, prípadne topológiu hviezdu hviezd, kde 
 centrálnym uzlom je LoRaWAN brána -- gateway, ktorá je pripojená k internetu a pevnému napájaniu. Ostatne uzly siete posielajú dáta do tejto brány, 
-ktorá ich potom preposiela na internet. Tam su už dáta dostupné odkiaľkoľvek.
+ktorá ich potom preposiela na internet. Tam sú už dáta dostupné odkiaľkoľvek.
 
 LoRaWAN definuje tri základne triedy zariadení, ktoré sa v sieti vyskytujú. Triedy špecifikujú funkciu zariadenia a jeho vlastnosti.
 Sú nimi triedy A, B a C, kde do triedy A spadajú zariadenia väčšinou poháňané batériami, ktoré po odvysielaní svojich dát otvárajú dve prijímacie okna, 
@@ -266,7 +269,7 @@ Zariadenia z triedy C môžu prijímať neustále. Z tohto dôvodu majú vyšši
 TODO tu este zo tri styri  vety aby strana nekoncila prazdnym miestom
 
 \section{Legislatíva}
-V Európe sa k frekvenčnému pásmu používaného v technológií LoRa viažu určité obmedzenia. 
+V Európe sa k frekvenčnému pásmu používaného pri technológií LoRa viažu určité obmedzenia. 
 Obmedzenia sa týkajú používania fyzického média. Regulácia určuje maximálnu povolenú dobu, v ktorú môže vysielač na daných frekvenciách vysielať 
 v rámci jednej hodiny a maximálny vysielací výkon, akým môže signal vysielať.
 
@@ -377,13 +380,13 @@ Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
   \subfloat[\centering TTGO LoRa32]{{\includegraphics[width=0.4\textwidth]{Figures/LILYGO-TTGO-LoRa32-V1.png} }}
   \qquad
   \subfloat[\centering TTGO T-beam]{{\includegraphics[width=0.35\textwidth]{Figures/ttgo-tbeam.jpg} }}
-  \caption{Mikrokontroléry TTGO}
+  \caption{Mikrokontroléry TTGO. Prevzaté z \cite{lilygo}}
   \label{fig:ttgo-moduly}
 \end{figure}
 \newpage
 
 \subsection{Raspberry Pi Pico RP2040}
-Mikrokontrolér od známej organizácie Raspberry Pi, založený na dvoj-jadrovom Arm procesore. 
+Mikrokontrolér od známej organizácie Raspberry Pi \cite{rpiOrg}, založený na dvoj-jadrovom Arm procesore. 
 Existuje verzia s Wi-Fi modulom aj bez. Na programovanie sa využíva jazyk C alebo MicroPython, 
 prípadne derivát MicroPythonu -- CircuitPython. V tejto práci bude použitý práve CircuitPython.
 
@@ -398,12 +401,12 @@ Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.4\textwidth]{Figures/armachat.jpg}
-	\caption{Zariadenie Armachat}
+	\caption{Zariadenie Armachat. Prevzaté z \cite{armachatObr}}
 	\label{fig:armachat}
 \end{figure}
 
 \subsection{Raspberry Pi 2B}
-Jednodoskový štvor-jadrový počítač vytvorený organizáciou Raspberry Pi.
+Jednodoskový, štvor-jadrový počítač vytvorený organizáciou Raspberry Pi.
 
 Zariadenie obsahuje eternetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
 Počítač sam o sebe neobsahuje žiaden modul a tak pre prácu s LoRa bude pridaný RFM96W modul pripojený do vstupno-výstupných pinov počítača.
@@ -415,20 +418,17 @@ Vďaka tomu, že CircuitPython je možne spojazdniť aj na Raspberry Pi, bude mo
 
 
 \chapter{Existujúce riešenia}
-Téma mesh sietí je v tejto dobe veľmi aktuálna a vývojári sa snažia vytvoriť rôzne riešenia, ktoré by boli vhodné pre rôzne účely.
-
-Výskumu od Ochoa et al. \cite{8115793} sa zaoberal porovnaním energetickej spotreby LoRa topológii typu hviezda, 
-voči topológii typu mesh. Z tohto výskumu môžme usúdiť, že topológia typu mesh dosahuje menšiu energetickú spotrebu pri 
-použití v rozsiahlejších sieťach 
+Téma mesh sietí je v tejto dobe veľmi aktuálna a vývojári sa snažia vytvoriť rôzne riešenia, ktoré by nahradili aktuálne používane 
+prístupy topológie hviezda v IoT sieťach. Použitie mesh topológie môže so sebou prinášať rôzne výhody oproti bežne zaužívaným topológiam typu hviezda.
 
 Vo výskume od Ochoa et al. \cite{8115793} porovnávali spotrebu energie medzi 
-topológiou typu mesh a hviezdicovou topológiou v sieti LoRa. A z týchto štúdií možno vyvodiť záver, že je viac
-efektívnejšie, z hľadiska spotreby energie, použiť topológiu mesh pre rozsiahlejšie siete. 
+topológiou typu mesh a hviezdicovou topológiou v sieti LoRa. A z týchto štúdií možno vyvodiť záver, že pre rozsiahlejšie siete je viac
+efektívnejšie, z hľadiska spotreby energie, použiť topológiu mesh. 
 
 Okrem toho je možné optimalizovať výber rádiových nastavení v súlade s hustotou siete tak, 
-aby sa ešte viac optimalizovala energia v sieťach typu mesh.
+aby sa v mesh sieťach ešte viac optimalizovala spotreba energie.
 
-Existujú rozvinuté projekty ako napríklad Meshtastic, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť 
+Existujú rozvinuté projekty ako napríklad Meshtastic, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť na miestach bez inej dostupnej konektivity, 
 za použitia lacných zariadení.
 
 Ďalším zaujímavým projektom je Armachat \cite{armachat}, ktorý ponúka možnosť komunikácie v prípade nedostupnosti ostatných sieti, napríklad po nejakej prírodnej alebo inej katastrofe.
@@ -439,7 +439,7 @@ Originálny projekt avšak sám o sebe nepodporuje využívanie mesh topológie.
 v projekte Armachat využívať mesh sieť projektu Meshtastic.
 
 \section{LoRa mesher}
-LoRaMesher \cite{loramesher} je knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieti.
+LoRaMesher \cite{loramesher} je C++ knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieťach.
 
 Na smerovanie v sieti sa používa distance vector routing protokol. Tento protokol vyberá cestu, kadiaľ bude správa v sieti preposlaná od odosielateľa k príjemcovi, na základe 
 najlepšej cesty. Najlepšiu cestu definuje ako cestu s najmenším počtom hopov -- preskokov medzi uzlami v mesh sieti.
@@ -452,7 +452,7 @@ LoRaMesher používa FreeRTOS, čo je operačný systém reálneho času. Takét
 FreeRTOS je použitý na zabezpečenie plánovania úloh. Rozličné úlohy sa starajú o prijatie a odoslanie paketov, iné úlohy sa starajú o samotne 
 spracovanie prijatých paketov.
 
-LoRaMesher dokáže nájsť novo vytvorené uzly v sieti vďaka smerovaciemu protokolu. Pri odoslaní správ čaká na prijatie potvrdzujúcej -- ACK správy, ktorá potvrdzuje, 
+LoRaMesher dokáže nájsť novo vytvorené uzly v sieti vďaka smerovaciemu protokolu. Pri odoslaní správ čaká na prijatie potvrdzujúcej ACK správy, ktorá potvrdzuje, 
 že správa bola prijatá a tým zaisťuje spoľahlivosť. Správy väčšie ako 222 bajtov rozdeľuje na viacero správ, ktoré pošle postupne.
 
 \section{Meshtastic}
@@ -471,7 +471,7 @@ Meshtastic poskytuje možnosť pripojenia sa k oficiálnemu meshtastic mqtt brok
 tak rozšíriť dosah siete.
 
 \section{LoRaBlink}
-Ďalší multi-hop protokol, ktorý požíva časovú synchronizáciu medzi uzlami. Časová synchronizácia definuje sloty, v ktorých môže uzol pristupovať ku prenosovému médiu a 
+Ďalší multi-hop protokol, ktorý používa časovú synchronizáciu medzi uzlami. Časová synchronizácia definuje sloty, v ktorých môže uzol pristupovať ku prenosovému médiu a 
 vysielať svoje dáta. Správy sa sieťou šíria pomocou multi-hop flooding.
 
 Sieť sa skladá z jedného uzlu, ktorý plní rolu takzvaného datasinku (gateway alebo brána) a ostatných uzlov. Uzly siete posielajú dáta do datasinku alebo dáta z neho prijímajú.
@@ -490,8 +490,11 @@ Takto tvorená sieť avšak vyžaduje existenciu nejakého hlavného uzlu (datas
 Pymesh je súčasťou Pycom \cite{pycom} ekosystému. Tento ekosystém je určený na vývoj IoT systémov. Ponúka rôzne zariadenia, ktoré su určené na použitie s týmto 
 ekosystémom. Zariadenia obsahujú WiFi, bluetooth a LoRa, prípadne SigFox moduly. Zariadenia je možné rozšíriť o rôzne moduly so senzormi, ktoré rozširujú ich schopnosti.
 
-PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v roli gateway alebo bežného uzla. Uzly typu gateway su označované ako Border Routers a prepájajú LoRa sieť s 
-internetom. Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
+PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway su označované ako Border Routers a prepájajú LoRa sieť s 
+internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncove 
+zariadenia.
+
+Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
 Aby sa zabránilo takýmto situáciám, je použitá metóda Listen Before Talk, pri ktorej sa pred vysielaním signálu overí, či nie je v sieti už niekto iný, kto by práve 
 vysielal. Pokiaľ áno, tak sa posielaná správa vyšle neskôr.
 
@@ -571,7 +574,7 @@ Obsah správ v sieti bude šifrovaný šifrovacím algoritmom AES.
     \hline
     Mobilita uzlov & Áno\footnotemark[7] & Áno & Áno\footnotemark[1] & Áno\footnotemark[7] & Áno\footnotemark[1] & Áno\\
     \hline
-    Smerovanie & \makecell{Distance \\ Vector} & Flooding & Flooding & \makecell{Distance \\ Vector} & Flooding & Flooding\\
+    Smerovanie & \makecell{Distance \\ Vector} & Flooding & Flooding & \makecell{Distance \\ Vector} & TODO & Flooding\\
     \hline
     Ad-hoc komunikácia & Áno & Áno & Nie & Áno & Nie & Áno \\
     \hline
@@ -589,15 +592,13 @@ Obsah správ v sieti bude šifrovaný šifrovacím algoritmom AES.
 Ako sme už spomínali v predchádzajúcej kapitole, nami vytvorený protokol bude fungovať na základe multi hop flooding. Tento prístup so sebou ale nesie 
 niekoľko nevýhod, ktoré by sme mali zohľadniť pri navrhovaní implementácie.
 
-Jednou z nevýhod je, že ak pošleme niekam správu, a destinácia práve nie je v dosahu, tak by sme správu prišli. Tento problém vyriešime tak, 
+Jednou z nevýhod je, že ak pošleme niekam správu, a destinácia práve nie je v dosahu, tak by sme o správu prišli. Tento problém vyriešime tak, 
 že odosielateľ si bude odoslané správy ukladať a v prípade, že sa nepodarí správu doručiť, môže ju opätovne 
 odoslať niekedy neskôr. To, že sa správu nepodarilo doručiť do destinácie, zistíme vďaka potvrdzovacím ACK správam. Tieto správy sa odosielajú v opačnom smere ako správa, ktorú potvrdzujeme. 
 
 Ďalším z problémov môže byť potenciálne zahltenie siete správami. Keby každý uzol v sieti preposielal ďalej každú správu, ktorú príjme, tak by sme sa rýchlo dostali 
 do stavu kedy by množstvo uzlov preposielalo rovnaké správy a sieť by sa tym pádom zahltila.
-Riešenie tohto problému bude spočívať v niekoľkých procesoch ako stavu zahltenia predchádzať. Tieto procesy si bližšie popíšeme v nasledujúcej kapitole.
-%TODO proces nieje spravne slovo, najst dake lepsie. Also nezabudnut referencovat na tuto vetu a popisat v dalsej kapitole ako som to vyriesil (rebroadcast iba spravy ktoru som nevidel, maxhop,ttl, stav DELETED, 
-% overenie ci maxhop je mensi ako currentmaxhop predtym, ako spravu zahodim atd....)
+Riešenie tohto problému bude spočívať v niekoľkých procesoch ako stavu zahltenia predchádzať. Tieto procesy si bližšie popíšeme v kapitole implementácie.
 
 Implementácia sa bude deliť na dve verzie. Jedna verzia, implementovaná v CircuitPython, bude určená pre výkonnejšie zariadenia. Táto implementácia bude obsahovať aj webové rozhranie na 
 obsluhu, posielanie a prijímanie sprav. Webové rozhranie avšak pôjde využiť len na zariadeniach, ktoré podporujú WiFi prípadne ethernet.
@@ -816,7 +817,7 @@ správy, vykonávame iba pri správach v stave nová a odoslaná. Spomínali sme
 ktorá má nastavenú vyššiu prioritu, bude vykonávať opakované znovu odosielanie správy, aj keď jej časový limit ešte nebol dosiahnutý. Tým dosiahneme toho, že správa sa 
 skôr odošle a do destinácie by mala v ideálnom prípade doraziť skôr ako správa s nižšou prioritou.
 
-Spomínali sme, že môže dôjsť k problému zahltenia siete, keby každý uzol v sieti preposielal všetky správy, ktoré príjme. Spôsob akým sme vzniku tohto problému zabránili 
+Spomínali sme tiež, že môže dôjsť k problému zahltenia siete, keby každý uzol v sieti preposielal všetky správy, ktoré príjme. Spôsob akým sme vzniku tohto problému zabránili 
 je práve to, že keď uzol príjme správu, ktorú už ma u seba uloženú, tak u seba tuto správu označí ako zmazanú ( stav zmazaná ) a nebude ju ďalej posielať. 
 Správy v zmazanom stave niesu ale ihneď vymazané z pamäti. Miesto toho sa im nastavuje časový interval a až po tom čo uplynie tento interval su správy skutočne vymazané z pamäti. 
 Vďaka tomu, že si držíme v pamäti správy aj keď su považované za zmazané, môžme overiť či novo prijatá správa nie je náhodou jedná z tých zmazaných. Ak áno tak novú 
@@ -853,8 +854,8 @@ Po implementácii triedy MessageQueueItem sme mohli začať implementovať samot
 kde kľúčom je identifikátor správy, a hodnota pod daným kľúčom je inštancia triedy MessageQueueItem. To nám umožní rýchlo vyhľadávať správy na základe jej identifikátora. 
 Tento slovník sme pomenovali message queue.
 
-Hlavný proces protokolu bude pozostávať z cyklu, v ktorom sa najskôr skontroluje či sme náhodou neprijali nový LoRa paket a následne sa prejdú všetky správy z message queue a ak je to 
-potrebné tak sa spracujú. K tomu vznikli dve hlavné funkcie. Funkcia receive(), ktorá skontroluje či sme neprijali nový LoRa paket a funkcia tick(), v ktorej sa prejdú všetky správy.
+Hlavný proces protokolu bude pozostávať z cyklu, v ktorom sa najskôr skontroluje či sme náhodou neprijali nový LoRa paket a následne sa prejdú všetky správy z message queue. Ak je to 
+potrebné tak sa určité správy spracujú. K tomu vznikli dve hlavné funkcie. Funkcia receive(), ktorá skontroluje či sme neprijali nový LoRa paket a funkcia tick(), v ktorej sa prejdú všetky správy zo zoznamu.
 
 Funkcia receive() prečíta novo prijatý paket z LoRa a následne overí, či daný paket spĺňa dĺžku aspoň 12 bajtov. Vychádza to z toho, že všetky správy nášho protokolu obsahujú predom definovanú 
 hlavičku paketu (viď. Tab. \ref{tab:packetHeader} ), ktorá ma veľkosť 12 bajtov. Ak je paket kratší ako 12 bajtov, môžme s istotou povedať, že nejde o správu nášho protokolu a teda ho nemusíme ďalej spracovávať. Po kontrole dĺžky paketu, následuje overenie 
@@ -922,7 +923,7 @@ cez nejaké iné tretie zariadenie. Na spodku displeja môžme vidieť identifik
 
 Na ďalšom obrázku \ref{fig:armRec2} môžme vidieť, že rozdiel medzi hodnotami max hop a initial max hop je 1. Indikuje to, že správa spravila preskok cez ďalšie zariadenie predtým ako 
 bola doručená na cieľové zariadenie. Tento test sme vykonali tak, že sme tri zariadenia rozmiestnili s určitou vzdialenosťou medzi nimi, tak aby sme docielili preskok cez jedno zariadenie. 
-Zariadenia mali nastavené adresy 0x0001, 0x0002 a 0xA1BC. Správa bola odoslaná zo zariadenia 0xA1BC na zariadenie 0x0001.
+Zariadenia mali nastavené adresy 0x0001, 0x0002 a 0xA1BC. Správa bola odoslaná zo zariadenia 0xA1BC na zariadenie 0x0002.
 
 Taktiež si môžme všimnúť zmenu v podobe skrátenia názvov atribútov max hop a initial max hop, z dôvodu, že sa na displeji nezmestili do jedného riadku.
 Okrem toho je na obrázku vidieť informačnú správu v podobe žltého textu na samom spodku displeja. V tejto informačnej správe sa zobrazujú 
@@ -955,12 +956,14 @@ textový reťazec \uv{Ahoj}. V prvých 12 bajtoch, vidíme hlavičku paketu. V �
   \setlength\tabcolsep{2pt}
 	\centering
   \caption{Ukážka bajtov odoslaného paketu}
-  \begin{tabular}{ c c c c c c c c c c c c | c c | c c c c }
+  \begin{tabular}{ c c | c c | c c c c |c c |c | c || c | c | c c c c }
+    \multicolumn{12}{c ||}{Hlavička} & \multicolumn{6}{c}{Dátový rámec} \\
+    \midrule
     0x00 & 0x02 & 0xA1 & 0xBC & 0xEF & 0x42 & 0x5D & 0xC2 & 0xF2 & 0x64 & 0x01 & 0x00 & 0x02 & 0x03 & 0xA4 & 0x4A & 0x33 & 0x56 \\
     \midrule
     \multicolumn{2}{c |}{\rotatebox[origin=c]{ 90}{Destinácia}} & \multicolumn{2}{c |}{\rotatebox[origin=c]{ 90}{Odosielateľ}} &
     \multicolumn{4}{c |}{ID správy} & \multicolumn{2}{c |}{\rotatebox[origin=c]{ 90}{Kontrólny súčet}} &
-    \multicolumn{1}{c |}{\rotatebox[origin=c]{ 90}{Typ správy}} & \multicolumn{1}{c |}{\rotatebox[origin=c]{ 90}{Priorita správy}} &
+    \multicolumn{1}{c |}{\rotatebox[origin=c]{ 90}{Typ správy}} & \multicolumn{1}{c ||}{\rotatebox[origin=c]{ 90}{Priorita správy}} &
     \multicolumn{1}{c|}{\rotatebox[origin=c]{ 90}{Max hop}} & \multicolumn{1}{c|}{\rotatebox[origin=c]{ 90}{Initial max hop}} & \multicolumn{4}{c}{Šifrovaný obsah správy}\\
   \end{tabular}
   \label{tab:packet}
@@ -969,21 +972,21 @@ textový reťazec \uv{Ahoj}. V prvých 12 bajtoch, vidíme hlavičku paketu. V �
 \newpage
 
 \section{Implementácia API pre webové rozhranie}
-Pri používaní nášho protokolu má používateľ možnosť využiť webové rozhranie, cez ktoré môže ovládať zariadenie a 
+Pri používaní nášho protokolu má používateľ možnosť využiť webové rozhranie, cez ktoré je možné ovládať zariadenie a 
 pracovať s naším LoRa protokolom. Používateľ ma možnosť vytvárať alebo prijímať nove správy, ktoré sa zobrazujú na webovej stránke.
-Okrem toho môže cez webové rozhranie konfigurovať rôzne nastavenia týkajúce sa nášho protokolu, ako napríklad adresu zariadenia 
+Okrem toho je možné cez webové rozhranie konfigurovať rôzne nastavenia týkajúce sa nášho protokolu, ako napríklad adresu zariadenia 
 alebo nastavenie LoRa parametrov.
 
 K tomu aby bolo možné cez webové rozhranie ovládať zariadenie a protokol, je nutné najskôr implementovať nejaké API. 
-Cez API budeme komunikovať so zariadením z webového rozhrania. Toto API bude bežať na serveri, ktorý bude bežať na zariadení 
+Cez API budeme komunikovať so zariadením z webového rozhrania. Toto API bude bežať na serveri, ktorý pobeží na zariadení 
 spolu s naším protokolom. API bude realizované prostredníctvom klasických HTTP požiadavkov.
 
 Najpodstatnejšími časťami API sú funkcie, ktoré nám umožnia prijímať alebo odosielať správy. K tomu vznikli dve 
-API prístupové body -- routy \uv{/api/messages} a \uv{/api/send text message}.
+API prístupové body -- takzvané routy. \uv{/api/messages} a \uv{/api/send text message}.
 
 Prvá routa slúži na získanie správ, ktoré boli prijaté na zariadení. Je volaná prostredníctvom HTTP GET požiadavku a 
 vracia zoznam obsahujúci entity jednotlivých správ. Každá správa je reprezentovaná JSON objektom, ktorý obsahuje 
-iba potrebné informácie o správe, k tomu aby bolo možné zobrazovať správy na webovej stránke. Štruktúru tohto JSON 
+iba potrebné informácie o správe, k tomu aby bolo možné zobrazovať správy na webovej stránke. Štruktúru tohoto JSON 
 objektu môžme vidieť na ukážke \ref{fig:messageObj}.
 
 \begin{figure}[h!]
@@ -1001,7 +1004,7 @@ opačnom prípade vráti chybovú hlášku. Z dôvodu limitácie LoRa paketov na
 nie je príliš dlhá a prípadne ju orezať na maximálnu povolenú dĺžku.
 
 Maximálna povolená dĺžka v tomto prípade nie je 255 bajtov ale len 238. Toto je výsledkom toho, 
-že použitá LoRa knižnica povoľuje maximálnu dĺžku paketu 252 bajtov kvôli kompatibilite s inými knižnicami.
+že použitá LoRa knižnica povoľuje maximálnu dĺžku paketu 252 bajtov a to kvôli kompatibilite s inými knižnicami.
 Pri našom protokole je okrem toho v každom LoRa pakete potrebné nejaké miesto ešte rezervovať pre hlavičku paketu a informácie o počte skokov.
 Z toho nám ostáva maximálna dĺžka správy 238 bajtov.
 
@@ -1096,11 +1099,11 @@ neúspešných správach.
     \subfloat[\centering Správa prijala potvrdenie o doručení]{{\includegraphics[width=0.45\textwidth]{Figures/ackDone.png} }}
     \subfloat[\centering Správa neprijala potvrdenie o doručení]{{\includegraphics[width=0.5\textwidth]{Figures/ackFailed.png} }}
   }}
-  \caption{Informačná ikonka pri správach}
+  \caption{Informačná ikonka v pravom dolnom rohu pri správach}
   \label{fig:messageStates}
 \end{figure}
 
-Tlačítko zobrazujúce sa pri neúspešných správach, pridáva možnosť neúspešnú správu skúsiť znovu odoslať. K tomu aby to fungovalo, 
+Tlačítko, zobrazujúce sa pri neúspešných správach, pridáva možnosť neúspešnú správu skúsiť znovu odoslať. K tomu aby to fungovalo, 
 bolo potrebné pridať ďalšiu API routu. Táto routa príjme ako parameter ID správy, ktorú chceme odoslať znovu a správa sa znova odošle.
 
 Stránku nastavení sme voči návrhu rozšírili o ďalšie nastavenia a spolu s tym sme rozšírili aj popis jednotlivých nastavení a čo robia.
@@ -1131,19 +1134,19 @@ nebude pripájať na žiadnu WiFi sieť, ale vytvorí svoju vlastnú.
 \end{wrapfigure}
 
 V našej LoRa mesh sieti sa môžu vyskytovať senzorové uzly, ktoré obsahujú GPS modul. Z toho dôvodu sme pridali do webového rozhrania funkciu, 
-ktorá zobrazí na mape aktuálnu polohu zariadenia. Správy, ktoré chceme aby sa zobrazili ako poloha na mape, musia dodržať určitý formát 
-a to taký, že správa musí obsahovať prefix \uv{GPS:} a následne musia nasledovať GPS súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
-Ako takáto správa s mapou vyzerá, môžme vidieť na obrázku \ref{fig:mobileWeb}. Na integráciu mapy do webového rozhrania bola použitá knižnica Leaflet.js\footnotemark[1].
+ktorá zobrazí na mape aktuálnu polohu zariadenia. Správy, ktoré chceme zobraziť ako polohu na mape, musia dodržať určitý formát 
+a to taký, že správa musí obsahovať prefix \uv{GPS:} a následne musia nasledovať súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
+Ako takáto správa s mapou vyzerá, môžme vidieť na obrázku \ref{fig:mobileWeb}. Na integráciu mapy do webového rozhrania bola použitá knižnica Leaflet.js \cite{leaflet}.
 
 Pri implementácií sme dbali na to, aby bolo možné webové rozhranie plnohodnotne používať aj na mobilných zariadeniach s malými displejmi. Preto sme 
 spravili webové rozhranie responzívne na veľkosť obrazovky. Okrem toho, že sa pri menšej veľkosti obrazovky zmenšujú veľkosti jednotlivých prvkov v rozhraní, 
 mení sa aj celkové usporiadanie prvkov na stránke tak, aby bolo používanie rozhrania prívetivejšie. 
 
-Aby sme odlíšili nami odoslané správy od správ, ktoré sme prijali od nejakého iného uzlu, sme pridali farebné odlíšenie jednotlivých správ. Správy, ktoré sme 
+Aby sme odlíšili nami odoslané správy od správ, ktoré sme prijali od 
+nejakého iného uzlu, bolo pridané farebné odlíšenie jednotlivých správ. Správy, ktoré sme 
 prijali od iného používateľa su zobrazené v sivej farbe. Správy ktoré sme prijali od senzorových uzlov, su zobrazené v žltej farbe. A správy, ktoré sme odoslali 
 my, su modré. Toto farebné odlíšenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy sú zobrazené v zelenej farbe.
 
-\footnotetext[1]{Leaflet.js - https://leafletjs.com/ }
 
 \section{Optimalizácia}
 Po sfunkčnení celej aplikácie sme narazil na problém, v podobe nepostačujúceho miesta na zariadeniach. Dochádzalo k tomu, že ak zariadenie prijalo 
@@ -1152,7 +1155,7 @@ väčšie množstvo správ, tak mu došla pamäť a beh programu sa ukončil.
 V zoznam správ sa držali všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny, a časom ako 
 uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a volná pamäť zariadenia sa postupne znižovala.
 
-Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahne určeného limitu, tak sa z neho odstráni naj poslednejšia správa.
+Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahne určeného limitu, tak sa z neho odstráni najposlednejšia správa.
 Po tejto úprave už nedochádzalo k spomínanému problému.
 
 Ďalším problémom, ku ktorému dochádzalo taktiež z nedostatku pamäti bolo, že pri volaní API na získanie správ zariadeniu došla pamäť a program sa ukončil.
@@ -1170,7 +1173,7 @@ Vďaka tejto optimalizácií už nedochádzalo k problému s pamäťou.
 Implementácia pre Raspberry Pi 2B bola z väčšej časti rovnaká ako tá, pre zariadenia Armachat. Bolo potrebné na Raspberry Pi nainštalovať podporu pre 
 CircuitPython, a následne sme mohli použiť rovnakú implementáciu ako pre Armachat.
 
-Todo Raspberry Pi avšak neobsahuje WiFi modul. Miesto toho ponúka ethernetový port. Preto sme museli upraviť implementáciu tak, 
+Nami použité Raspberry Pi avšak neobsahuje WiFi modul. Miesto toho ponúka ethernetový port. Preto sme museli upraviť implementáciu tak, 
 aby sa nepripájala na WiFi sieť, ale použila vstavané ethernetové pripojenie. A tým pádom bolo tiež potrebné, z webovej stránky nastavení, odstrániť možnosť 
 pridávania WiFi siete.
 
@@ -1181,7 +1184,7 @@ knižnice, ktoré nemali podporu a prispôsobiť implementáciu náhradným kni�
 
 \section{Implementácia pre zariadenia TTGO}
 Z dôvodu menšieho výkonu a hlavne menšej pamäti sme sa rozhodli implementáciu pre TTGO zariadenia zjednodušiť. Keďže zariadenia TTGO nepodporujú 
-CircuitPython, bolo nutne vytvoriť kompletne novú implementáciu v jazyku C plus plus.
+CircuitPython, bolo nutne vytvoriť kompletne novú implementáciu v jazyku C++.
 
 Určili sme, že zariadenia TTGO budu v našej mesh sieti reprezentovať jednoduché uzly, ktoré budu posielať nejaké senzorové dáta. Implementácia preto 
 nebude obsahovať žiadne užívateľské rozhranie, server ani webovú stránku. Implementácia bude obsahovať iba základné funkcie, ktoré sú potrebné pre 
@@ -1195,12 +1198,12 @@ premenných, predtým ako je program preložený a nahraný do zariadenia. Súč
 Implementácia pozostáva z funkcií, ktoré postupne poskladajú hlavičku paketu a k nej pridajú obsah senzorovej správy. Tieto novo vytvorené správy sa uložia do zoznamu 
 a rovnako ako pri plnej verzii programu, sa zoznam správ cyklicky prechádza a správy z neho sa odosielajú, keď nadíde ich čas.
 
-Každá správa je taktiež odosielaná viackrát. Počet koľko krát sa ma správa odoslať je dané konfiguračnou premennou. Keďže táto zjednodušená implementácia nerieši prijaté správy, 
+Každá správa je taktiež odosielaná viackrát. Počet koľko krát sa ma správa odoslať je daný konfiguračnou premennou. Keďže táto zjednodušená implementácia nerieši prijímanie správ, 
 každá správa sa bude opakovane posielať daný počet pokusov aj napriek tomu, že bola daná správa uz preposlaná ďalej nejakým iným uzlom. Po tom čo sa správa odošle 
 daný počet krát, sa správa zoznamu správ odstráni.
 
 Hlavný chod programu pozostáva z cyklu v ktorom sa prechádzajú správy zo zoznamu správ a funkcie, ktorá generuje senzorové dáta. Na zariadení TTGO T-Beam sme použili integrovaný 
-GPS modul, z ktorého získavame GPS súradnice a z nich tvoríme obsah senzorovej správy. Zariadenie TTGO LoRa32 ma zas integrovaný hall effect senzor, ktorý sníma 
+GPS modul, z ktorého získavame GPS súradnice a z nich tvoríme obsah senzorovej správy. Zariadenie TTGO LoRa32 ma integrovaný hall effect senzor, ktorý sníma 
 úroveň magnetického poľa. Na tomto zariadení generujeme senzorové správy, ktorých obsahom je úroveň magnetického poľa plus čas ako dlho je daný senzor v prevádzke.
 
 Funkcia na vygenerovanie novej senzorovej správy je volaná v určitých intervaloch. Tento interval je možne nastaviť konfiguračnou premennou. Výsledkom je tak 
@@ -1228,25 +1231,29 @@ Tento limit 10 správ, však nemusí znamenať až taký problém. Pokiaľ ma po
 bežiacej v prehliadači používateľa. Ak dôjde k dosiahnutiu maximálneho limitu správ tak sa z pamäte zariadenia odstráni najstaršia správa. V pamäti prehliadača na webovej aplikácii 
 ale táto správa ostane. Takže používateľ je schopný vidieť aj správy staršie ako posledných 10 správ.
 
-Na zariadeniach Armachat bez WiFi modulu je možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu nie je taký problém.
+Na zariadeniach Armachat bez WiFi modulu je možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu taktiež nie je taký problém.
 
 Veľkou limitáciou našej implementácie je, že CircuitPython nemá podporu pre externé prerušenia. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
-nepracuje veľmi efektívne. Keď aktuálne LoRa modul prijíma nejaký paket, tak sa pozdrží cely zvyšok bežiaceho programu, až kým sa paket nepríjme celý alebo nedôjde k vypršaniu 
+nepracuje veľmi efektívne. Keď aktuálne LoRa modul prijíma nejaký paket, tak sa pozdrží cely zvyšok bežiaceho programu, až kým sa paket nepríjme a neprečíta celý alebo nedôjde k vypršaniu 
 časového limitu. Toto nam spomaľuje beh programu zakaždým keď je v sieti vysielaný nejaký paket.
 
 Použitá knižnica na ovládanie LoRa modulu so sebou prináša ešte dodatočnú limitáciu. Táto knižnica nesprávne pracuje s LoRa modulom a nie je možné stabilne používať 
 LoRa prenos pokiaľ je nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky zníži. Pri 
-našom testovaní sa nám podarilo úspešne doručiť jednu správu z desiatich pokusov.
+našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z desiatich pokusov.
 
-Chybu v knižnici sme sa snažili bezvýsledne opraviť.
+Chybu v knižnici sme sa snažili opraviť. Jedným z dôvodov prečo ku chybe dochádzalo bol nesprávne nastavený časový limit pre posielanie paketu. Časový limit bol nastavený na 2 sekundy. 
+Avšak, ak sme si zobrali prípad paketu, ktorý by mal veľkosť 100 bajtov a bol vysielaný s rozprestieracím faktorom 12, kódovacím pomerom 4/8, a šírkou pásma 125 kHz, zistili sme 
+že čas potrebný na vyslanie tohto paketu sa blíži k 6 sekundám. Časový limit bol teda nedostačujúci na vysielanie paketov s vyššími rozprestieracími faktormi. Po 
+zvýšení časového limitu v knižnici sme znovu otestovali spoľahlivosť prenosu. Tentokrát sa nam podarilo doručiť 2 správy z 10 pokusov. To avšak stále nie je dostatočné a 
+naznačuje to, že problém je ešte niekde inde. Ten sa nam už ale nepodarilo nájsť.
 
 Zariadenie Raspberry Pi pico s WiFi modulom, je pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií a ma veľa nedostatkov.
-Nie je možné prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nie je možné prepnúť modul do režimu station ak bol 
+Neumožňuje prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nie je možné prepnúť modul do režimu station ak bol 
 už prepnutý do režimu AP. Jediný spôsob ako WiFi modul úspešne prepnúť medzi režimami je tvrdé resetovanie zariadenia. 
 
 Pôvodne sme mali v pláne implementovať štartovací proces zariadenia tak, že najskôr sa zariadenie pokúsi pripojiť k WiFi sieťam ktoré má uložené v zozname a ak sa mu nepodarí 
 pripojiť ku žiadnej z týchto sieti, tak vytvori svoju vlastnú WiFi sieť, na ktorú sa môže používateľ pripojiť. Kvôli chybnému správaniu WiFi knižnice však tento prístup nie je možné 
-realizovať. V momente kedy sa snaží WiFi modul pripojiť na nejakú zo zoznamu WiFi sieti, prepne sa do režimu station. Potom už nie je možné modul prepnúť do režimu AP ak sa nepodari pripojiť 
+realizovať. V momente kedy sa snaží WiFi modul pripojiť na nejakú sieť zo zoznamu WiFi sieti, prepne sa do režimu station. Potom už nie je možné modul prepnúť do režimu AP ak sa nepodari pripojiť 
 k žiadnej zo sieti.
 
 K WiFi knižnici sa viaže ešte jeden problém a to taký, že pokiaľ sa snaží používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojí na WiFi sieť, 

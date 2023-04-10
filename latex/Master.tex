@@ -88,7 +88,7 @@ aby mal bezdrôtový prenos veľký dosah. Z týchto dôvodov sa pri IoT sieťac
 \section {LPWAN}
 LPWAN (Low Power Wide Area Network) je kategória sieti s veľkou rozlohou a nízkou spotrebou energie. Tieto siete sa vyznačujú nízkymi obstarávacími 
 nákladmi a dlhodobou prevádzkou. Siete sú tvorené jednoduchými a často pomerné lacnými zariadeniami, ktoré vďaka nízkej spotrebe energie dokážu pracovať dlhú dobu bez 
-nutnosti pripojenia do elektrickej siete. Zariadenia bývajú napájane batériami a môžu nepretržite fungovať aj niekoľko rokov. V kombinácií so solárnymi panelmi 
+nutnosti stáleho pripojenia do elektrickej siete. Zariadenia bývajú napájane batériami a môžu nepretržite fungovať aj niekoľko rokov. V kombinácií so solárnymi panelmi 
 môže byť ich prevádzka ešte predĺžená. 
 
 Tieto siete sú teda vhodné pre aplikácie, kde je potrebná dlhodobá prevádzka bez nutných servisných zásahov.
@@ -221,7 +221,7 @@ Ostatné LoRa parametre sú vyberané na základe toho ako ďaleko, ako spoľahl
 a dosahom prenosu.
 
 Parameter bandwidth (BW) určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššej šírke pásma sa zvyšuje rýchlosť prenosu, avšak znižuje sa použiteľný dosah.
-Najbežnejšie používané su šírky pásma 125 kHz, 250 kHz a 500 kHz.
+Najbežnejšie používané šírky pásma sú 125 kHz, 250 kHz a 500 kHz.
 
 Rozprestierací faktor -- spreading factor (SF) určuje koľko bitov dát bude prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom 
 zvyšuje alebo znižuje rýchlosť prenosu na úkor zníženia alebo zvýšenia dosahu prenosu. Spreading factor je vo väčšine prípadov možné zvoliť z intervalu 6--12. 
@@ -321,7 +321,7 @@ Ten je pri modemoch série SX126x výrobcom udávaný na 170 dBm, takže sú opt
 \begin{table}[!h]
 	\centering
   \small
-  \setlength\tabcolsep{6pt}
+  \setlength\tabcolsep{4pt}
 	\caption[Parametre Semtech SX modemov]{Parametre Semtech SX modemov}
   \begin{tabular}{c|c|c|c|c|c|c|c|c}
     \toprule
@@ -357,11 +357,11 @@ Na vývoj a testovanie tejto práce boli použité rôzne zariadenia s rôznymi 
 ktoré môžu predstavovať napríklad nejaký senzor, boli použité mikrokontroléry TTGO od výrobcu LILYGO \cite{lilygo}.
 
 Okrem mikrokontrolérov TTGO boli použité aj mikrokontroléry Raspberry Pi Pico a jednodoskový počítač Raspberry Pi.
-Nami použité mikrokontroléry môžu byť neskôr rozšírene o batériu a byť mobilné.
+Nami použité mikrokontroléry môžu byť neskôr rozšírene o batériu a stať sa tak mobilnými.
 
 \subsection{TTGO LoRa32}
 Tento mikrokontrolér je založený na module ESP32. Obsahuje Wi-Fi, bluetooth a LoRa moduly. 
-Konkrétne používa SX1276 LoRa modem.
+Konkrétne obsahuje SX1276 LoRa modem.
 
 Dá sa prepnúť do úsporného režimu spánku, ktorý znižuje spotrebu mikrokontroléru na 0,6 mA.
 Mikrokontrolér obsahuje aj 0,96 palcový čiernobiely displej, ktorý je pripojený cez I2C rozhranie.
@@ -372,7 +372,7 @@ Rovnako používa SX1276 LoRa modem no okrem spomínaných modulov obsahuje aj G
 
 Mikrokontrolér ma na zadnej strane držiak na batériu, z ktorej môže byť napájaný a taktiež aj nabíjací modul 
 pre bezpečné nabíjanie a ochranu lítiových batérií.
-V režime spánku ma spotrebu 0,2 mA. Podporuje pripojenie dodatočného displeju, avšak nami používaný mikrokontrolér tento displej nemá.
+V režime spánku ma spotrebu 0,2 mA. Podporuje pripojenie dodatočného displeju, avšak nami používaný mikrokontrolér tento displej nemal.
 
 Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
 \begin{figure}[h!]
@@ -388,11 +388,10 @@ Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
 \subsection{Raspberry Pi Pico RP2040}
 Mikrokontrolér od známej organizácie Raspberry Pi \cite{rpiOrg}, založený na dvoj-jadrovom Arm procesore. 
 Existuje verzia s Wi-Fi modulom aj bez. Na programovanie sa využíva jazyk C alebo MicroPython, 
-prípadne derivát MicroPythonu -- CircuitPython. V tejto práci bude použitý práve CircuitPython.
+prípadne derivát MicroPythonu -- CircuitPython. V tejto práci bol použitý práve CircuitPython.
 
 Avšak aby bolo možné využívať tieto mikrokontroléry s technológiou LoRa, bolo potrebné pridať k nim nejaký LoRa modul.
 
-%TODO armachat footnote?
 Na implementáciu v tejto práci boli preto zvolené zariadenia Armachat, ktoré kombinujú mikrokontrolér Raspberry Pi Pico s LoRa modulom RFM96W.
 Okrem toho pridávajú dvoj palcový farebný displej a klávesnicu.
 
@@ -409,12 +408,12 @@ Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 Jednodoskový, štvor-jadrový počítač vytvorený organizáciou Raspberry Pi.
 
 Zariadenie obsahuje eternetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
-Počítač sam o sebe neobsahuje žiaden modul a tak pre prácu s LoRa bude pridaný RFM96W modul pripojený do vstupno-výstupných pinov počítača.
+Počítač sam o sebe neobsahuje žiaden modul a tak bol pre prácu s LoRa pridaný RFM96W modul, pripojený do vstupno-výstupných pinov počítača.
 
 Na rozdiel od predchádzajúcich mikrokontrolérov disponuje tento jednodoskový počítač oveľa väčším výkonom a pamäťou, 
-avšak ma oveľa vyššiu spotrebu energie. Z tohto dôvodu bude tento počítač plniť rolu nemobilného uzlu v sieti, ktorý bude pripojený cez ethernet do internetovej siete.
+avšak ma oveľa vyššiu spotrebu energie. Z tohto dôvodu tento počítač plnil rolu nemobilného uzlu v sieti, ktorý bol pripojený cez ethernet do internetovej siete.
 
-Vďaka tomu, že CircuitPython je možne spojazdniť aj na Raspberry Pi, bude možné čast implementácie zdielať medzi Raspberry Pi Pico a Raspberry Pi 2B.
+Vďaka tomu, že CircuitPython je možne spojazdniť aj na Raspberry Pi, bolo možné čast implementácie zdielať medzi Raspberry Pi Pico a Raspberry Pi 2B.
 
 
 \chapter{Existujúce riešenia}
@@ -422,7 +421,7 @@ Téma mesh sietí je v tejto dobe veľmi aktuálna a vývojári sa snažia vytvo
 prístupy topológie hviezda v IoT sieťach. Použitie mesh topológie môže so sebou prinášať rôzne výhody oproti bežne zaužívaným topológiam typu hviezda.
 
 Vo výskume od Ochoa et al. \cite{8115793} porovnávali spotrebu energie medzi 
-topológiou typu mesh a hviezdicovou topológiou v sieti LoRa. A z týchto štúdií možno vyvodiť záver, že pre rozsiahlejšie siete je viac
+topológiou typu mesh a hviezdicovou topológiou v sieti LoRa. A z týchto štúdií možno vyvodiť, že pre rozsiahlejšie siete je viac
 efektívnejšie, z hľadiska spotreby energie, použiť topológiu mesh. 
 
 Okrem toho je možné optimalizovať výber rádiových nastavení v súlade s hustotou siete tak, 
@@ -435,13 +434,13 @@ za použitia lacných zariadení.
 Súčasťou projektu Armachat sú plošné spoje, z ktorých si používateľ poskladá finálne zariadenie.
 Zariadenia Armachat su poháňané mikrokontrolérmi Raspberry Pi Pico, obsahujú LoRa moduly, displej, klávesnicu a ďalšie vymoženosti.
 
-Originálny projekt avšak sám o sebe nepodporuje využívanie mesh topológie. Používa ale rovnakú štruktúru správ ako projekt Meshtastic a vďaka tomu je možné 
+Originálny projekt avšak sám o sebe zatiaľ nepodporuje využívanie mesh topológie. Používa ale rovnakú štruktúru správ ako projekt Meshtastic a vďaka tomu je možné 
 v projekte Armachat využívať mesh sieť projektu Meshtastic.
 
 \section{LoRa mesher}
 LoRaMesher \cite{loramesher} je C++ knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieťach.
 
-Na smerovanie v sieti sa používa distance vector routing protokol. Tento protokol vyberá cestu, kadiaľ bude správa v sieti preposlaná od odosielateľa k príjemcovi, na základe 
+Na smerovanie v sieti používa distance vector routing protokol. Tento protokol vyberá cestu, kadiaľ bude správa v sieti preposlaná od odosielateľa k príjemcovi, na základe 
 najlepšej cesty. Najlepšiu cestu definuje ako cestu s najmenším počtom hopov -- preskokov medzi uzlami v mesh sieti.
 
 K realizácií distance vector smerovania je potrebné udržiavať smerovaciu tabuľku, ktorá obsahuje informácie o ID uzlov, cez ktoré susedné uzly sa dané uzly dajú dosiahnuť a 
@@ -491,7 +490,7 @@ Pymesh je súčasťou Pycom \cite{pycom} ekosystému. Tento ekosystém je určen
 ekosystémom. Zariadenia obsahujú WiFi, bluetooth a LoRa, prípadne SigFox moduly. Zariadenia je možné rozšíriť o rôzne moduly so senzormi, ktoré rozširujú ich schopnosti.
 
 PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway su označované ako Border Routers a prepájajú LoRa sieť s 
-internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncove 
+internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncové 
 zariadenia.
 
 Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
@@ -506,10 +505,8 @@ Takto sa bude paket preposielať, až kým sa nedostane ku uzlu, ktorého susedo
 tabuliek uzlov. Následne môže uzol vyslať pôvodný paket do destinácie.
 
 
-%TODO trochu viac popisat ako funguje
-
 \section{Synchronous LoRa Mesh}
-Tento projekt\cite{synchronouslorameshnetwork} vznikol z potreby získavania real-time dát z podzemných kanalizácií. Tieto dáta sú potrebné k monitorovaniu a predikcií kritických situácií akými 
+Projekt Synchronous LoRa Mesh \cite{synchronouslorameshnetwork} vznikol z potreby získavania real-time dát z podzemných kanalizácií. Tieto dáta sú potrebné k monitorovaniu a predikcií kritických situácií akými 
 sú napríklad záplavy.
 
 LoRaWan však nemá moc veľký dosah do podzemia. Z toho dôvodu by bolo potrebné v podzemných priestoroch implementovať LoRaWan gateway-e, ktoré su ale energeticky náročne, drahé a vyžadujú 
@@ -543,21 +540,21 @@ To pridáva do siete zaťaženie v podobe dodatočných dátových prenosov.
 Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime. To môže byť 
 veľkou limitáciou pri niektorých aplikáciách, kde je potrebná komunikácia v reálnom čase  (napr. chat).
 
-Protokol navrhnutý v tejto práci nebude využívať žiadne smerovacie tabuľky. Vďaka tomu dosiahneme mobility uzlov bez potreby 
-periodických aktualizácií smerovacích tabuliek. Hlavným využitím nášho protokolu je komunikácia v reálnom čase, preto protokol nebude používať 
-žiadnu časovú synchronizáciu ani časové okná vyhradené na komunikáciu, uzly siete tak budu môcť prijímať a odosielať dáta hocikedy.
-To so sebou ale prináša nevýhodu v podobe vyššej spotreby energie.
+Protokol navrhnutý v tejto práci nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá mobilita uzlov bez potreby 
+periodických aktualizácií smerovacích tabuliek. Hlavným využitím nášho protokolu bola komunikácia v reálnom čase, preto protokol nepoužíval 
+žiadnu časovú synchronizáciu ani časové okná vyhradené na komunikáciu, uzly siete tak mohli prijímať a odosielať dáta hocikedy.
+To so sebou ale prinášalo nevýhodu v podobe vyššej spotreby energie.
 
-Funkcionalita navrhnutého protokolu bude, podobne ako niektoré zo spomínaných riešení, fungovať na základe multi hop flooding, kedy sa správa v sieti preposiela cez uzly siete až kým nedorazí do destinácie.
-Správa sa odošle a uzol, ktorý túto správu prijal ako posledný ju prepošle ďalej. Toto sa opakuje na ostatných uzloch v sieti až kým sa správa nedostane do destinácie alebo kym správe nedôjde limit preskokov, prípade TTL.
+Funkcionalita navrhnutého protokolu, podobne ako niektoré zo spomínaných riešení, fungovala na základe multi hop flooding, kedy sa správa v sieti preposielala cez uzly siete až kým nedorazila do destinácie.
+Správa sa odoslala a uzol, ktorý túto správu prijal ako posledný ju preposlal ďalej. Toto sa opakovalo na ostatných uzloch v sieti až kým sa správa nedostala do destinácie alebo kym správe nedošiel limit preskokov, prípade TTL.
 
-Navrhnutý protokol nie je závislý na žiadnych špeciálnych centrálnych uzloch typu gateway, prípadne nejakých riadiacich uzloch. Každý uzol v sieti môže byť jednoduchým uzlom, ktorý bude prijímať a preposielať dáta ďalej.
-Vďaka tomu môžu byť uzly realizované prostredníctvom lacných a malých zariadení.
+Navrhnutý protokol nebol závislý na žiadnych špeciálnych centrálnych uzloch typu gateway, prípadne nejakých riadiacich uzloch. Každý uzol v sieti mohol byť jednoduchým uzlom, ktorý prijímal a preposielal dáta ďalej.
+Vďaka tomu mohli byť uzly realizované prostredníctvom lacných a malých zariadení.
 
-Protokol bude možné používať na rôznych platformách. V tejto práci vznikne implementácia protokolu pre mikrokontroléry používajúce programovací jazyk C++ a 
+Protokol bolo možné používať na rôznych platformách. V tejto práci vznikla implementácia protokolu pre mikrokontroléry používajúce programovací jazyk C++ a 
 mikrokontroléry alebo jednodoskové počítače podporujúce CircuitPython.
 
-Obsah správ v sieti bude šifrovaný šifrovacím algoritmom AES.
+Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
 
 
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
@@ -589,81 +586,79 @@ Obsah správ v sieti bude šifrovaný šifrovacím algoritmom AES.
 %TODO overit ci synchronous lora mesh je flooding
 
 \chapter{Vlastná implementácia}
-Ako sme už spomínali v predchádzajúcej kapitole, nami vytvorený protokol bude fungovať na základe multi hop flooding. Tento prístup so sebou ale nesie 
-niekoľko nevýhod, ktoré by sme mali zohľadniť pri navrhovaní implementácie.
+Ako sme už spomínali v predchádzajúcej kapitole, nami vytvorený protokol fungoval na základe multi hop flooding. Tento prístup so sebou ale niesol 
+niekoľko nevýhod, ktoré sme museli zohľadniť pri navrhovaní implementácie.
 
-Jednou z nevýhod je, že ak pošleme niekam správu, a destinácia práve nie je v dosahu, tak by sme o správu prišli. Tento problém vyriešime tak, 
-že odosielateľ si bude odoslané správy ukladať a v prípade, že sa nepodarí správu doručiť, môže ju opätovne 
-odoslať niekedy neskôr. To, že sa správu nepodarilo doručiť do destinácie, zistíme vďaka potvrdzovacím ACK správam. Tieto správy sa odosielajú v opačnom smere ako správa, ktorú potvrdzujeme. 
+Jednou z nevýhod bolo, že ak sme poslali niekam správu, a destinácia práve nebola v dosahu, tak sme o správu prišli. Tento problém bol vyriešený tak, 
+že odosielateľ si odoslané správy ukladá a v prípade, že sa nepodarí správu doručiť, môže ju opätovne 
+odoslať niekedy neskôr. To, že sa správu nepodarilo doručiť do destinácie, sme zisťovali vďaka potvrdzovacím ACK správam. Tieto správy sa odosielali v opačnom smere ako správa, ktorá bola potvrdzovaná. 
 
-Ďalším z problémov môže byť potenciálne zahltenie siete správami. Keby každý uzol v sieti preposielal ďalej každú správu, ktorú príjme, tak by sme sa rýchlo dostali 
+Ďalším z problémov mohlo byť potenciálne zahltenie siete správami. Keby každý uzol v sieti preposielal ďalej každú správu, ktorú prijal, tak by sme sa rýchlo dostali 
 do stavu kedy by množstvo uzlov preposielalo rovnaké správy a sieť by sa tym pádom zahltila.
-Riešenie tohto problému bude spočívať v niekoľkých procesoch ako stavu zahltenia predchádzať. Tieto procesy si bližšie popíšeme v kapitole implementácie.
+Riešenie tohto problému spočívalo v niekoľkých procesoch ako stavu zahltenia predchádzať. Tieto procesy si bližšie popíšeme v kapitole implementácie.
 
-Implementácia sa bude deliť na dve verzie. Jedna verzia, implementovaná v CircuitPython, bude určená pre výkonnejšie zariadenia. Táto implementácia bude obsahovať aj webové rozhranie na 
-obsluhu, posielanie a prijímanie sprav. Webové rozhranie avšak pôjde využiť len na zariadeniach, ktoré podporujú WiFi prípadne ethernet.
+V tejto práci vznikli dve verzie implementácie. Jedna verzia, implementovaná v CircuitPython, bola určená pre výkonnejšie zariadenia. Táto implementácia obsahovala aj webové rozhranie na 
+obsluhu, posielanie a prijímanie sprav. Webové rozhranie avšak šlo využiť len na zariadeniach, ktoré podporujú WiFi prípadne ethernet.
 
-Implementácia v C++ bude určená pre menej výkonne zariadenia. Táto implementácia bude len zjednodušená verzia kompletnej implementácie a 
-bude určená pre mikrokontroléry TTGO. Z dôvodu výkonnosti a obmedzenej pamäti bude táto implementácia obsahovať iba základné funkcionality protokolu, potrebné na odosielanie správ s 
-údajmi so senzorov. Mikrokontroléry TTGO tak budu v sieti fungovať iba ako jednoduché uzly, ktoré budú v určitých časových intervaloch odosielať dáta.
+Implementácia v C++ bola určená pre menej výkonne zariadenia. Táto implementácia bola len zjednodušená verzia kompletnej implementácie a 
+bola primárne určená pre mikrokontroléry TTGO. Z dôvodu výkonnosti a obmedzenej pamäti táto implementácia obsahovala iba základné funkcionality protokolu, potrebné na odosielanie správ s 
+údajmi so senzorov. Mikrokontroléry TTGO tak v sieti fungovali iba ako jednoduché uzly, ktoré v určitých časových intervaloch odosielali dáta zo senzorov.
 
 \section{Typy a stavy správ}
 Predom sme si stanovili, že v našom protokole bude možné odosielať rôzne typy správ. Na základe typov správ, sa potom správy spracovávajú odlišne.
 
-Okrem typov správ, je nutné si definovať aj určité stavy, v ktorých sa správa môže nachádzať. Tieto stavy potom budú určovať, ako sa správa spracováva.
+Okrem typov správ, bolo nutné si definovať aj určité stavy, v ktorých sa správa môže nachádzať. Tieto stavy potom určovali, ako sa správa spracováva.
 \subsection{Typy správ}
 Rozhodli sme sa v našom protokole implementovať dokopy sedem typov správ. Každý typ správy má svoju úlohu a využitie.
 Sú nasledovné:
 
-ACK správa bude slúžiť na potvrdenie doručenia správy. Keď odosielateľ pôvodnej správy niekedy neskôr príjme ACK správu, ktorá 
-potvrdzuje doručenie správy, tak môžme pôvodnú správu považovať za doručenú.
+ACK správa slúžila na potvrdenie doručenia správy. Keď odosielateľ pôvodnej správy niekedy neskôr prijal ACK správu, ktorá 
+potvrdzovala doručenie správy, tak mohol pôvodnú správu považovať za doručenú.
 
-Textová správa je správa, ktorá bude obsahovať textový reťazec. Rozšírením tejto správy je správa s potvrdením o doručení.
-Obsah textových správ bude šifrovaný.
+Textová správa (TEXT_MSG) je správa, ktorá obsahovala textový reťazec. Rozšírením tejto správy je správa s potvrdením o doručení (TEXT_MSG_W_ACK).
+Obsah textových správ je šifrovaný.
 
-Správa typu senzorové dáta bude určená na prenos dát z rôznych senzorov. Obsah správy bude taktiež vo forme textového 
-reťazca, ktorý bude obsahovať dáta zo senzorov. Tento typ správ avšak oproti obyčajnej textovej správe ponuka možnosť nastaviť 
-časový interval -- TTL, po ktorého uplynutí sa správa nebude ďalej šíriť sieťou. Obsah správy bude taktiež šifrovaný.
+Správa typu senzorové dáta (SENSOR_DATA) bola určená na prenos dát z rôznych senzorov. Obsah správy bol taktiež vo forme textového 
+reťazca, ktorý obsahoval dáta zo senzorov. Tento typ správ avšak oproti obyčajnej textovej správe ponúkal možnosť nastaviť 
+časový interval -- TTL, po ktorého uplynutí sa správa nebude ďalej šíriť sieťou. Obsah správy bol taktiež šifrovaný.
 
-Sprava žiadosť o traceroute sa bude používať len v krajných prípadoch, kedy by nás zaujímalo akou cestou sa správa preposiela sieťou. 
-Ked nejaký uzol príjme správu typu žiadosť o traceroute, tak vytvorí novu správu typu odpoveď na traceroute a vloží do nej svoju adresu. 
-Adresátom tejto novej správy bude odosielateľ pôvodnej správy. Ked sa bude tato odpoveď na traceroute šíriť sieťou, 
-tak každý uzol, ktorý danú správu preposlal ďalej, pridá do nej svoju vlastnú adresu.
-Takto sa vytvorí reťazec, ktorý bude obsahovať adresy všetkých uzlov, cez ktoré bola správa preposlaná.
-Aby mohli ostatné uzly v sieti do správy postupne pridávať svoje adresy, tak obsah tejto správy nebude šifrovaný.
+Sprava žiadosť o traceroute (TRACEROUTE_REQUEST) bola používaná len v krajných prípadoch, kedy nás zaujímalo akou cestou sa správa preposiela sieťou. 
+Ked nejaký uzol prijal správu typu žiadosť o traceroute, tak vytvoril novu správu typu odpoveď na traceroute (TRACEROUTE) a vložil do nej svoju adresu. 
+Adresátom tejto novej správy bol odosielateľ pôvodnej správy. Ked sa táto odpoveď na traceroute šírila sieťou, 
+tak každý uzol, ktorý danú správu preposlal ďalej, pridal do nej svoju vlastnú adresu.
+Takto sa vytvoril reťazec, ktorý obsahoval adresy všetkých uzlov, cez ktoré bola správa preposlaná.
+Aby mohli ostatné uzly v sieti do správy postupne pridávať svoje adresy, tak obsah tejto správy nemohol byť šifrovaný.
 
-Posledným typom správy je nespracovaný paket. Tento typ správy bude využívaný iba v prípade, že ma používateľ zapnutý monitorovací režim.
-V tomto režime sa všetky správy, ktoré sa v sieti prenášajú, budú zaznamenávať. V tomto režime môžme zachytiť aj pakety, 
-ktoré niesu súčasťou nášho protokolu a ich štruktúra nebude zodpovedať našim špecifikáciám. Z toho dôvodu ich nie je možné spracovať.
-Uložia sa teda ako typ správy nespracovaný paket, a budu obsahovať iba holé prijaté dáta vo forme bajtov.
+Posledným typom správy je nespracovaný paket (RAW_PACKET). Tento typ správy bol využívaný iba v prípade, že ma používateľ zapnutý monitorovací režim.
+V tomto režime sa zaznamenávali všetky správy, ktoré sa v sieti prenášali. V tomto režime bolo možne zachytiť aj pakety, 
+ktoré neboli súčasťou nášho protokolu a ich štruktúra nezodpovedala našim špecifikáciám. Z toho dôvodu ich nebolo možné spracovať a 
+uložili sa teda ako typ správy nespracovaný paket. Ich obsah tvorili iba holé prijaté dáta vo forme bajtov.
 
 \subsection{Stavy správ}
-%TODO pisat do zatvoriek nazov toho stavu tak je to je v kode ?
-%TODO dat sem obrazky stateflowu? rozkusovat to do viacero obrazkov?
-Na správnu funkčnosť je potrebné aby správy existovali v určitých stavoch. Správy budu časom svoj stav aktualizovať a prechádzať medzi nimi. 
-Tieto stavy budú definované nasledovne:
+Na správnu funkčnosť bolo potrebné aby správy existovali v určitých stavoch. Správy časom svoj stav aktualizovali a prechádzali medzi nimi. 
+Tieto stavy boli definované nasledovne:
 
-Stav nová správa (NEW). Tento stav bude mať správa, ktorá bola práve vytvorená. Nebola ešte ani raz odoslaná aktuálnym uzlom, a čaká na svoje 
-prvé odoslanie. Po prvom odoslaní sa správa presunie do stavu odoslaná (SENT).
+Stav nová správa (NEW). Tento stav bol určený pre správu, ktorá bola práve vytvorená. Nebola ešte ani raz odoslaná aktuálnym uzlom, a čaká na svoje 
+prvé odoslanie. Po prvom odoslaní sa správa presunula do stavu odoslaná (SENT).
 
-Zo stavu odoslaná sa môže sprava presunúť do stavu neúspešná (FAILED), hotová (DONE), preposlaná (REBROADCASTED) alebo zmazaná (DELETED). 
-Ak aktuálny uzol príjme tu istú správu, odoslanú iným uzlom, znamená to, že dana správa sa šíri ďalej v sieti. Aktuálny uzol teda správu 
-presunie do stavu preposlaná alebo do stavu zmazaná. 
-To či sa správa presunie do stavu zmazaná alebo preposlaná je závisle od toho, či je aktuálny uzol zároveň aj autorom danej správy. V prípade, že je autorom, 
-správa sa presunie do stavu preposlaná.
+Zo stavu odoslaná bolo možne správu presunúť do stavu neúspešná (FAILED), hotová (DONE), preposlaná (REBROADCASTED) alebo zmazaná (DELETED). 
+Ak aktuálny uzol prijal tu istú správu, odoslanú iným uzlom, znamená to, že dana správa sa šíri ďalej v sieti. Aktuálny uzol teda správu 
+presunul do stavu preposlaná alebo do stavu zmazaná. 
+To či sa správa presunula do stavu zmazaná alebo preposlaná bolo závisle od toho, či bol aktuálny uzol zároveň aj autorom danej správy. V prípade, že bol autorom, 
+správa sa presunula do stavu preposlaná.
 
-Správy v stave preposlaná, pri ktorých nepotrebujeme sledovať, či správa dorazila do destinácie, sa následne presunú do stavu hotová.
+Správy v stave preposlaná, pri ktorých nepotrebujeme sledovať, či správa dorazila do destinácie, sa následne presunuli do stavu hotová.
 
-Pokiaľ aktuálny uzol vyčerpá všetky pokusy o odoslanie správy, prípadne pri správe typu senzorové dáta dôjde časový limit, správa sa presunie do stavu neúspešná alebo zmazaná.
-To či sa presunie do stavu neúspešná alebo zmazaná je znovu závisle na tom, či je aktuálny uzol autorom danej správy alebo nie.
+Pokiaľ aktuálny uzol vyčerpal všetky pokusy o odoslanie správy, prípadne pri správe typu senzorové dáta došiel časový limit, správa sa presunula do stavu neúspešná alebo zmazaná.
+To či sa presunula do stavu neúspešná alebo zmazaná bolo znovu závisle na tom, či bol aktuálny uzol autorom danej správy alebo nie.
 
-Správam, ktoré su v stave preposlané sa odpočítava časový limit na prijatie potvrdenia. Pokiaľ v tomto časovom intervale nedorazí potvrdzovacia ACK správa, tak sa 
-správa presunie do stavu nepotvrdená (NAK). V opačnom prípade sa presunie do stavu potvrdená (ACK).
+Správam, ktoré boli v stave preposlané sa odpočítaval časový limit na prijatie potvrdenia. Pokiaľ v tomto časovom intervale nedorazila potvrdzovacia ACK správa, tak sa 
+správa presunula do stavu nepotvrdená (NAK). V opačnom prípade sa presunula do stavu potvrdená (ACK).
 
-Stav zmazaná značí, že správu považujeme za vymazanú. Ďalej s ňou už nebudeme pracovať a po uplynutí určitého intervalu sa reálne vymaže z pamäte.
+Stav zmazaná značil, že správu považujeme za vymazanú. Ďalej s ňou už nebudeme pracovať a po uplynutí určitého intervalu sa reálne vymazala z pamäti.
 
 \section{Návrh paketu}
-Paket bude obsahovať hlavičku a dátový rámec. Štruktúra dátového rámcu bude závisieť od typu správy.
+Paket obsahoval hlavičku a dátový rámec. Štruktúra dátového rámcu bola závislá od typu správy.
 Navrhnutú štruktúru hlavičky paketu môžme vidieť v tabuľke \ref{tab:packetHeader}
 
 \begin{table}[!h]
@@ -679,16 +674,16 @@ Navrhnutú štruktúru hlavičky paketu môžme vidieť v tabuľke \ref{tab:pack
   \label{tab:packetHeader}
 \end{table}
 
-Pre adresy odosielateľa a destinácie budeme používať dvoj bajtové adresy. Štvor bajtový identifikátor správy bude náhodne generovaný pri každom vytvorení novej správy.
+Pre adresy odosielateľa a destinácie boli využité dvoj bajtové adresy. Štvor bajtový identifikátor správy bol náhodne generovaný pri každom vytvorení novej správy.
 
-Z adresy destinácie, adresy odosielateľa a identifikátoru správy sa vytvorí dvoj bajtový kontrolný súčet. Tento kontrolný súčet bude používaný na overenie, či prijatá správa 
-patrí do nášho protokolu. Overovať integritu dát na základe kontrolného súčtu nie je za potreby, pretože táto kontrola je už zahrnutá na fyzickej vrstve LoRa technológie.
+Z adresy destinácie, adresy odosielateľa a identifikátoru správy bol vytvorený dvoj bajtový kontrolný súčet. Tento kontrolný súčet bol používaný na overenie, či prijatá správa 
+patrila do nášho protokolu. Overovať integritu dát na základe kontrolného súčtu nie je za potreby, pretože táto kontrola je už zahrnutá na fyzickej vrstve LoRa technológie.
 
-V položke typ správy bude číslo, ktoré definuje typ danej správy. Číslo bude reprezentovať jeden z typov spomínaných v predošlej sekcii.
+Položka typ správy obsahovala číslo, ktoré definovalo typ danej správy. Číslo reprezentovalo jeden z typov spomínaných v predošlej sekcii.
 
-Správam môžme v hlavičke paketu určiť vyššiu prioritu. Na túto prioritu sa následne bude dbať pri spracovávaní správ a správy s vyššou prioritou budu odbavené prioritne.
+Správam bolo možné v hlavičke paketu určiť vyššiu prioritu. Na túto prioritu sa následne bral ohľad pri spracovávaní správ a správy s vyššou prioritou boli odbavené prioritne.
 
-Dátové rámce sa budú líšiť na základe typu správy. V tabuľkách \ref{tab:textFrame}, \ref{tab:trFrames} a \ref{tab:frames} 
+Dátové rámce sa líšili na základe typu správy. V tabuľkách \ref{tab:textFrame}, \ref{tab:trFrames} a \ref{tab:frames} 
 sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
 
 
@@ -730,12 +725,12 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \label{tab:trFrames}
 \end{table}
 
-V niektorých dátových rámcoch môžme vidieť položku počet skokov. Do tejto položky bude pri vytvorení novej správy zapísaný maximálny počet skokov, ktoré môže správa vykonať 
-pri prenose sieťou. Každý uzol, predtým ako správu prepošle ďalej, zmenší počet skokov o jedna. Ak sa počet skokov dostane na nulu tak správu ďalej nespracovávame a nastaví sa jej 
+V niektorých dátových rámcoch môžme vidieť položku počet skokov. Do tejto položky bol pri vytvorení novej správy zapísaný maximálny počet skokov, ktoré môže správa vykonať 
+pri prenose sieťou. Každý uzol, predtým ako správu preposlal ďalej, zmenšil počet skokov o jedna. Ak sa počet skokov dostal na nulu tak sa daná správa ďalej nespracovávala a nastavil sa jej 
 adekvátny stav.
 
-V rámcoch tiež nájdeme položku pôvodný počet skokov. Do tejto položky bude tak isto pri vytvorení novej správy zapísaný maximálny počet skokov. Hodnota v tejto položke sa 
-však už ďalej nemení. Bude slúžiť k tomu, aby prijímateľ dokázal zistiť, koľko preskokov správe zabralo, kym správa dorazila až k nemu. Túto informáciu bude možné 
+V rámcoch tiež nájdeme položku pôvodný počet skokov. Do tejto položky bol tak isto pri vytvorení novej správy zapísaný maximálny počet skokov. Hodnota v tejto položke sa 
+však už ďalej nemenila. Slúžila k tomu, aby prijímateľ dokázal zistiť, koľko preskokov správe zabralo, kym správa dorazila až k nemu. Túto informáciu bolo možné 
 následne použiť na správne nastavenie maximálneho počtu skokov pre odoslanie potvrdzovacej správy, prípadne správy typu odpoveď na traceroute.
 
 \begin{table}[h!]
@@ -763,151 +758,151 @@ následne použiť na správne nastavenie maximálneho počtu skokov pre odoslan
   \label{tab:frames}
 \end{table}
 
-V dátovom rámci, používanom na senzorové dáta, používame namiesto maximálneho počtu preskokov TTL. TTL vyjadruje časový interval, po ktorý môže byť daná správa 
-spracovávaná a preposielaná v sieti. Táto hodnota sa pri vytvorení správy nastaví na predom určený časový interval v sekundách. Každý uzol, ktorý bude danú správu preposielať, 
-si overí ako dlho už bola správa uložená u neho v pamäti a na základe toho odčíta hodnotu z TTL. Po odčítaní hodnoty z TTL, uzol správu ďalej prepošle.
+V dátovom rámci, používanom na senzorové dáta, bol použitý, namiesto maximálneho počtu preskokov, TTL. TTL vyjadruje časový interval, po ktorý mohla byť daná správa 
+spracovávaná a preposielaná v sieti. Táto hodnota sa pri vytvorení správy nastavila na predom určený časový interval v sekundách. Každý uzol, ktorý danú správu preposielal, 
+si overil ako dlho už bola správa uložená u neho v pamäti a na základe toho odčítal hodnotu z TTL. Po odčítaní hodnoty z TTL, uzol správu ďalej preposlal.
 
-Pri odčítavaní TTL sa berie do úvahy iba čas, ktorý daná správa strávila na určitom uzle. Nebudeme brať do úvahy čas, ktorý správe zabralo preniesť sa rádiovými vlnami z jedného uzlu 
-na ďalší. A to z toho dôvodu, že nie sme schopní presne určiť, aku vzdialenosť prekonala vysielaná správa rádiovými vlnami. Existujúce spôsoby merania vzdialenosti, 
-ktorú správa prešla vzduchom, produkujú len hrubé odhady a su veľmi závisle od aktuálnych atmosférických podmienok. Preto sme sa rozhodli, že v našom riešení budeme 
+Pri odčítavaní TTL bol braný do úvahy iba čas, ktorý daná správa strávila na určitom uzle. Nebral sa do úvahy čas, ktorý správe zabralo preniesť sa rádiovými vlnami z jedného uzlu 
+na ďalší. A to z toho dôvodu, že sme neboli schopní presne určiť, aku vzdialenosť prekonala vysielaná správa rádiovými vlnami. Existujúce spôsoby merania vzdialenosti, 
+ktorú správa prešla vzduchom, produkovali len hrubé odhady a boli veľmi závisle od aktuálnych atmosférických podmienok. Preto sme sa rozhodli, že v našom riešení budeme 
 počítať iba s časom, ktorý správa strávila na určitom uzle. Mimo toho, keby sme počítali s maximálnou možnou vzdialenosťou medzi dvoma uzlami, ktorá sa pri LoRa 
 udáva okolo 15 kilometrov v otvorenom priestranstve, a rýchlosťou ktorou sa šíria rádiové vlny, ktorá je vo vákuu rovná rýchlosti svetla, tak by sme zistili, 
-že prenos správy medzi týmito dvoma uzlami by v ideálnom prípade trval okolo 50 mikrosekúnd. Táto hodnota je v porovnaní s časom, ktorý správa strávi na určitom uzle, 
-zanedbateľná.
+že prenos správy medzi týmito dvoma uzlami by v ideálnom prípade trval okolo 50 mikrosekúnd. Táto hodnota bola v porovnaní s časom, ktorý správa strávi na určitom uzle, 
+zanedbateľná. %TODO footnote ze pocitame s casom od zaciatku vysielania do prveho prijatia
 
 \section{Funkcionalita protokolu}
-Protokol bude fungovať tak, že novo prijatú správu si každý uzol u seba uloží. Následne sa uložené správy budu spracovávať v hlavnom cykle programu. 
-Každú správu, ktorú uzol príjme, sa bude následne snažiť znovu preposlať ďalej, pokiaľ teda nebola daná správa určená práve tomu uzlu.
+Navrhnutý protokol fungoval tak, že každý uzol si u seba uložil novo prijatú správu. Následne boli uložené správy spracovávané v hlavnom cykle programu. 
+Každú správu, ktorú uzol prijal, sa následne pokúšal znovu preposlať ďalej, pokiaľ teda nebola daná správa určená práve tomu uzlu.
 
-Uzol bude každú správu odosielať určitý počet krát a medzi každým odoslaním konkrétnej správy bude uzol čakať predom stanovený časový interval predtým ako ju môže znova odoslať.
-Toto viacnásobne odosielanie každej správy nám zabezpečí vyššiu spoľahlivosť v doručení. Keby sa každá správa preposielala iba jeden krát, mohlo by sa stať, že na ten prvý raz 
+Uzol každú správu odosielal iba určitý počet krát a medzi každým odoslaním konkrétnej správy uzol čakal predom stanovený časový interval predtým ako ju mohol znova odoslať.
+Toto viacnásobne odosielanie každej správy nám zabezpečilo vyššiu spoľahlivosť v doručení. Keby sa každá správa preposielala iba jeden krát, mohlo by sa stať, že na ten prvý raz 
 by tuto vyslanú správu nezachytil žiaden ďalší uzol a správa by sa tak nedoručila ďalej.
 
-Medzi tým ako sa budu správy spracovávať a preposielať bude uzol zároveň počúvať na novo príchodzie správy od iných uzlov. Ak by náhodou uzol 
-prijal správu, ktorá už bola prijatá a uložená u neho tak to berie ako potvrdenie, že sa správa šíri ďalej v sieti. Uzol teda u seba danú správu zahodí a už ju 
-ďalej nebude posielať.
+Medzi tým ako boli správy spracovávané a preposielané, uzol zároveň počúval na novo príchodzie správy od iných uzlov. Ak náhodou uzol 
+prijal správu, ktorá už bola prijatá a uložená u neho tak to považoval ako potvrdenie, že sa správa šírila ďalej v sieti. Uzol teda u seba danú správu zahodil a už ju 
+ďalej nepreposielal.
 
-Ak by došlo k situácií, kedy uzol jednu správu opakovane prepošle maximálny možný počet pokusov, a medzitým nepríjme danú správu preposlanú iným uzlom, 
-tak považujeme tuto situáciu ako neúspešne odoslanie správy. Správe sa nastaví adekvátny stav a nebude sa ďalej spracovávať.
+Ak došlo k situácií, kedy uzol jednu správu opakovane preposlal maximálny možný počet pokusov a medzitým neprijal danú správu preposlanú iným uzlom, 
+tak bola považovaná táto situácia ako neúspešne odoslanie správy. Správe sa nastavil adekvátny stav a nebola ďalej spracovávaná.
 
-Každý uzol prijatej správe zníži hodnotu maximálneho počtu preskokov. Pokiaľ sa však jedná o správy typu senzorové dáta, tak sa neznižuje hodnota maximálneho počtu preskokov 
-ale hodnota TTL, a to pred každým znovu odoslaním danej správy. Pokiaľ by uzol prijal správu, ktorej hodnota maximálneho počtu skokov dosiahla nulu, tak túto 
-správu nebude u seba ani ukladať. Ak by sa počas spracovávania správ na uzle dostala hodnota TTL nejakej senzorovej správy na nulu, tak tuto situáciu tak isto považujeme 
-za neúspešne odoslanie správy. Správe sa nastaví adekvátny stav a nebude sa ďalej spracovávať.
+Každý uzol prijatej správe znížil hodnotu maximálneho počtu preskokov. Pokiaľ sa však jednalo o správy typu senzorové dáta, tak sa neznižovala hodnota maximálneho počtu preskokov 
+ale hodnota TTL, a to pred každým znovu odoslaním danej správy. Pokiaľ však uzol prijal správu, ktorej hodnota maximálneho počtu skokov dosiahla nulu, tak táto 
+správa nebola u daného uzla ani ukladaná. Ak sa počas spracovávania správ na uzle dostala hodnota TTL nejakej senzorovej správy na nulu, tak táto situácia bola tak isto považovaná 
+za neúspešne odoslanie správy. Správe sa nastavil adekvátny stav a nebola ďalej spracovávaná.
 
-Obsah textových a senzorových správ bude vždy šifrovaný, pokiaľ nie je správa posielaná na broadcast adresu. Na šifrovanie bude použitý šifrovací algoritmus AES, ktorý šifruje bloky dát za pomoci kľúča.
-Jedna sa o symetrickú šifru, takže zašifrované dáta môžme rovnakým kľúčom neskôr dešifrovať. To ponúka možnosť aby si určitá skupina používateľov vytvorila vlastný 
-šifrovací kľúč a iba oni budú môcť dešifrovať správy, ktoré budú vytvorené za použitia tohto kľúča. Ostatní účastníci siete obsah správ nebudú schopní dešifrovať.
+Obsah textových a senzorových správ bol vždy šifrovaný, pokiaľ nebola správa posielaná na broadcast adresu. Na šifrovanie bol použitý šifrovací algoritmus AES, ktorý šifruje bloky dát za pomoci kľúča.
+Jedna sa o symetrickú šifru, takže zašifrované dáta bolo možné rovnakým kľúčom neskôr dešifrovať. To ponúkalo možnosť aby si určitá skupina používateľov vytvorila vlastný 
+šifrovací kľúč a iba oni boli schopní dešifrovať svoje správy, ktoré boli vytvorené za použitia tohto kľúča. Ostatní účastníci siete obsah správ neboli schopní dešifrovať.
 
-V protokole bude možné odosielať správy na broadcast adresu. Tieto správy budú prijaté každým uzlom.
+V protokole bolo možné odosielať správy aj na broadcast adresu. Tieto správy boli potom prijaté každým uzlom.
 
 \section{Implementácia protokolu}
-%TODO tieto veci trsoku upravit, a pripadne presunut o kapitolu vyssie lebo to je skor popius ako implementacia
-Hlavnou súčasťou nami navrhnutého protokolu bude list správ. Do tohto listu sa budú pridávať novo vytvorené, 
-prípadne novo prijaté správy. Následne sa bude v hlavnom cykle programu prechádzať tento list správ a každá správa sa bude spracovávať.
+Hlavnou súčasťou nami navrhnutého protokolu bol zoznam správ. Do tohto zoznamu boli pridávané novo vytvorené, 
+prípadne novo prijaté správy. Následne bol tento zoznam správ v hlavnom cykle programu prechádzaný a každá správa sa bola spracovávaná.
 
-Na to aby sme správy mohli ukladať do tohoto listu, bolo potrebné vytvoriť istú dátovú štruktúru, do ktorej sa budú ukladať jednotlivé správy.
-Správy v liste budu so sebou držať rôzne informácie. Okrem tých základných informácií o správe akými su napríklad jej identifikátor, odosielateľ a prijímateľ, obsah správy atď., 
-bolo potrebné držať spolu so správou aj dodatočné informácie, ktoré boli potrebné na jej následne spracovávanie. Do týchto dodatočných informácií patri napríklad 
-čas, kedy bola správa naposledy spracovávaná aktuálnym uzlom. Táto informácia sa využíva pri kontrole či uz nadišiel čas správu znovu preposlať ale aj 
-na to aby sme vedeli koľko času treba odčítať z hodnoty TTL pri senzorových správach.
+Na to aby bolo možné správy do tohoto zoznamu ukladať, bolo potrebné vytvoriť istú dátovú štruktúru, do ktorej by sa ukladali jednotlivé správy.
+Správy v zozname so sebou držali rôzne informácie. Okrem tých základných informácií o správe akými boli napríklad jej identifikátor, odosielateľ a prijímateľ, obsah správy atď., 
+bolo potrebné držať spolu so správou aj dodatočné informácie, ktoré boli potrebné na jej následne spracovávanie. Do týchto dodatočných informácií patrili napríklad 
+čas, kedy bola správa naposledy spracovávaná aktuálnym uzlom. Táto informácia bola využitá pri kontrole či uz nadišiel čas správu znovu preposlať ale aj 
+na to aby bolo možné zistiť koľko času treba odčítať z hodnoty TTL pri senzorových správach.
 
-Pri prechádzaní listu správ sa pri každej správe skontroluje jej stav a to či časový limit už dosiahol požadovanej hodnoty. Opakované znovu odosielanie 
-správy, vykonávame iba pri správach v stave nová a odoslaná. Spomínali sme, že je možne určiť správe vyššiu prioritu. Tato vyššia priorita zabezpečí to, že sa pri správe, 
-ktorá má nastavenú vyššiu prioritu, bude vykonávať opakované znovu odosielanie správy, aj keď jej časový limit ešte nebol dosiahnutý. Tým dosiahneme toho, že správa sa 
-skôr odošle a do destinácie by mala v ideálnom prípade doraziť skôr ako správa s nižšou prioritou.
+Pri prechádzaní zoznamu správ sa pri každej správe skontroloval jej stav a to či časový limit už dosiahol požadovanej hodnoty. Opakované znovu odosielanie 
+správy, bolo vykonávané iba pri správach v stave nová a odoslaná. Spomínali sme, že je bolo možne určiť správe vyššiu prioritu. Tato vyššia priorita zabezpečila to, že sa pri správe, 
+ktorá má nastavenú vyššiu prioritu, vykonávalo opakované znovu odosielanie správy, aj keď jej časový limit ešte nebol dosiahnutý. Tým bolo dosiahnuté toho, že správa sa 
+skôr odoslala a do destinácie by mala v ideálnom prípade doraziť skôr ako správa s nižšou prioritou.
 
 Spomínali sme tiež, že môže dôjsť k problému zahltenia siete, keby každý uzol v sieti preposielal všetky správy, ktoré príjme. Spôsob akým sme vzniku tohto problému zabránili 
-je práve to, že keď uzol príjme správu, ktorú už ma u seba uloženú, tak u seba tuto správu označí ako zmazanú ( stav zmazaná ) a nebude ju ďalej posielať. 
-Správy v zmazanom stave niesu ale ihneď vymazané z pamäti. Miesto toho sa im nastavuje časový interval a až po tom čo uplynie tento interval su správy skutočne vymazané z pamäti. 
-Vďaka tomu, že si držíme v pamäti správy aj keď su považované za zmazané, môžme overiť či novo prijatá správa nie je náhodou jedná z tých zmazaných. Ak áno tak novú 
-správu nebudeme znovu ukladať. K tejto situácii môže bežne dochádzať a neošetrenie tohto problému by mohlo viesť k zacykleniu, kedy by sa jedna a ta istá správa neustále 
+spočíval práve v tom, že keď uzol prijal správu, ktorú už mal u seba uloženú, tak u seba tuto správu označil ako zmazanú ( stav zmazaná ) a správa nebola ďalej preposielaná. 
+Správy v zmazanom stave neboli ale ihneď vymazané z pamäti. Miesto toho sa im nastavoval časový interval a až po tom čo uplynul tento interval boli správy skutočne vymazané z pamäti. 
+Vďaka tomu, že sme si držali v pamäti správy aj keď boli považované za zmazané, bolo možné overiť či novo prijatá správa nebola náhodou jedná z tých zmazaných. Ak áno tak nová 
+správ nebola znovu ukladaná. K tejto situácii môže bežne dochádzať a neošetrenie tohto problému by mohlo viesť k zacykleniu, kedy by sa jedna a ta istá správa neustále 
 preposielala medzi dvoma uzlami až kým by jej nedošiel limit skokov prípadne TTL.
 
-Aby bolo v mesh sieti dosiahnuté čo najlepšieho dosahu, je nutné nejak zabezpečiť, aby sa odosielané správy dostali k čo najvzdialenejším uzlom a aby tieto 
-najvzdialenejšie uzly boli tie ktoré propagujú prenášanú správu ďalej. To zabezpečíme tak, že každej novo prijatej správe sa nastaví prvotné časové oneskorenie na základe 
+Aby bolo v mesh sieti dosiahnuté čo najlepšieho dosahu, bolo nutné nejak zabezpečiť, aby sa odosielané správy dostali k čo najvzdialenejším uzlom a aby tieto 
+najvzdialenejšie uzly boli tie ktoré propagujú prenášanú správu ďalej. To bolo zabezpečene tak, že každej novo prijatej správe bolo nastavené prvotné časové oneskorenie na základe 
 toho s akou hodnotou SNR bola daná správa prijatá. Hodnota SNR vyjadruje pomer signálu k šumu. Čím je hodnota SNR vyššia, tým je signál silnejší oproti okolitému šumu.
-Vďaka tomu, dokážeme približne odhadnúť, ktorý uzol je vzdialenejší. Uzly ktoré su vzdialenejšie budu mať nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
-To povedie k tomu, že vzdialenejšie uzly odvysielajú správu skôr, ako uzly ktoré su bližšie. Ostatné uzly toto vysielanie príjmu, a u seba označia danú správu ako zmazanú, 
-keďže už nie je potrebné aby ju oni preposielali.
+Vďaka tomu, bolo možné približne odhadnúť, ktorý uzol bol vzdialenejší. Uzly ktoré boli vzdialenejšie mali nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
+To poviedlo k tomu, že vzdialenejšie uzly odvysielali správu skôr, ako uzly ktoré boli bližšie. Ostatné uzly toto vysielanie prijali, a u seba označili danú správu ako zmazanú, 
+keďže už nebolo potrebné aby ju oni preposielali.
 
-Ďalší z potrebných aspektov správneho fungovania nášho protokolu je zabezpečiť aby nedošlo k situácií kedy by dva alebo viac uzlov v sieti začalo vysielať signály v rovnakom čase.
-K tomu sme využili takzvaného prístupu listen before talk, kedy sa uzol predtým ako začne vysielať presvedčí, či náhodou práve nevysiela niekto iný. Ak áno tak tak sa vyslanie správy pozdrží 
-a skúsi sa odoslať neskôr.
+Ďalší z potrebných aspektov správneho fungovania nášho protokolu bolo zabezpečiť aby nedošlo k situácií kedy by dva alebo viac uzlov v sieti začalo vysielať signály v rovnakom čase.
+K tomu bol využitý takzvaný prístup listen before talk, kedy sa uzol predtým ako začal vysielať presvedčil, či náhodou práve nevysielal niekto iný v jeho dosahu. Ak áno tak tak sa vyslanie správy pozdržalo 
+a skúsilo sa odoslať neskôr.
 
 Rozhodli sme sa implementáciu protokolu začať na zariadeniach Armachat. Keďže sme zatiaľ nemali vytvorené žiadne užívateľské rozhranie, tak veľké farebné displeje na zariadeniach Armachat 
-boli vhodné na zobrazovanie informácií o prebiehajúcich procesoch a komunikácií v sieti. Na programovanie zariadení Armachat sa používa CircuitPython, ktorý ma ale rovnakú syntax ako 
+boli vhodné na zobrazovanie informácií o prebiehajúcich procesoch a komunikácií v sieti. Na programovanie zariadení Armachat bol použitý CircuitPython, ktorý ma ale rovnakú syntax ako 
 programovací jazyk Python.
 
-Ako prvé bolo potrebné vytvoriť vhodnú dátovú štruktúru, ktorá by uchovávala v sebe správu. K tomu sme vytvorili triedu Message. Trieda obsahuje všetky potrebné informácie o správe. 
-Taktiež obsahuje metódy na vytváranie rôznych typov a obsahov správ. Tieto metódy budú slúžiť na prvotné vytvorenie nových správ, na autorskom uzle. Okrem týchto metód je 
-ale potrebné mať aj metódy, ktoré dokážu z prijatých dát vytvoriť správu. Pri prijatí nového paketu v LoRa, dostaneme dáta vo forme bajtového poľa. Tieto dáta sú potom predané 
-do metódy, ktorá z nich vytvorí správu.
+Ako prvé bolo potrebné vytvoriť vhodnú dátovú štruktúru, ktorá by uchovávala v sebe správu. K tomu bola vytvorená trieda Message. Trieda obsahovala všetky potrebné informácie o správe. 
+Taktiež obsahovala metódy na vytváranie rôznych typov a obsahov správ. Tieto metódy slúžili na prvotné vytvorenie nových správ, na autorskom uzle. Okrem týchto metód bolo 
+ale potrebné mať aj metódy, ktoré dokázali z prijatých dát vytvoriť správu. Pri prijatí nového paketu v LoRa, sme dostali dáta vo forme bajtového poľa. Tieto dáta boli potom predané 
+do metódy, ktorá z nich vytvorila správu.
 
 Po implementácií triedy Message, sme teda boli schopní vytvoriť novu správu alebo prijať bajtové pole z LoRa, z ktorého sa následne poskladala správa. Na to aby sme 
-mohli správy ukladať do listu bolo ale potrebné vytvoriť ešte akýsi kontajner, ktorý by v sebe uchovával správu plus dodatočne informácie potrebne k ďalšiemu spracovávaniu.
-K tomu sme vytvorili triedu MessageQueueItem. Tá v sebe drží inštanciu triedy Message, počítadlo opakovaných odoslaní, časový odpočet, časové razítko, ktoré zachytáva čas, kedy bola 
-správa naposledy spracovávaná, aktuálny stav správy a ďalšie užitočné informácie. Okrem toho obsahuje trieda metódy, ktoré budu využívane pri spracovávaní správ. Sem patria metódy na zníženie maximálneho počtu preskokov alebo 
-TTL, metóda na zmenu stavu správy, metóda na aktualizovanie časového razítka, ktorá časové razítko nastaví na aktuálny čas a mnoho ďalších.
+mohli správy ukladať do zoznamu správ bolo ale potrebné vytvoriť ešte akýsi kontajner, ktorý by v sebe uchovával správu plus dodatočne informácie potrebne k ďalšiemu spracovávaniu.
+K tomu vznikla trieda MessageQueueItem. Tá v sebe držala inštanciu triedy Message, počítadlo opakovaných odoslaní, časový odpočet, časové razítko, ktoré zachytávalo čas, kedy bola 
+správa naposledy spracovávaná, aktuálny stav správy a ďalšie užitočné informácie. Okrem toho obsahovala táto trieda metódy, ktoré boli využívane pri spracovávaní správ. Sem patria metódy na zníženie maximálneho počtu preskokov alebo 
+TTL, metóda na zmenu stavu správy, metóda na aktualizovanie časového razítka, ktorá časové razítko nastavila na aktuálny čas a mnoho ďalších.
 
-Po implementácii triedy MessageQueueItem sme mohli začať implementovať samotný proces funkcionality nášho protokolu. List správ sme realizovali ako slovník, 
-kde kľúčom je identifikátor správy, a hodnota pod daným kľúčom je inštancia triedy MessageQueueItem. To nám umožní rýchlo vyhľadávať správy na základe jej identifikátora. 
-Tento slovník sme pomenovali message queue.
+Po implementácii triedy MessageQueueItem sme mohli začať implementovať samotný proces funkcionality nášho protokolu. Zoznam správ bol realizovaný ako slovník, 
+kde kľúčom bol identifikátor správy, a hodnota pod daným kľúčom bola inštanciou triedy MessageQueueItem. To nám umožnilo rýchlo vyhľadávať správy na základe jej identifikátora. 
+Tento slovník sme pomenovali message queue a tak ku nemu budeme referovať aj vo zvyšku tejto práce.
 
-Hlavný proces protokolu bude pozostávať z cyklu, v ktorom sa najskôr skontroluje či sme náhodou neprijali nový LoRa paket a následne sa prejdú všetky správy z message queue. Ak je to 
-potrebné tak sa určité správy spracujú. K tomu vznikli dve hlavné funkcie. Funkcia receive(), ktorá skontroluje či sme neprijali nový LoRa paket a funkcia tick(), v ktorej sa prejdú všetky správy zo zoznamu.
+Hlavný proces protokolu pozostával z cyklu, v ktorom bolo najskôr skontrolované či náhodou nebol prijatý nový LoRa paket a následne boli prejdené všetky správy z message queue. Ak to bolo 
+potrebné tak sa určité správy spracovali. K tomu vznikli dve hlavné funkcie. Funkcia receive(), ktorá slúžila na skontrolovanie či nebol prijatý nový LoRa paket a funkcia tick(), v ktorej boli prejdené všetky správy z message queue.
 
-Funkcia receive() prečíta novo prijatý paket z LoRa a následne overí, či daný paket spĺňa dĺžku aspoň 12 bajtov. Vychádza to z toho, že všetky správy nášho protokolu obsahujú predom definovanú 
-hlavičku paketu (viď. Tab. \ref{tab:packetHeader} ), ktorá ma veľkosť 12 bajtov. Ak je paket kratší ako 12 bajtov, môžme s istotou povedať, že nejde o správu nášho protokolu a teda ho nemusíme ďalej spracovávať. Po kontrole dĺžky paketu, následuje overenie 
-kontrolného súčtu. Funkcia zoberie prvých 8 bajtov paketu a vypočíta sa z nich kontrolný súčet. Ak sa vypočítaný kontrolný súčet zhoduje s kontrolným súčtom, ktorý je v pakete, tak správu považujeme za 
-súčasť nášho protokolu. Na výpočet kontrolného súčtu bola použitá funkcia cyklicky redundantného súčtu typu CRC-16/CCITT-FALSE. Overovanie, či paket prisluhuje do nášho protokolu je pomerné dôležité, 
-pretože na rovnakých LoRa parametroch môžu byť vysielané aj pakety iných protokolov a tieto pakety by sa nam nepodarilo správne spracovať keďže by nespĺňali našu štruktúru paketu.
+Funkcia receive() prečítala novo prijatý paket z LoRa a následne overila, či daný paket spĺňa dĺžku aspoň 12 bajtov. Vychádza to z toho, že všetky správy nášho protokolu obsahujú predom definovanú 
+hlavičku paketu (viď. Tab. \ref{tab:packetHeader} ), ktorá mala veľkosť 12 bajtov. Ak bol paket kratší ako 12 bajtov, bolo možné s istotou povedať, že sa nejednalo o správu nášho protokolu a teda ho nebolo 
+nutné ďalej spracovávať. Po kontrole dĺžky paketu, nasledovalo overenie kontrolného súčtu. Funkcia zobrala prvých 8 bajtov paketu a vypočítal sa z nich kontrolný súčet. 
+Ak sa vypočítaný kontrolný súčet zhodoval s kontrolným súčtom, ktorý bol v pakete, tak bolo možné správu považovať za 
+súčasť nášho protokolu. Na výpočet kontrolného súčtu bola použitá funkcia cyklicky redundantného súčtu typu CRC-16/CCITT-FALSE. Overovanie, či paket prisluhuje do nášho protokolu bolo pomerné dôležité, 
+pretože na rovnakých LoRa parametroch mohli byť vysielané aj pakety iných protokolov a tieto pakety by sa nam nepodarilo správne spracovať keďže by nespĺňali našu štruktúru paketu.
 
-Potom čo sa vo funkcii receive() overí, že paket spĺňa naše požiadavky, bude z neho vytvorená nova inštancia triedy Message. Využijeme k tomu metódu triedy Message určenú na vytvorenie správy z 
-poľa bajtov. Pri novo prijatej správe nás zaujíma či je správa určená nám. Ak je správa určená nám, je potrebné zistiť o aky typ správy sa jedna. Pokiaľ sme prijali správu typu ACK, tak je 
-nutné vyhľadať v message queue korešpondujúcu spravu a zmeniť jej stav na ACK. Pokiaľ sa nejedná o ACK správu, následuje kontrola, či sa daná správa už nenachádza v message queue a ak nie tak je tam pridaná.
+Potom čo sa vo funkcii receive() overilo, že paket spĺňa naše požiadavky, bola z neho vytvorená nova inštancia triedy Message. Bola k tomu využitá metóda triedy Message určená na vytvorenie správy z 
+poľa bajtov. Pri novo prijatej správe nás zaujímalo či je správa určená nám. Ak bola správa určená nám, bolo potrebné zistiť o aky typ správy sa jednalo. Pokiaľ bola prijatá správa typu ACK, tak bolo 
+nutné vyhľadať v message queue korešpondujúcu správu a zmeniť jej stav na ACK. Pokiaľ sa nejednalo o ACK správu, nasledovala kontrola, či sa daná správa už nenachádzala v message queue a ak nie tak tam bola pridaná.
 
-Je dôležité, aby uzol po prijatí správy, odoslal naspäť ACK správu. A to aj v prípade, že sa nejedná o typ správy, ktorý vyžaduje potvrdenie o doručení. Dôvodom je, že ak by 
-uzol neposlal naspäť ACK správu, tak by predošlý uzol pokračoval v opakovanom vysielaní správy, a tieto vysielania by zbytočne obsadzovali prenos v sieti. Uzol teda po prijatí vyšle ACK správu. 
-V prípade, že prijatá správa nevyžadovala potvrdenie o doručení, tak môže uzol ACK správe nastaviť maximálny počet preskokov na 0. 
-Tým pádom sa správa neposunie ďalej v sieti ako k najbližšiemu uzlu. Ak by sa ale jednalo o správu vyžadujúcu potvrdenie o doručení, tak sa maximálny počet preskokov nastaví na 
+Bolo dôležité, aby uzol po prijatí správy, odoslal naspäť ACK správu. A to aj v prípade, že sa nejednalo o typ správy, ktorý vyžadoval potvrdenie o doručení. Dôvodom bolo to, že ak by 
+uzol neposlal naspäť ACK správu, tak by predošlý uzol pokračoval v opakovanom vysielaní správy, a tieto vysielania by zbytočne obsadzovali prenos v sieti. Uzol teda po prijatí vyslal ACK správu. 
+V prípade, že prijatá správa nevyžadovala potvrdenie o doručení, tak mohol uzol ACK správe nastaviť maximálny počet preskokov na 0. 
+Tým pádom sa správa neposunula ďalej v sieti ako k najbližšiemu uzlu. Ak sa ale jednalo o správu vyžadujúcu potvrdenie o doručení, tak sa maximálny počet preskokov nastavil na 
 hodnotu, ktorá bola uložená v prijatej správe pod položkou pôvodný počet skokov. 
-Tym zaručíme, že správa bude mať dostatočný počet dostupných skokov aby sa dostala naspäť k uzlu, ktorý pôvodnú správu poslal.
+Tym bolo zaručené, že správa bude mať dostatočný počet dostupných skokov aby sa dostala naspäť k uzlu, ktorý pôvodnú správu poslal.
 
-V prípadnom scenári, že by prijatá správa nebola určená nám, skontrolujeme či sa rovnaká správa už nenachádza v message queue, ak nie tak ju tam pridáme za predpokladu, že má ešte dostupný 
-nejaký počet skokov alebo TTL. Správe zároveň nastavíme prvotné časové pozdržanie na základe hodnoty SNR, s ktorou sme ju prijali.
+V prípadnom scenári, že prijatá správa nebola určená nám, bolo skontrolované či sa rovnaká správa už nenachádzala v message queue a ak nie tak tam bola pridaná za predpokladu, že mala ešte dostupný 
+nejaký počet skokov alebo TTL. Správe bolo zároveň nastavené prvotné časové pozdržanie na základe hodnoty SNR, s ktorou bola prijatá.
 
-V opačnom prípade, kedy sa sprava už nachádza v message queue, je nutné znova vykonať sériu overení a na základe nich zmeniť stav správy.
-Prvé z overení je, či daná správa bola vytvorená nami. To či bola vytvorená nami, zistime z adresy odosielateľa správy. Adresa sa bude zhodovať s tou našou ak bola vytvorená nami. 
-V tom prípade nastala situácia kedy našu správu preposlal nejaký iny uzol. Môžme teda správe zmeniť stav na hotovo, prípadne na stav preposlaná ak sa jednalo o správu s potrebným 
+V opačnom prípade, kedy sa sprava už nachádzala v message queue, bolo nutné znova vykonať sériu overení a na základe nich zmeniť stav správy.
+Prvé z overení bolo, či daná správa bola vytvorená nami. To či bola vytvorená nami, sme zistili na základe toho, či sa adresa odosielateľa správy zhodovala s tou našou. 
+V tom prípade nastala situácia kedy našu správu preposlal nejaký iny uzol. Bolo možné teda správe zmeniť stav na hotovo, prípadne na stav preposlaná ak sa jednalo o správu s potrebným 
 potvrdením o doručení.
 
-Ak by sa ukázalo, že správa nebola vytvorená nami ale niekým iným, tak sa správa presunie do stavu zmazaná. Do tohto stavu sa ale presunie iba v prípade overenia, že je hodnota počtu preskokov alebo TTL 
-z prijatej správy nižšia ako hodnota správy v message queue. %TODO tu mozno vysvetlit preco sa to tak robi
+Ak sa ukázalo, že správa nebola vytvorená nami ale niekým iným, tak bola správa presunutá do stavu zmazaná. Do tohto stavu bola ale presunutá iba v prípade overenia, že hodnota počtu preskokov alebo TTL 
+z prijatej správy bola nižšia ako hodnota správy v message queue. %TODO tu mozno vysvetlit preco sa to tak robi
 
-Po dokončení funkcie receive(), následuje funkcia tick(). V tejto funkcii sa postupne prechádza všetkými spravami z message queue. Pri každej správe sa pozrieme na jej stav 
-a ak je v stave preposlaná alebo zmazaná tak sa následne skontroluje, či jej už nevypršal časový limit. Pokiaľ limit vypršal, tak sa správa 
-skutočne vymaže z message queue ak bola v stave zmazaná. Ak bola v stave preposlaná, tak sa jej stav zmení na nepotvrdená -- NAK.
+Po dokončení funkcie receive(), nasledovala funkcia tick(). V tejto funkcii bolo postupne prechádzane všetkými spravami z message queue. Pri každej správe bol overený jej stav 
+a ak bola v stave preposlaná alebo zmazaná tak sa následne skontrolovalo, či jej už nevypršal časový limit. Pokiaľ limit vypršal, tak sa správa 
+skutočne vymazala z message queue ak bola v stave zmazaná. Ak bola v stave preposlaná, tak sa jej stav zmenil na nepotvrdená -- NAK.
 
-V prípade, že by bol stav správy nová alebo odoslaná, tak sa pokračuje v jej spracovávaní, ktoré pozostáva z následujúcich krokov.
-Ako prvé sa overí, či už nadišiel čas danú správu spracovať. To zistíme tak, že sa pozrieme či správe už vypršal časový limit. Ak áno, znamená to, že správa je pripravená na spracovávanie 
-a môžme pokračovať ďalej. Ak nie tak sa daná správa preskočí a prejdeme na ďalšiu správu.
+V prípade, že bol stav správy nová alebo odoslaná, tak sa pokračovalo v jej spracovávaní, ktoré pozostávalo z následujúcich krokov.
+Ako prvé bolo overené, či už nadišiel čas danú správu spracovať. To bolo zistené tak, že sme sa pozreli či správe už vypršal časový limit. Ak áno, znamenalo to, že správa bola pripravená na spracovávanie 
+a bolo možné pokračovať ďalej. Ak nie tak sa daná správa preskočila a prešlo sa na ďalšiu správu.
 
-Ak nadišiel čas správu spracovať, tak skontrolujeme, či ma ešte dostupné nejaké pokusy o odoslanie a v prípade senzorových správ aj či má ešte dostupný TTL.
-Ak sa stane, že správa už vyčerpala všetky pokusy o odoslanie alebo jej TTL došlo na nulu, tak sa správa presunie do stavu neúspešná alebo zmazaná ak to nebola 
-správa vytvorená nami. Keby správe ešte zostali nejaké pokusy o odoslanie, tak správu odošleme cez LoRa. Keď sa jednalo o správu typu senzorové dáta, tak sa správe pred 
-odoslaním zmenší TTL.
+Ak nadišiel čas správu spracovať, tak bolo skontrolované, či má ešte dostupné nejaké pokusy o odoslanie a v prípade senzorových správ aj to, či bol ešte dostupný TTL.
+Ak došlo k situácii, že správa už vyčerpala všetky pokusy o odoslanie alebo jej TTL došlo na nulu, tak bola správa presunutá do stavu neúspešná alebo zmazaná ak to nebola 
+správa vytvorená nami. Ak správe ešte zostali nejaké pokusy o odoslanie, tak bola správa odoslaná cez LoRa. Keď sa jednalo o správu typu senzorové dáta, tak sa správe pred 
+odoslaním zmenšila hodnota TTL.
 
-Po odoslaní správe aktualizujeme aktuálne časové razítko, znížime počítadlo dostupných pokusov o odoslanie a nastavíme nový časový limit pre správu. Tento 
-limit bude závisieť od konfiguračnej premennej, ktorá určuje, ako často sa ma správa znovu odosielať. Pokiaľ bola správa pred odoslaním v stave nová, tak jej stav aktualizujeme 
+Po odoslaní bolo správe aktualizované aktuálne časové razítko, znížilo sa počítadlo dostupných pokusov o odoslanie a bol nastavený nový časový limit pre správu. Tento 
+limit bol závislý od konfiguračnej premennej, ktorá určovala, ako často sa ma správa znovu odosielať. Pokiaľ bola správa pred odoslaním v stave nová, tak jej stav bol aktualizovaný 
 na odoslaná.
 
-Pri pokuse o odoslanie môže dôjsť k situácií, kedy práve niekto iný vysiela signál a tak je nutné pozdržanie odoslania. To realizujeme tak, že správe nastavíme 
-časové pozdržanie na hodnotu konfiguračnej premennej a aktualizujeme jej časové razítko. Výsledkom bude, že táto správa sa bude znovu pokúšať o odoslanie až po uplynutí 
+Pri pokuse o odoslanie mohlo dôjsť k situácií, kedy práve niekto iný vysielal signál a tak bolo nutné pozdržanie odoslania. To bolo realizované tak, že správe bolo nastavené 
+časové pozdržanie na hodnotu konfiguračnej premennej a bolo aktualizované jej časové razítko. Výsledkom bolo, že táto správa sa pokúšala znovu odoslať až po uplynutí 
 časového intervalu.
 
 Po dokončení implementácie hlavnej funkcionality sme ju mohli otestovať. Na zariadeniach Armachat sme vytvorili jednoduché rozhranie, 
-ktoré zobrazuje na displeji informácie o novo prijatej správe. Taktiež môžme využiť klávesnicu zariadenia, na napísanie vlastnej správy a jej odoslanie.
+ktoré zobrazovalo na displeji informácie o novo prijatej správe. Taktiež bolo možné využiť klávesnicu zariadenia, na napísanie vlastnej správy a jej odoslanie.
 Na obrázku \ref{fig:armRec} môžme vidieť, že zariadenie prijalo správu od odosielateľa s adresou 0xA1BC, ktoré bolo v tomto prípade druhé Armachat zariadenie.
 \newpage
 \begin{figure}
@@ -917,11 +912,11 @@ Na obrázku \ref{fig:armRec} môžme vidieť, že zariadenie prijalo správu od 
 	\label{fig:armRec}
 \end{figure}
 
-Okrem obsahu správy, môžme vidieť hodnoty SNR a RSSI, s ktorými zariadenie správu prijalo, hodnotu max hop, ktorá predstavuje počet preskokov a hodnotu initial max hop, 
-ktorá predstavuje pôvodný maximálny počet preskokov. Na základe rovnosti týchto dvoch hodnôt, môžme usúdiť, že správa prešla medzi dvoma zariadeniami bez toho aby prešla 
+Okrem obsahu správy, môžme vidieť hodnoty SNR a RSSI, s ktorými zariadenie správu prijalo, hodnotu max hop, ktorá predstavovala počet preskokov a hodnotu initial max hop, 
+ktorá predstavovala pôvodný maximálny počet preskokov. Na základe rovnosti týchto dvoch hodnôt, môžme usúdiť, že správa prešla medzi dvoma zariadeniami bez toho aby prešla 
 cez nejaké iné tretie zariadenie. Na spodku displeja môžme vidieť identifikátor prijatej správy.
 
-Na ďalšom obrázku \ref{fig:armRec2} môžme vidieť, že rozdiel medzi hodnotami max hop a initial max hop je 1. Indikuje to, že správa spravila preskok cez ďalšie zariadenie predtým ako 
+Na ďalšom obrázku \ref{fig:armRec2} môžme vidieť, že rozdiel medzi hodnotami max hop a initial max hop bol 1. Indikuje to, že správa spravila preskok cez ďalšie zariadenie predtým ako 
 bola doručená na cieľové zariadenie. Tento test sme vykonali tak, že sme tri zariadenia rozmiestnili s určitou vzdialenosťou medzi nimi, tak aby sme docielili preskok cez jedno zariadenie. 
 Zariadenia mali nastavené adresy 0x0001, 0x0002 a 0xA1BC. Správa bola odoslaná zo zariadenia 0xA1BC na zariadenie 0x0002.
 
@@ -972,20 +967,20 @@ textový reťazec \uv{Ahoj}. V prvých 12 bajtoch, vidíme hlavičku paketu. V �
 \newpage
 
 \section{Implementácia API pre webové rozhranie}
-Pri používaní nášho protokolu má používateľ možnosť využiť webové rozhranie, cez ktoré je možné ovládať zariadenie a 
-pracovať s naším LoRa protokolom. Používateľ ma možnosť vytvárať alebo prijímať nove správy, ktoré sa zobrazujú na webovej stránke.
-Okrem toho je možné cez webové rozhranie konfigurovať rôzne nastavenia týkajúce sa nášho protokolu, ako napríklad adresu zariadenia 
+Pri používaní nášho protokolu mal používateľ možnosť využiť webové rozhranie, cez ktoré bolo možné ovládať zariadenie a 
+pracovať s naším LoRa protokolom. Používateľ mal možnosť vytvárať alebo prijímať nove správy, ktoré sa zobrazovali na webovej stránke.
+Okrem toho bolo možné cez webové rozhranie konfigurovať rôzne nastavenia týkajúce sa nášho protokolu, ako napríklad adresu zariadenia 
 alebo nastavenie LoRa parametrov.
 
-K tomu aby bolo možné cez webové rozhranie ovládať zariadenie a protokol, je nutné najskôr implementovať nejaké API. 
-Cez API budeme komunikovať so zariadením z webového rozhrania. Toto API bude bežať na serveri, ktorý pobeží na zariadení 
-spolu s naším protokolom. API bude realizované prostredníctvom klasických HTTP požiadavkov.
+K tomu aby bolo možné cez webové rozhranie ovládať zariadenie a protokol, bolo nutné najskôr implementovať nejaké API. 
+Cez API sme mohli komunikovať so zariadením z webového rozhrania. Toto API bežalo na serveri, ktorý bol spustený na zariadení 
+spolu s naším protokolom. API bolo realizované prostredníctvom klasických HTTP požiadavkov.
 
-Najpodstatnejšími časťami API sú funkcie, ktoré nám umožnia prijímať alebo odosielať správy. K tomu vznikli dve 
+Najpodstatnejšími časťami API boli funkcie, ktoré nám umožnili prijímať alebo odosielať správy. K tomu vznikli dve 
 API prístupové body -- takzvané routy. \uv{/api/messages} a \uv{/api/send text message}.
 
-Prvá routa slúži na získanie správ, ktoré boli prijaté na zariadení. Je volaná prostredníctvom HTTP GET požiadavku a 
-vracia zoznam obsahujúci entity jednotlivých správ. Každá správa je reprezentovaná JSON objektom, ktorý obsahuje 
+Prvá routa slúžila na získanie správ, ktoré boli prijaté na zariadení. Bola volaná prostredníctvom HTTP GET požiadavku a 
+vraciala zoznam obsahujúci entity jednotlivých správ. Každá správa bola reprezentovaná JSON objektom, ktorý obsahoval 
 iba potrebné informácie o správe, k tomu aby bolo možné zobrazovať správy na webovej stránke. Štruktúru tohoto JSON 
 objektu môžme vidieť na ukážke \ref{fig:messageObj}.
 
@@ -996,11 +991,11 @@ objektu môžme vidieť na ukážke \ref{fig:messageObj}.
 	\label{fig:messageObj}
 \end{figure}
 
-Druhá routa slúži na odoslanie správy prostredníctvom HTTP POST požiadavku. Táto routa prijíma JSON objekt, ktorý reprezentuje novú správu.
+Druhá routa slúžila na odosielanie správ prostredníctvom HTTP POST požiadavku. Táto routa prijímala JSON objekt, ktorý reprezentoval novú správu.
 V JSON objekte musia byť uvedené všetky potrebné informácie o správe, ktoré sú potrebné na jej správne odoslanie. 
-Sú nimi destinácia, maximálny počet skokov, priorita, obsah správy a príznak, či chceme potvrdenie o doručení. 
-API po prijatí požiadavku na vytvorenie novej správy validuje vstupné údaje a ak sú všetky údaje v poriadku, tak vytvorí novú správu. V 
-opačnom prípade vráti chybovú hlášku. Z dôvodu limitácie LoRa paketov na maximálnu dĺžku 255 bajtov pre posielané dáta, je potrebné overiť či textová správa 
+Boli nimi destinácia, maximálny počet skokov, priorita, obsah správy a príznak, či chceme potvrdenie o doručení. 
+API po prijatí požiadavku na vytvorenie novej správy validovala vstupné údaje a ak boli všetky údaje v poriadku, tak bola vytvorená nová správa. V 
+opačnom prípade API vrátila chybovú hlášku. Z dôvodu limitácie LoRa paketov na maximálnu dĺžku 255 bajtov pre posielané dáta, bolo potrebné overiť či textová správa 
 nie je príliš dlhá a prípadne ju orezať na maximálnu povolenú dĺžku.
 
 Maximálna povolená dĺžka v tomto prípade nie je 255 bajtov ale len 238. Toto je výsledkom toho, 
@@ -1008,27 +1003,27 @@ Maximálna povolená dĺžka v tomto prípade nie je 255 bajtov ale len 238. Tot
 Pri našom protokole je okrem toho v každom LoRa pakete potrebné nejaké miesto ešte rezervovať pre hlavičku paketu a informácie o počte skokov.
 Z toho nám ostáva maximálna dĺžka správy 238 bajtov.
 
-Ďalším potrebným API prístupovým bodom je routa na získavanie a zmenu aktuálnej konfigurácie. 
-Vznikla na to routa \uv{/api/config}. Táto routa môže byť volaná prostredníctvom HTTP GET požiadavku, kedy vráti aktuálnu konfiguráciu 
-alebo prostredníctvom HTTP PUT požiadavku, kedy nastaví novú konfiguráciu z poskytnutého JSON objektu, zachytávajúceho nové nastavenia.
+Ďalším potrebným API prístupovým bodom bola routa na získavanie a zmenu aktuálnej konfigurácie. 
+Vznikla na to routa \uv{/api/config}. Táto routa mohla byť volaná prostredníctvom HTTP GET požiadavku, kedy vrátila aktuálnu konfiguráciu 
+alebo prostredníctvom HTTP PUT požiadavku, kedy nastavila novú konfiguráciu z poskytnutého JSON objektu, zachytávajúceho nové nastavenia.
 
-Používateľ má možnosť nastaviť rôzne parametre, ktoré ovplyvňujú správanie protokolu. Nastavené hodnoty parametrov sa budú ukladať do 
+Používateľ má možnosť nastaviť rôzne parametre, ktoré ovplyvňujú správanie protokolu. Nastavené hodnoty parametrov boli ukladané do 
 JSON súboru na zariadení. Tieto nastavenia si bližšie popíšeme v časti implementácie 
 konfiguračného rozhrania.
 
 
 \section{Návrh webového rozhrania}
 Pred samotnou implementáciou webového rozhrania bolo nutné vytvoriť nejaký návrh, 
-ako bude webové rozhranie vyzerať. Na vytvorenie návrhov webových stránok bol použitý dizajnérsky nástroj Figma.
+ako bude webové rozhranie vyzerať. Na vytvorenie návrhov webových stránok bol použitý dizajnérsky nástroj Figma \cite{figma}.
 
-Bolo potrebné navrhnúť dokopy štyri web stránky, kde prvou bude úvodná stránka na ktorej používateľ uvidí prijaté a odoslané správy. 
-Taktiež tam bude mať možnosť odoslať novú správu.
+Bolo potrebné navrhnúť dokopy štyri web stránky, kde prvou bola úvodná stránka na ktorej mohol používateľ vidieť prijaté a odoslané správy. 
+Taktiež tam bola možnosť odoslať novú správu.
 
-Rozhodli sme sa pridať aj možnosť ukladať si kontakty do adresára, ktorý bude používateľovi umožňovať vidieť namiesto 
-hexadecimálnych adries v správach, názov kontaktu. Tieto kontaktné adresáre budu rozdelené pre kontakty na iných používateľov a kontakty 
-ne senzorové uzly. Z toho dôvodu boli potrebne dve ďalšie stránky, kde používateľ bude môcť spravovať svoje kontakty.
+Rozhodli sme sa pridať aj možnosť ukladať si kontakty do adresára, ktorý umožňoval používateľovi vidieť namiesto 
+hexadecimálnych adries v správach, názov uloženého kontaktu. Tieto kontaktné adresáre boli rozdelené pre kontakty na iných používateľov a kontakty 
+ne senzorové uzly. Z toho dôvodu boli potrebné dve ďalšie stránky, kde by používateľ mohol spravovať svoje kontakty.
 
-Poslednou stránkou bola stránka na konfiguračné rozhranie. Táto stránka bude obsahovať všetky možnosti, ktoré používateľ bude môcť nastavovať.
+Poslednou stránkou bola stránka na konfiguračné rozhranie. Táto stránka obsahovala všetky možnosti, ktoré mal používateľ možnosť nastavovať.
 
 Výsledne návrhy môžeme vidieť na následujúcich obrázkoch. Stránky pre správu kontaktov ( Obr. \ref{fig:figma2} ) na používateľov a kontaktov na senzorové uzly budú vyzerať 
 rovnako.
@@ -1046,9 +1041,9 @@ bude môcť používateľ meniť a tak sú tam iba nastavenia adresy, šifrovaci
   \label{fig:figmaHome}
 \end{figure}
 
-Keďže sme pridali novú funkciu v podobe pridávania kontaktov, bolo potrebné vytvoriť novú API routu, ktorá bude 
-vraciať zoznam kontaktov. Okrem toho bola vytvorená ďalšia routa, slúžiaca na pridávanie nových alebo mazanie starých kontaktov. 
-Ako databázu kontaktov sme použili JSON súbor, do ktorého sa budu kontakty ukladať priamo na zariadení.
+Keďže sme pridali novú funkciu v podobe pridávania kontaktov, bolo potrebné vytvoriť novú API routu, ktorá vraciala 
+zoznam kontaktov. Okrem toho bola vytvorená ďalšia routa, slúžiaca na pridávanie nových alebo mazanie starých kontaktov. 
+Ako databáza kontaktov bol použitý JSON súbor, do ktorého sa kontakty ukladali priamo na zariadení.
 
 \begin{figure}[h!]
   \centering
@@ -1060,8 +1055,8 @@ Ako databázu kontaktov sme použili JSON súbor, do ktorého sa budu kontakty u
 \end{figure}
 
 \section{Implementácia webového rozhrania}
-Na implementáciu webového rozhrania bola použitá kombinácia HTML, CSS a JavaScriptu. Na komunikáciu s API bol použitý fetch API, 
-ktorý je súčasťou JavaScriptu. Ako také volanie API za použitia fetch API môžeme vidieť v nasledujúcom kóde.
+Na implementáciu webového rozhrania bola použitá kombinácia HTML, CSS a JavaScriptu. Na komunikáciu s API bolo použité fetch API, 
+ktoré je súčasťou JavaScriptu. Ukážku volania za použitia fetch API môžeme vidieť v nasledujúcom kóde.
 
 \begin{lstlisting}[language=Python, label={lst:fetch}]
   const newMessage = {
@@ -1083,9 +1078,9 @@ Webové stránky sme implementovali podľa pripravených návrhov. Avšak pri im
 niektoré veci trochu pozmeníme a pridáme. Ukážku finálnej implementácie webového rozhrania bude možné vidieť v časti testovania.
 
 Jednou z hlavných zmien bolo pridanie statusu, ku jednotlivým správam. 
-Tento status vo forme ikonky sa bude zobrazovať pri nami odoslaných správach a bude indikovať, či bola správa prijatá alebo nie. 
-Na obrázku \ref{fig:messageStates} vidíme ukážku, ako tieto jednotlive stavy budú vyzerať. Môžme si tiež všimnúť, že nad správu 
-pribudla dodatočná informácia o použitých LoRa parametroch. Taktiež môžme vidieť nove tlačítko, ktoré sa zobrazuje pri 
+Tento status vo forme ikonky bol zobrazovaný pri nami odoslaných správach a indikoval, či bola správa prijatá alebo nie. 
+Na obrázku \ref{fig:messageStates} vidíme ukážku, ako tieto jednotlive stavy vyzerali. Môžme si tiež všimnúť, že nad správu 
+pribudla dodatočná informácia o použitých LoRa parametroch. Taktiež môžme vidieť nove tlačítko, ktoré sa zobrazovalo pri 
 neúspešných správach.
 
 \begin{figure}[h!]
@@ -1103,11 +1098,12 @@ neúspešných správach.
   \label{fig:messageStates}
 \end{figure}
 
-Tlačítko, zobrazujúce sa pri neúspešných správach, pridáva možnosť neúspešnú správu skúsiť znovu odoslať. K tomu aby to fungovalo, 
-bolo potrebné pridať ďalšiu API routu. Táto routa príjme ako parameter ID správy, ktorú chceme odoslať znovu a správa sa znova odošle.
+Tlačítko, zobrazujúce sa pri neúspešných správach, pridalo možnosť neúspešnú správu skúsiť znovu odoslať. K tomu aby to fungovalo, 
+bolo potrebné pridať ďalšiu API routu. Táto routa prijímala ako parameter ID správy, ktorú sme chceli odoslať znovu a správa sa znova odoslala.
 
-Stránku nastavení sme voči návrhu rozšírili o ďalšie nastavenia a spolu s tym sme rozšírili aj popis jednotlivých nastavení a čo robia.
-Obmedzili sme možnosť nastavenia vlastnej adresy na jednorázové nastavenie. Týmto sa snažíme zamedziť tomu, aby si používateľ kedykoľvek 
+Stránku nastavení sme voči návrhu rozšírili o ďalšie nastavenia a spolu s tym sme rozšírili aj popis jednotlivých nastavení a čo robia. 
+Pri niektorých nastaveniach bolo nutne reštartovať zariadenie, k týmto pribudol popis s informáciou o nutnom reštarte. 
+Nastavenia vlastnej adresy bolo obmedzené na jednorázové nastavenie. Týmto sme sa snažili zamedziť tomu, aby si používateľ kedykoľvek 
 upravoval svoju adresu a tým sa mohol vydávať za iného používateľa. Finálnu stránku nastavení vidíme na obrázku \ref{fig:webConfig}.
 
 \begin{figure}[h!]
@@ -1117,12 +1113,12 @@ upravoval svoju adresu a tým sa mohol vydávať za iného používateľa. Finá
   \label{fig:webConfig}
 \end{figure}
 
-Všetky nastaviteľné položky su validované predtým, ako sa novo upravené nastavenia odošlú na server. Táto validácia je potom redundantne 
+Všetky nastaviteľné položky boli validované predtým, ako sa novo upravené nastavenia odoslali na server. Táto validácia bola potom redundantne 
 vykonávaná aj na strane serveru.
 
-Na stránku nastavení sme pridali možnosť pridávať alebo odstraňovať WiFi siete. Na tieto siete sa bude snažiť zariadenie pripojiť pri spustení a 
-následne sa rozbehne server. Je možné definovať si aj vlastnú sieť typu access point. Pri použití tejto možnosti sa zariadenia pri spúštaní 
-nebude pripájať na žiadnu WiFi sieť, ale vytvorí svoju vlastnú.
+Na stránku nastavení sme pridali možnosť pridávať alebo odstraňovať WiFi siete. Na tieto siete sa zariadenie snažilo pripojiť pri spustení a 
+po úspešnom pripojení sa spustil webový server. Pribudla aj možnosť definovať si vlastnú sieť typu access point. Pri použití tejto možnosti sa zariadenie pri spúštaní 
+nepokúšalo pripájať na žiadnu WiFi sieť, ale vytvorilo svoju vlastnú.
 
 
 \begin{wrapfigure}{r}{0.5\textwidth}
@@ -1133,39 +1129,38 @@ nebude pripájať na žiadnu WiFi sieť, ale vytvorí svoju vlastnú.
   \label{fig:mobileWeb}
 \end{wrapfigure}
 
-V našej LoRa mesh sieti sa môžu vyskytovať senzorové uzly, ktoré obsahujú GPS modul. Z toho dôvodu sme pridali do webového rozhrania funkciu, 
-ktorá zobrazí na mape aktuálnu polohu zariadenia. Správy, ktoré chceme zobraziť ako polohu na mape, musia dodržať určitý formát 
-a to taký, že správa musí obsahovať prefix \uv{GPS:} a následne musia nasledovať súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
-Ako takáto správa s mapou vyzerá, môžme vidieť na obrázku \ref{fig:mobileWeb}. Na integráciu mapy do webového rozhrania bola použitá knižnica Leaflet.js \cite{leaflet}.
+V našej LoRa mesh sieti sa mohli vyskytovať senzorové uzly, ktoré obsahovali GPS modul. Z toho dôvodu sme pridali do webového rozhrania funkciu, 
+ktorá zobrazovala na mape aktuálnu polohu zariadenia. Správy, ktoré sme chceli zobraziť ako polohu na mape, museli dodržiavať určitý formát 
+a to taký, že správa musela obsahovať prefix \uv{GPS:} a následne nasledovali súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
+Ako takáto správa s mapou vyzerala, môžme vidieť na obrázku \ref{fig:mobileWeb}. Na integráciu mapy do webového rozhrania bola použitá knižnica Leaflet.js \cite{leaflet}.
 
-Pri implementácií sme dbali na to, aby bolo možné webové rozhranie plnohodnotne používať aj na mobilných zariadeniach s malými displejmi. Preto sme 
-spravili webové rozhranie responzívne na veľkosť obrazovky. Okrem toho, že sa pri menšej veľkosti obrazovky zmenšujú veľkosti jednotlivých prvkov v rozhraní, 
-mení sa aj celkové usporiadanie prvkov na stránke tak, aby bolo používanie rozhrania prívetivejšie. 
+Pri implementácií bol kladený dôraz na to, aby bolo možné webové rozhranie plnohodnotne používať aj na mobilných zariadeniach s malými displejmi. Preto sme 
+spravili webové rozhranie responzívne na veľkosť obrazovky. Okrem toho, že sa pri menšej veľkosti obrazovky zmenšovali veľkosti jednotlivých prvkov a písma v rozhraní, 
+menilo sa aj celkové usporiadanie prvkov na stránke tak, aby bolo používanie rozhrania prívetivejšie. 
 
-Aby sme odlíšili nami odoslané správy od správ, ktoré sme prijali od 
-nejakého iného uzlu, bolo pridané farebné odlíšenie jednotlivých správ. Správy, ktoré sme 
-prijali od iného používateľa su zobrazené v sivej farbe. Správy ktoré sme prijali od senzorových uzlov, su zobrazené v žltej farbe. A správy, ktoré sme odoslali 
-my, su modré. Toto farebné odlíšenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy sú zobrazené v zelenej farbe.
+Aby boli odlíšené nami odoslané správy od správ, ktoré sme prijali od nejakého iného uzlu, bolo pridané farebné označenie jednotlivých správ. Správy, ktoré sme 
+prijali od iného používateľa boli zobrazené v sivej farbe. Správy ktoré sme prijali od senzorových uzlov, boli zobrazené v žltej farbe. A správy, ktoré sme odoslali 
+my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy boli zobrazené v zelenej farbe.
 
 
 \section{Optimalizácia}
 Po sfunkčnení celej aplikácie sme narazil na problém, v podobe nepostačujúceho miesta na zariadeniach. Dochádzalo k tomu, že ak zariadenie prijalo 
 väčšie množstvo správ, tak mu došla pamäť a beh programu sa ukončil.
 
-V zoznam správ sa držali všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny, a časom ako 
+V zoznam správ boli uložené všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny, a časom ako 
 uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a volná pamäť zariadenia sa postupne znižovala.
 
-Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahne určeného limitu, tak sa z neho odstráni najposlednejšia správa.
+Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahol určeného limitu, tak sa z neho odstránila najposlednejšia správa.
 Po tejto úprave už nedochádzalo k spomínanému problému.
 
 Ďalším problémom, ku ktorému dochádzalo taktiež z nedostatku pamäti bolo, že pri volaní API na získanie správ zariadeniu došla pamäť a program sa ukončil.
 Dochádzalo k tomu preto, že funkcia na získanie správ sa snažila celý zoznam správ transformovať do JSON formátu, ktorý by následne poslala nazad. Pri tejto transformácií 
-na JSON, sa všetky dáta z jednotlivých správ kopírovali do nového JSON objektu. Keďže bolo v zozname správ veľa položiek, tak ich kopírovanie do JSON objektu zabralo 
-nadmerné množstvo pamäti.
+na JSON, sa však všetky dáta z jednotlivých správ kopírovali do nového JSON objektu. Keďže bolo v zozname správ veľa položiek, tak ich kopírovanie do JSON objektu zabralo 
+nadmerné množstvo pamäti a program spadol.
 
-API na získanie správ sme preto upravili tak, že používa takzvané stránkovanie. Toto stránkovanie funguje tak, že API rozdelí zoznam správ na menšie časti -- stránky a 
-vracia iba jednu stránku. Pri volaní API sa pridáva parameter špecifikujúci, ktorú stránku má API vrátiť. Tento prístup má za následok, že 
-webová stránka bude volať API na získanie správ nie raz, ale viac krát, až kym nezíska všetky stránky.
+API na získanie správ sme preto upravili tak, že používa takzvané stránkovanie. Toto stránkovanie funguje tak, že na API bol zoznam správ rozdelený na menšie časti -- stránky a 
+vraciala sa vždy iba jedna stránka. Pri volaní API bol pridaný parameter špecifikujúci, ktorú stránku má API vrátiť. Tento prístup mal za následok, že 
+webová stránka volala API na získanie správ nie raz, ale viac krát, až kym nezískala všetky stránky.
 
 Vďaka tejto optimalizácií už nedochádzalo k problému s pamäťou.
 
@@ -1175,42 +1170,42 @@ CircuitPython, a následne sme mohli použiť rovnakú implementáciu ako pre Ar
 
 Nami použité Raspberry Pi avšak neobsahuje WiFi modul. Miesto toho ponúka ethernetový port. Preto sme museli upraviť implementáciu tak, 
 aby sa nepripájala na WiFi sieť, ale použila vstavané ethernetové pripojenie. A tým pádom bolo tiež potrebné, z webovej stránky nastavení, odstrániť možnosť 
-pridávania WiFi siete.
+pridávania WiFi siete keďže už nebola potrebná.
 
-Keďže Raspberry Pi má väčšiu pamäť, tak sme mohli zvýšiť limit dĺžky zoznamu správ.
+Vďaka tomu, že Raspberry Pi má väčšiu pamäť, sme mohli zvýšiť limit dĺžky zoznamu správ.
 
-CircuitPython na Raspberry Pi nemá podporu pre všetky knižnice, ktoré používame v implementácií pre Armachat zariadenia. Bolo nutné nájsť vhodnú náhradu pre 
+CircuitPython na Raspberry Pi nemal podporu pre všetky knižnice, ktoré boli používané v implementácií pre Armachat zariadenia. Bolo nutné nájsť vhodné náhrady pre 
 knižnice, ktoré nemali podporu a prispôsobiť implementáciu náhradným knižniciam. Jednalo sa o knižnicu na šifrovanie pomocou AES šifry a knižnicu na webový server. 
 
 \section{Implementácia pre zariadenia TTGO}
 Z dôvodu menšieho výkonu a hlavne menšej pamäti sme sa rozhodli implementáciu pre TTGO zariadenia zjednodušiť. Keďže zariadenia TTGO nepodporujú 
-CircuitPython, bolo nutne vytvoriť kompletne novú implementáciu v jazyku C++.
+CircuitPython, bolo nutné vytvoriť kompletne novú implementáciu v jazyku C++.
 
-Určili sme, že zariadenia TTGO budu v našej mesh sieti reprezentovať jednoduché uzly, ktoré budu posielať nejaké senzorové dáta. Implementácia preto 
-nebude obsahovať žiadne užívateľské rozhranie, server ani webovú stránku. Implementácia bude obsahovať iba základné funkcie, ktoré sú potrebné pre 
-odosielanie senzorových správ. Senzorové uzly budu posielať správy iba jednosmerne, nie je potreba aby senzorové uzly nejaké správy prijímali. 
-Kvôli tomu, že senzorové uzly nebudú prijímať žiadne správy, nebudú schopné ani preposielať ďalej cudzie správy. Dosah mesh siete teda nie je možné 
+Určili sme, že zariadenia TTGO budu v našej mesh sieti reprezentovať jednoduché samostatné uzly, ktoré v určitých intervaloch posielali nejaké senzorové dáta. Implementácia preto 
+neobsahovala žiadne užívateľské rozhranie, server ani webové rozhranie. Implementácia obsahovala iba základné funkcie, ktoré boli potrebné pre 
+odosielanie senzorových správ. Senzorové uzly posielali správy iba jednosmerne, nebola potreba aby senzorové uzly nejaké správy prijímali. 
+Kvôli tomu, že senzorové uzly nami možnosť prijímať žiadne správy, neboli schopné ani preposielať ďalej cudzie správy. Dosah mesh siete teda nebolo možné 
 rozšíriť pomocou týchto uzlov.
 
-Rovnako ako pri predošlých verziách pre Armachat a Raspberry Pi, je možné konfigurovať určité nastavenia. Táto konfigurácia sa vykonáva upravovaním konfiguračných 
-premenných, predtým ako je program preložený a nahraný do zariadenia. Súčasťou konfigurácie je zoznam kontaktov, na ktoré bude senzorový uzol odosielať správy.
+Rovnako ako pri predošlých verziách pre Armachat a Raspberry Pi, bolo možné konfigurovať určité nastavenia. Táto konfigurácia sa vykonávala upravovaním konfiguračných 
+premenných, predtým ako bol program preložený a nahraný do zariadenia. Súčasťou konfigurácie bol aj zoznam kontaktov, na ktoré senzorový uzol odosielal správy.
 
-Implementácia pozostáva z funkcií, ktoré postupne poskladajú hlavičku paketu a k nej pridajú obsah senzorovej správy. Tieto novo vytvorené správy sa uložia do zoznamu 
-a rovnako ako pri plnej verzii programu, sa zoznam správ cyklicky prechádza a správy z neho sa odosielajú, keď nadíde ich čas.
+Implementácia pozostávala z funkcií, ktoré postupne poskladali hlavičku paketu a k nej pridali obsah senzorovej správy. Tieto novo vytvorené správy sa uložili do zoznamu 
+a rovnako ako pri plnej verzii programu, sa zoznam správ cyklicky prechádzal a správy z neho sa odosielali, keď nadišiel ich čas.
 
-Každá správa je taktiež odosielaná viackrát. Počet koľko krát sa ma správa odoslať je daný konfiguračnou premennou. Keďže táto zjednodušená implementácia nerieši prijímanie správ, 
-každá správa sa bude opakovane posielať daný počet pokusov aj napriek tomu, že bola daná správa uz preposlaná ďalej nejakým iným uzlom. Po tom čo sa správa odošle 
-daný počet krát, sa správa zoznamu správ odstráni.
+Každá správa bola taktiež odosielaná viackrát. Počet pokusov koľko krát sa mala správa odoslať bol daný konfiguračnou premennou. Keďže táto zjednodušená implementácia neriešila prijímanie správ, 
+každá správa sa opakovane posielala daný počet pokusov aj napriek tomu, že bola daná správa uz preposlaná ďalej nejakým iným uzlom. Po tom čo sa správa odoslala 
+daný počet pokusov, sa správa zo zoznamu odstránila.
 
-Hlavný chod programu pozostáva z cyklu v ktorom sa prechádzajú správy zo zoznamu správ a funkcie, ktorá generuje senzorové dáta. Na zariadení TTGO T-Beam sme použili integrovaný 
-GPS modul, z ktorého získavame GPS súradnice a z nich tvoríme obsah senzorovej správy. Zariadenie TTGO LoRa32 ma integrovaný hall effect senzor, ktorý sníma 
-úroveň magnetického poľa. Na tomto zariadení generujeme senzorové správy, ktorých obsahom je úroveň magnetického poľa plus čas ako dlho je daný senzor v prevádzke.
+Hlavný chod programu pozostával z cyklu v ktorom sa prechádzali správy zo zoznamu a funkcie, ktorá generovala senzorové dáta. Na zariadení TTGO T-Beam bol použitý integrovaný 
+GPS modul, z ktorého boli získavané GPS súradnice a z nich tvorený obsah senzorovej správy. Zariadenie TTGO LoRa32 malo integrovaný hall effect senzor, ktorý snímal 
+úroveň magnetického poľa. Na tomto zariadení boli generované senzorové správy, ktorých obsahom bola úroveň magnetického poľa plus čas ako dlho bol daný senzor v prevádzke.
 
-Funkcia na vygenerovanie novej senzorovej správy je volaná v určitých intervaloch. Tento interval je možne nastaviť konfiguračnou premennou. Výsledkom je tak 
-uzol v mesh sieti, ktorý periodicky vysiela hodnoty zo senzorov. Adresátmi týchto správ su uzly, ktorých adresy ma zariadenie uložené v konfiguračnej premennej kontaktov. 
-Ak do zoznamu kontaktov zadáme broadcast adresu -- 0xFFFF, tak správa bude doručená všetkým uzlom v sieti.
+Funkcia na vygenerovanie novej senzorovej správy bola volaná v určitých intervaloch. Tento interval bolo možne nastaviť konfiguračnou premennou. Výsledkom bol tak 
+uzol v mesh sieti, ktorý periodicky vysielal hodnoty zo senzorov. Adresátmi týchto správ boli uzly, ktorých adresy malo zariadenie uložené v konfiguračnej premennej kontaktov. 
+Ak bola do zoznamu kontaktov zadaná broadcast adresa -- 0xFFFF, tak správa bola doručená všetkým uzlom v sieti.
 
-Výsledná implementácia je veľmi odľahčená verzia nášho protokolu, ktorá je vhodná pre použitie na tých najjednoduchších zariadeniach. Pridáva to možnosť rozšíriť sieť 
+Výsledná implementácia bola veľmi odľahčená verzia nášho protokolu, ktorá bola vhodná pre použitie na tých najjednoduchších zariadeniach. Pridávalo to možnosť rozšíriť sieť 
 o rôzne monitorovacie senzorové zariadenia, ktorých obstarávacia cena je vďaka ich jednoduchosti pomerne nízka.
 
 \section{Testovanie funkčnosti}
@@ -1224,41 +1219,43 @@ test vykonnosti, packet loss, ping, dosah atd
 
 \section{Problémy a limitácie}
 Najväčším problémom, na ktorý sme narazili pri implementácii, bol spomínaný nedostatok pamäti na zariadeniach. Tento problém sa nám podarilo 
-vyriešiť, ale nesie to so sebou istý kompromis v podobe obmedzeného počtu správ, ktoré môže jedno zariadenie u seba držať. Tento limit je pri 
-zariadení Armachat s WiFi modulom len 10 správ. Kvôli tomu, že na tomto zariadení nám musí bežať webový server, je pamäť zariadenia veľmi vyťažená. 
+vyriešiť, ale nesie to so sebou istý kompromis v podobe obmedzeného počtu správ, ktoré môže jedno zariadenie u seba držať. Kvôli tomu, že na 
+zariadení Armachat s WiFi modulom nám musel bežať webový server, bola pamäť zariadenia veľmi vyťažená. Limit na počet správ, ktoré môže zariadenie u seba držať, bol nastavený 
+na 10 správ. 
 
-Tento limit 10 správ, však nemusí znamenať až taký problém. Pokiaľ ma používateľ otvorené webové rozhranie tak sa správy ukladajú aj na strane webovej aplikácie 
-bežiacej v prehliadači používateľa. Ak dôjde k dosiahnutiu maximálneho limitu správ tak sa z pamäte zariadenia odstráni najstaršia správa. V pamäti prehliadača na webovej aplikácii 
-ale táto správa ostane. Takže používateľ je schopný vidieť aj správy staršie ako posledných 10 správ.
+Tento limit 10 správ, však v realite neznamenal až taký problém. Pokiaľ mal používateľ otvorené webové rozhranie tak sa správy ukladali aj na strane webovej aplikácie 
+bežiacej v prehliadači používateľa. Ak došlo k dosiahnutiu maximálneho limitu správ tak sa z pamäte zariadenia odstránila najstaršia správa. V pamäti prehliadača na webovej aplikácii 
+ale táto správa ostala. Takže používateľ bol schopný vidieť aj správy staršie ako posledných 10 správ.
 
-Na zariadeniach Armachat bez WiFi modulu je možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu taktiež nie je taký problém.
+Na zariadeniach Armachat bez WiFi modulu bolo možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu taktiež nebol problémom.
 
-Veľkou limitáciou našej implementácie je, že CircuitPython nemá podporu pre externé prerušenia. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
-nepracuje veľmi efektívne. Keď aktuálne LoRa modul prijíma nejaký paket, tak sa pozdrží cely zvyšok bežiaceho programu, až kým sa paket nepríjme a neprečíta celý alebo nedôjde k vypršaniu 
-časového limitu. Toto nam spomaľuje beh programu zakaždým keď je v sieti vysielaný nejaký paket.
+Veľkou limitáciou našej implementácie bolo, že CircuitPython nemá podporu pre externé prerušenia. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
+nepracovala veľmi efektívne. Keď aktuálne LoRa modul prijímal nejaký paket, tak sa pozdržal cely zvyšok bežiaceho programu, až kým sa paket neprijal a neprečítal celý alebo kým nedošlo k vypršaniu 
+časového limitu. Toto nam spomaľovalo beh programu zakaždým keď bol v sieti vysielaný nejaký paket.
 
-Použitá knižnica na ovládanie LoRa modulu so sebou prináša ešte dodatočnú limitáciu. Táto knižnica nesprávne pracuje s LoRa modulom a nie je možné stabilne používať 
-LoRa prenos pokiaľ je nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky zníži. Pri 
-našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z desiatich pokusov.
+Použitá knižnica na ovládanie LoRa modulu so sebou priniesla ešte dodatočnú limitáciu. Táto knižnica nesprávne pracovala s LoRa modulom a nebolo možné stabilne používať 
+LoRa prenos pokiaľ bol nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky znížila. Pri 
+našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z desiatich pokusov pri použití najvyššieho rozprestieracieho faktoru.
 
-Chybu v knižnici sme sa snažili opraviť. Jedným z dôvodov prečo ku chybe dochádzalo bol nesprávne nastavený časový limit pre posielanie paketu. Časový limit bol nastavený na 2 sekundy. 
-Avšak, ak sme si zobrali prípad paketu, ktorý by mal veľkosť 100 bajtov a bol vysielaný s rozprestieracím faktorom 12, kódovacím pomerom 4/8, a šírkou pásma 125 kHz, zistili sme 
-že čas potrebný na vyslanie tohto paketu sa blíži k 6 sekundám. Časový limit bol teda nedostačujúci na vysielanie paketov s vyššími rozprestieracími faktormi. Po 
-zvýšení časového limitu v knižnici sme znovu otestovali spoľahlivosť prenosu. Tentokrát sa nam podarilo doručiť 2 správy z 10 pokusov. To avšak stále nie je dostatočné a 
-naznačuje to, že problém je ešte niekde inde. Ten sa nam už ale nepodarilo nájsť.
+Chybu v knižnici sme sa bezvýsledne snažili opraviť. Jedným z dôvodov, ktoré ku chybe prispievali bol nesprávne nastavený časový limit pre posielanie paketu. Knižnica odpočítavala časový limit dvoch sekúnd 
+pri čítaní novo prijímaného paketu. Ak sa paket nestihol prečítať v tomto intervale tak sa čítanie prerušilo a prijatý paket sa zahodil. 
+Avšak, keď sme si zobrali prípad paketu, ktorý mal veľkosť 100 bajtov a bol vysielaný s rozprestieracím faktorom 12, kódovacím pomerom 4/8, a šírkou pásma 125 kHz, zistili sme 
+že čas potrebný na vyslanie tohto paketu sa blížil k 6 sekundám. Časový limit bol teda nedostačujúci na vysielanie paketov s vyššími rozprestieracími faktormi. Po 
+zvýšení časového limitu v knižnici sme znovu otestovali spoľahlivosť prenosu. Tentokrát sa nam podarilo doručiť 2 správy z 10 pokusov. To avšak stále nebolo dostatočné a 
+naznačovalo to, že problém bol ešte niekde inde. Ten sa nam už ale nepodarilo nájsť.
 
-Zariadenie Raspberry Pi pico s WiFi modulom, je pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií a ma veľa nedostatkov.
-Neumožňuje prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nie je možné prepnúť modul do režimu station ak bol 
-už prepnutý do režimu AP. Jediný spôsob ako WiFi modul úspešne prepnúť medzi režimami je tvrdé resetovanie zariadenia. 
+Zariadenie Raspberry Pi pico s WiFi modulom, bolo pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií a ma veľa nedostatkov.
+Neumožňovala prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nebolo možné prepnúť modul do režimu station ak bol 
+už prepnutý do režimu AP. Jediný spôsob ako bolo možné WiFi modul úspešne prepnúť medzi režimami bolo tvrdé resetovanie zariadenia. 
 
-Pôvodne sme mali v pláne implementovať štartovací proces zariadenia tak, že najskôr sa zariadenie pokúsi pripojiť k WiFi sieťam ktoré má uložené v zozname a ak sa mu nepodarí 
-pripojiť ku žiadnej z týchto sieti, tak vytvori svoju vlastnú WiFi sieť, na ktorú sa môže používateľ pripojiť. Kvôli chybnému správaniu WiFi knižnice však tento prístup nie je možné 
-realizovať. V momente kedy sa snaží WiFi modul pripojiť na nejakú sieť zo zoznamu WiFi sieti, prepne sa do režimu station. Potom už nie je možné modul prepnúť do režimu AP ak sa nepodari pripojiť 
+Pôvodne sme mali v pláne implementovať štartovací proces zariadenia tak, že najskôr by sa zariadenie pokúsilo pripojiť k WiFi sieťam, ktoré malo uložené v zozname a ak sa mu nepodarilo 
+pripojiť ku žiadnej z týchto sieti, tak vytvorilo svoju vlastnú WiFi sieť, na ktorú sa mohol používateľ pripojiť. Kvôli chybnému správaniu WiFi knižnice však tento prístup nebolo možné 
+realizovať. V momente kedy sa snažil WiFi modul pripojiť na nejakú sieť zo zoznamu WiFi sieti, prepol sa do režimu station. Potom už nebolo možné modul prepnúť do režimu AP ak sa nepodarilo pripojiť 
 k žiadnej zo sieti.
 
-K WiFi knižnici sa viaže ešte jeden problém a to taký, že pokiaľ sa snaží používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojí na WiFi sieť, 
-zariadenie sa dostane do zamrznutého stavu a prestane reagovať na čokoľvek. Na obnovenie funkcionality je potrebný tvrdý reštart zariadenia. 
-Tomuto problému sa snažíme vyhýbať tak, že zariadenie zobrazí informáciu o spustenom web serveri až po určitom oneskorení a spoliehame sa na to, že používateľ 
+K WiFi knižnici sa viazal ešte jeden problém a to taký, že pokiaľ sa snažil používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojilo na WiFi sieť, 
+zariadenie sa dostalo do zamrznutého stavu a prestalo reagovať na čokoľvek. Na obnovenie funkcionality bol potrebný tvrdý reštart zariadenia. 
+Tomuto problému sme sa snažili vyhýbať tak, že zariadenie zobrazovalo informáciu o spustenom web serveri až po určitom oneskorení a spoliehali sme na to, že používateľ 
 sa bude pripájať na webový server až po zobrazení tejto informácie.
 
 \chapter{Záver}

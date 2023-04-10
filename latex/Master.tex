@@ -615,21 +615,21 @@ Sú nasledovné:
 ACK správa slúžila na potvrdenie doručenia správy. Keď odosielateľ pôvodnej správy niekedy neskôr prijal ACK správu, ktorá 
 potvrdzovala doručenie správy, tak mohol pôvodnú správu považovať za doručenú.
 
-Textová správa (TEXT_MSG) je správa, ktorá obsahovala textový reťazec. Rozšírením tejto správy je správa s potvrdením o doručení (TEXT_MSG_W_ACK).
+Textová správa (TEXT\_MSG) je správa, ktorá obsahovala textový reťazec. Rozšírením tejto správy je správa s potvrdením o doručení (TEXT\_MSG\_W\_ACK).
 Obsah textových správ je šifrovaný.
 
-Správa typu senzorové dáta (SENSOR_DATA) bola určená na prenos dát z rôznych senzorov. Obsah správy bol taktiež vo forme textového 
+Správa typu senzorové dáta (SENSOR\_DATA) bola určená na prenos dát z rôznych senzorov. Obsah správy bol taktiež vo forme textového 
 reťazca, ktorý obsahoval dáta zo senzorov. Tento typ správ avšak oproti obyčajnej textovej správe ponúkal možnosť nastaviť 
 časový interval -- TTL, po ktorého uplynutí sa správa nebude ďalej šíriť sieťou. Obsah správy bol taktiež šifrovaný.
 
-Sprava žiadosť o traceroute (TRACEROUTE_REQUEST) bola používaná len v krajných prípadoch, kedy nás zaujímalo akou cestou sa správa preposiela sieťou. 
+Sprava žiadosť o traceroute (TRACEROUTE\_REQUEST) bola používaná len v krajných prípadoch, kedy nás zaujímalo akou cestou sa správa preposiela sieťou. 
 Ked nejaký uzol prijal správu typu žiadosť o traceroute, tak vytvoril novu správu typu odpoveď na traceroute (TRACEROUTE) a vložil do nej svoju adresu. 
 Adresátom tejto novej správy bol odosielateľ pôvodnej správy. Ked sa táto odpoveď na traceroute šírila sieťou, 
 tak každý uzol, ktorý danú správu preposlal ďalej, pridal do nej svoju vlastnú adresu.
 Takto sa vytvoril reťazec, ktorý obsahoval adresy všetkých uzlov, cez ktoré bola správa preposlaná.
 Aby mohli ostatné uzly v sieti do správy postupne pridávať svoje adresy, tak obsah tejto správy nemohol byť šifrovaný.
 
-Posledným typom správy je nespracovaný paket (RAW_PACKET). Tento typ správy bol využívaný iba v prípade, že ma používateľ zapnutý monitorovací režim.
+Posledným typom správy je nespracovaný paket (RAW\_PACKET). Tento typ správy bol využívaný iba v prípade, že ma používateľ zapnutý monitorovací režim.
 V tomto režime sa zaznamenávali všetky správy, ktoré sa v sieti prenášali. V tomto režime bolo možne zachytiť aj pakety, 
 ktoré neboli súčasťou nášho protokolu a ich štruktúra nezodpovedala našim špecifikáciám. Z toho dôvodu ich nebolo možné spracovať a 
 uložili sa teda ako typ správy nespracovaný paket. Ich obsah tvorili iba holé prijaté dáta vo forme bajtov.

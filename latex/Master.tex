@@ -20,16 +20,34 @@
 
 \ThesisAssignmentFileName{ThesisSpecification_OZA0016.pdf}
 
-\Acknowledgement{Rád by som sa poďakoval svojmu vedúcemu diplomovej práce pánovi Mgr. Ing. Michalovi Krumniklovi, Ph.D. za 
-odborné vedenie, konzultácie a podnety k diplomovej práci.}
+\Acknowledgement{
+Rád bych se poděkoval vedoucímu své diplomové práce panu Mgr. Ing. Michalu Krumniklovi, Ph.D. za 
+odborné vedení, konzultace a podněty k mé diplomové práci.
+}
 
-\CzechAbstract{TODO Tohle je český abstrakt, zbytek odstavce je tvořen výplňovým textem. Naší si rozmachu potřebami s posílat v poskytnout ty má plot. Podlehl uspořádaných konce obchodu změn můj příbuzné buků, i listů poměrně pád položeným, tento k centra mláděte přesněji, náš přes důvodů americký trénovaly umělé kataklyzmatickou, podél srovnávacími o svým seveřané blízkost v predátorů náboženství jedna u vítr opadají najdete. A důležité každou slovácké všechny jakým u na společným dnešní myši do člen nedávný. Zjistí hází vymíráním výborná.}
+\CzechAbstract{
+Technologie LoRa je v současné době jednou z nejslibnějších pro internet věcí a získává si velkou pozornost.
+V současných aplikacích však existují omezení způsobená použitou specifikací LoRaWAN, která používá hvězdicovou topologií.
+Sítě založené na LoRaWAN mají obvykle omezenou škálovatelnost kvůli použití strategie centralizované správy.
+Nedávný pokrok v různých konstrukcích sítí LoRa mesh může představovat potenciální řešení těchto omezení.
+V této práci se zabýváme návrhem a implementací protokolu, který umožňuje komunikaci mezi uzly sítě LoRa s využitím topologie mesh.
+Protokol vyvinutý v této práci se zaměřuje na komunikaci v reálném čase prostřednictvím technologie LoRa a jako ukázka byla vyvinuta aplikace
+určená především pro chatovou komunikaci mezi uživateli v síti mesh. Součástí sítě však mohou být i senzorové uzly, které do sítě odesílají data ze senzorů.
+}
 
-\CzechKeywords{LoRa; Mesh; Raspberry Pi; komunikačny protokol; diplomová práce}
+\CzechKeywords{LoRa; Mesh; Raspberry Pi; Komunikační protokol; IoT; Diplomová práce}
 
-\EnglishAbstract{TODO This is English abstract. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Fusce tellus odio, dapibus id fermentum quis, suscipit id erat. Aenean placerat. Vivamus ac leo pretium faucibus. Duis risus. Fusce consectetuer risus a nunc. Duis ante orci, molestie vitae vehicula venenatis, tincidunt ac pede. Aliquam erat volutpat. Donec vitae arcu. Nullam lectus justo, vulputate eget mollis sed, tempor sed magna. Curabitur ligula sapien, pulvinar a vestibulum quis, facilisis vel sapien. Vestibulum fermentum tortor id mi. Etiam bibendum elit eget erat. Pellentesque pretium lectus id turpis. Nulla quis diam.}
+\EnglishAbstract{
+LoRa technology is currently one of the most promising for IoT and is gaining a lot of attention. 
+However, there are limitations in current applications due to the LoRaWAN specification used, which uses a star topology. 
+LoRaWAN-based networks typically have limited scalability due to the use of a centralized management strategy. 
+Recent advances in various LoRa mesh network designs may present a potential solution to these limitations.
+In this work, we address the design and implementation of a protocol that enables communication between LoRa network nodes using a mesh topology. 
+The protocol developed in this thesis focuses on real time communication through LoRa technology and as a demonstration an application has been developed 
+primarily intended for chat communication between users in a mesh network. However, sensor nodes can also be part of the network, sending data from the sensors to the network.
+}
 
-\EnglishKeywords{LoRa; Mesh; Raspberry Pi; communication protocol; master thesis}
+\EnglishKeywords{LoRa; Mesh; Raspberry Pi; Communication protocol; IoT; Master's thesis}
 
 \AddAcronym{IoT}{Internet of Things - Internet vecí}
 \AddAcronym{SF}{Spreading factor - rozprestierací faktor}
@@ -63,21 +81,21 @@ Zariadenia môžu byť jednoduché senzory na monitorovanie nejakej fyzikálnej 
 zariadenia, ktoré je možné ovládať na diaľku. Zariadenia tvoria sieť, v ktorej si môžu medzi sebou posielať 
 dáta.
 
-K realizácií tejto siete je potrebné mať niečo, čo by zariadenia spájalo a umožňovalo im komunikáciu. Veľmi používanou technológiou
+K realizácií takejto siete je potrebné mať niečo, čo by zariadenia spájalo a umožňovalo im komunikáciu. Veľmi používanou technológiou
 v tejto oblasti je práve technológia LoRa, ktorá umožňuje bezdrôtovú komunikáciu na veľmi veľké vzdialenosti.
 
-Často sa využíva riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov pripojených k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom. 
-Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svoje dáta. Centrálny uzol potom dáta posiela cez internet na nejakú službu kde 
+Často je využívané riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov pripojených k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom pomocou LoRa. 
+Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svoje dáta. Centrálny uzol dáta môže posielať cez internet na nejakú službu kde 
 k ním môžu užívatelia pristupovať z internetu.
 
 Pri LoRaWAN je potrebné mať nejaký centrálny uzol a ak chceme nejaké zariadenie pripojiť do siete, musí mať dosah na daný centrálny uzol. 
 Takto sme limitovaní existenciou a dosahom centrálnych uzlov, a hviezdicovou topológiou, čož nie je v niektorých prípadoch užitia vhodné. Neustále vznikajú nové 
 protokoly, ktoré by tieto problémy riešili, napríklad za použitia mesh topológii (napr. Meshtastic \cite{meshtastic}, LoRaMesher \cite{loramesher}).
 
-V tejto práci sa budeme venovať návrhu a vytvoreniu protokolu, ktorý by umožnil komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
-bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol bude tvoriť sieťovú topológiu typu mesh, ktorá ma oproti hviezdicovej topológii, 
+V tejto práci sa venujeme návrhu a vytvoreniu protokolu, ktorý umožňuje komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
+bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol vytvára sieťovú topológiu typu mesh, ktorá ma oproti hviezdicovej topológii, 
 využívanej pri LoRaWAN, niekoľko výhod. Su nimi napríklad škálovatelnosť siete, kedy sa môžu zo siete odoberať alebo do nej pridávať nové zariadenia, 
-bez nutnosti akejkoľvek konfigurácie na ostatných zariadeniach. Z toho vyplýva aj mobilita zariadení. Zariadenia sa môžu fyzicky pohybovať a 
+bez nutnosti akejkoľvek konfigurácie na ostatných zariadeniach. Z toho vyplýva aj vyššia mobilita zariadení. Zariadenia sa môžu fyzicky pohybovať a 
 pokiaľ sa nachádzajú v dosahu hocijakého iného uzla, majú prístup do siete.
 
 \chapter{LoRa a spôsob prenosu dát}
@@ -1207,8 +1225,6 @@ Ak bola do zoznamu kontaktov zadaná broadcast adresa -- 0xFFFF, tak správa bol
 Výsledná implementácia bola veľmi odľahčená verzia nášho protokolu, ktorá bola vhodná pre použitie na tých najjednoduchších zariadeniach. Pridávalo to možnosť rozšíriť sieť 
 o rôzne monitorovacie senzorové zariadenia, ktorých obstarávacia cena je vďaka ich jednoduchosti pomerne nízka.
 
-\section{Návrh a výroba ochranných obalov pre zariadenia}
-TODO
 
 \section{Testovanie funkčnosti}
 TODO
@@ -1266,6 +1282,21 @@ spomenut ze niektore riesenia neponukaju mobilitu uzlov, ani ovladanie cez mobil
 
 tu mozem spomenut ze meshtastic ma problem s topologiou tvaru V, ja tento problem riesim cez randomize path prepinatko, pridať screeny z meshtastic simulatoru
 
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/meshtasticV.png}
+  \caption{TODO meshtastic simulator}
+  \label{fig:mestasticV}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/randomizePath.png}
+  \caption{TODO randomize path true}
+  \label{fig:randomizePath}
+\end{figure}
+
+
 moznosti rozsirenia, moznost zablokovat daku adresu aby som nevidel jej spravy,
 rozdelovat dlhsie spravy na dve a viac ak sa nezmestia do pozadovaneho limitu
 
@@ -1276,9 +1307,13 @@ rozdelovat dlhsie spravy na dve a viac ak sa nezmestia do pozadovaneho limitu
 \printbibliography[title={Literatura}, heading=bibintoc]
 
 % Prilohy
-%\appendix
-%\input{Chapters/Appendix1.tex}
+\appendix
+\begin{figure}[]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/state_flow_W.png}
+  \caption{Zjednodušený stavový diagram}
+  \label{fig:stateDiagram}
+\end{figure}
 
-%\lstinputlisting[label=src:CppExternal,caption={Dlouhý zdrojový kód v jazyce C++ načtený s externího souboru}]{SourceCodes/ArraySortingAlgorithms.cpp}
 
 \end{document}

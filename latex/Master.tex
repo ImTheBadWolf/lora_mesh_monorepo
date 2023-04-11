@@ -1277,31 +1277,54 @@ Tomuto problému sme sa snažili vyhýbať tak, že zariadenie zobrazovalo infor
 sa bude pripájať na webový server až po zobrazení tejto informácie.
 
 \chapter{Záver}
-co sme dosiahli, ze to funguje, porovnat v com je to lepsie oproti inym, porovnanie voci inym rieseniam
-spomenut ze niektore riesenia neponukaju mobilitu uzlov, ani ovladanie cez mobil atd.
+V tejto práci sa nam podarilo vytvoriť funkčný komunikačný protokol pre bezdrôtovú komunikáciu medzi zariadeniami v LoRa mesh sieti.
+Funkcionalita protokolu bola otestovaná na rôznych zariadeniach kde bolo potvrdené, že protokol funguje správne. 
 
-tu mozem spomenut ze meshtastic ma problem s topologiou tvaru V, ja tento problem riesim cez randomize path prepinatko, pridať screeny z meshtastic simulatoru
+K obsluhe protokolu vzniklo webové rozhranie, na ktoré sa používateľ pripájal a mohol cez neho prijímať a odosielať správy, konfigurovať 
+rôzne nastavenia, ktoré ovplyvňovali správanie protokolu, a spravovať zoznam kontaktov. Zoznam kontaktov slúžil na prekladanie 
+hexadecimálnych adries zariadení na používateľom definované názvy.
 
+Nami vytvorené riešenie je vhodné pre použitie v rôznych oblastiach, a ponúka oproti iným riešeniam isté výhody ako aj nevýhody.
+Ak porovnáme naše riešenie voči niektorým spomínaným protokolom, ako napríklad LoRaBlink alebo Synchronous LoRa Mesh, 
+tak náš protokol nie je závislý na žiadnych centrálnych uzloch, potrebných k riadeniu siete.
 
+Naše riešenie by sa dalo prirovnať k projektu Meshtastic, ale oproti tomuto projektu ponúka naš protokol rôzne typy správ, ktoré umožňujú 
+rozlične spracovávať správy zo senzorov a správy od používateľov. Okrem toho v našom protokole riešime aj slabinu projektu Meshtastic, ktorá 
+sa prejavuje napríklad v situácií kedy by malo rozmiestnenie uzlov v sieti tvár písmena V.
+
+Na obrázku \ref{fig:mestasticV} môžme vidieť takúto situáciu. Ak by sme z uzla číslo 0 chceli posielať správu do uzla číslo 4, nikdy by sa nám to nepodarilo.
+A to z toho dôvodu, že vyslaná správa z uzlu 0 by bola prijatá uzlami 1 a 2, a keďže uzol 1 je od uzla 0 vzdialenejší ako uzol 2, bude mat horšiu hodnotu SNR.
+Na základe horšej hodnoty SNR uzol 1 správu odvysiela skôr a správa sa ďalej bude šíriť už len v pravej vetve siete.
+
+Na obrázku môžme vidieť rozmiestnenie uzlov a dosah ich signálu v simulátore Meshtasticator, patriaceho ku projektu Meshtastic. Taktiež môžme vidieť časový priebeh šírenia správy medzi uzlami. 
+V tomto časovom priebehu su modrou farbou označené vysielania správy a zelenou prijatia správy.
+\newpage
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1\textwidth]{Figures/meshtasticV.png}
-  \caption{TODO meshtastic simulator}
+  \includegraphics[width=0.8\textwidth]{Figures/meshtasticV.png}
+  \caption{Meshtasticator simulátor}
   \label{fig:mestasticV}
 \end{figure}
+
+V našom riešení bolo pridané experimentálne nastavenie, ktoré po jeho zapnutí spôsobilo to, že poradie v ktorom sa správa odosielala z ďalších uzlov 
+nebolo závislé na hodnote SNR ale bolo určovaná náhodne. Toto riešenie nebolo však úplne optimálne a vzhľadom na to, že poradie bolo určované 
+náhodne,mohla nastať situácia, že náhodne vybraná trasa sa zhodovala s trasou vybranou 
+na základe hodnôt SNR a správa sa teda tiež nedostala do cieľa. V tomto prípade bolo potrebné správu odoslať znovu. 
+Tento problém by šlo optimálnejšie vyriešiť smerovacími tabuľkami, ktoré ale v našom protokole neboli použité.
+
+Na obrázku \ref{fig:randomizePath} môžme vidieť časový priebeh šírenia správy medzi uzlami potom, čo sme upravili implementáciu simulátoru Meshtasticator tak, 
+aby používal náhodnú trasu. Správa sa v tomto prípade už správne dostala z uzla 0 do uzla 4.
+
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1\textwidth]{Figures/randomizePath.png}
-  \caption{TODO randomize path true}
+  \includegraphics[width=0.4\textwidth]{Figures/randomizePath.png}
+  \caption{Priebeh šírenia správy s náhodnou trasou}
   \label{fig:randomizePath}
 \end{figure}
 
-
-moznosti rozsirenia, moznost zablokovat daku adresu aby som nevidel jej spravy,
-rozdelovat dlhsie spravy na dve a viac ak sa nezmestia do pozadovaneho limitu
-
-
-
+Náš protokol môže byť v budúcnosti rozšírený o ďalšie typy správ. Napríklad by bolo možné pridať nový typ správy určený pre binárne dáta, 
+ktorá by sa mohla hodiť pri určitých aplikáciach. 
+Taktiež by mohla byť funkcionalita rozšírená o možnosť rozdeľovať dlhšie správy na viacero menších správ, ktoré by sa potom posielali postupne.
 
 % Seznam literatury
 \printbibliography[title={Literatura}, heading=bibintoc]

@@ -582,7 +582,7 @@ Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
   \setlength\tabcolsep{3pt}
 	\caption[Porovnanie LoRa mesh protokolov]{Porovnanie LoRa mesh protokolov}
   \begin{tabular}{c|c|c|c|c|c|c}
-    \toprule %TODO preformulovat komunikácia hocikedy
+    \toprule
     Protokol  & \makecell{LoRa \\ mesher} & Meshtastic & LoRaBlink & Pymesh & \makecell{Synchronous\\ LoRa Mesh} & Náš protokol\\
     \midrule
     Centrálne uzly & Nie & Nie & Áno & Áno & Áno & Nie \\
@@ -593,7 +593,7 @@ Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
     \hline
     Ad-hoc komunikácia & Áno & Áno & Nie & Áno & Nie & Áno \\
     \hline
-    TODO  & nejake & dalsie  & atributy & \\
+    TODO  & nejake & dalsie  & atributy & ? \\
     \midrule
   \end{tabular}
   \label{tab:compar}
@@ -601,6 +601,7 @@ Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
 \footnotetext[1]{Po zmene polohy mobilného uzla, je potrebné čakať pokým nastane ďalšia epocha}
 \footnotetext[7]{Po zmene polohy mobilného uzla, je potrebné nájsť a aktualizovať cestu k nemu v smerovacích tabuľkách}
 \renewcommand{\thefootnote}{\arabic{footnote}}
+TODO vyriesit tuto prazdnu stranu
 %TODO overit ci synchronous lora mesh je flooding
 
 \chapter{Vlastná implementácia}
@@ -674,6 +675,8 @@ Správam, ktoré boli v stave preposlané sa odpočítaval časový limit na pri
 správa presunula do stavu nepotvrdená (NAK). V opačnom prípade sa presunula do stavu potvrdená (ACK).
 
 Stav zmazaná značil, že správu považujeme za vymazanú. Ďalej s ňou už nebudeme pracovať a po uplynutí určitého intervalu sa reálne vymazala z pamäti.
+
+Zjednodušený diagram prechodu medzi jednotlivými stavmi správ je vyobrazený na obrázku v prílohe \ref{fig:stateDiagram}.
 
 \section{Návrh paketu}
 Paket obsahoval hlavičku a dátový rámec. Štruktúra dátového rámcu bola závislá od typu správy.

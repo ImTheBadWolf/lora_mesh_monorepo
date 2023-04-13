@@ -90,7 +90,7 @@ k ním môžu užívatelia pristupovať z internetu.
 
 Pri LoRaWAN je potrebné mať nejaký centrálny uzol a ak chceme nejaké zariadenie pripojiť do siete, musí mať dosah na daný centrálny uzol. 
 Takto sme limitovaní existenciou a dosahom centrálnych uzlov, a hviezdicovou topológiou, čož nie je v niektorých prípadoch užitia vhodné. Neustále vznikajú nové 
-protokoly, ktoré by tieto problémy riešili, napríklad za použitia mesh topológii (napr. Meshtastic \cite{meshtastic}, LoRaMesher \cite{loramesher}).
+protokoly, ktoré by tieto problémy riešili, napríklad za použitia mesh topológii \cite{9385408}.
 
 V tejto práci sa venujeme návrhu a vytvoreniu protokolu, ktorý umožňuje komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
 bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol vytvára sieťovú topológiu typu mesh, ktorá ma oproti hviezdicovej topológii, 
@@ -447,7 +447,12 @@ efektívnejšie, z hľadiska spotreby energie, použiť topológiu mesh.
 Okrem toho je možné optimalizovať výber rádiových nastavení v súlade s hustotou siete tak, 
 aby sa v mesh sieťach ešte viac optimalizovala spotreba energie.
 
-Existujú rozvinuté projekty ako napríklad Meshtastic, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť na miestach bez inej dostupnej konektivity, 
+V rámci sieťového prenosu je kľúčové zabezpečiť správne smerovanie, aby správy mohli byť úspešne doručené 
+od odosielateľa k príjemcovi. Je k dispozícii celé množstvo rôznych smerovacích algoritmov, ktoré môžu byť využité 
+s cieľom dosiahnuť tento cieľ, pričom každý z nich prináša svoje výhody a nevýhody \cite{ALOTAIBI2012940}. Preto je dôležité zvážiť 
+konkrétne požiadavky a okolnosti siete a zvoliť ten najlepší algoritmus pre danú situáciu
+
+Existujú rozvinuté projekty ako napríklad Meshtastic \cite{meshtastic}, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť na miestach bez inej dostupnej konektivity, 
 za použitia lacných zariadení.
 
 Ďalším zaujímavým projektom je Armachat \cite{armachat}, ktorý ponúka možnosť komunikácie v prípade nedostupnosti ostatných sieti, napríklad po nejakej prírodnej alebo inej katastrofe.
@@ -475,7 +480,7 @@ LoRaMesher dokáže nájsť novo vytvorené uzly v sieti vďaka smerovaciemu pro
 že správa bola prijatá a tým zaisťuje spoľahlivosť. Správy väčšie ako 222 bajtov rozdeľuje na viacero správ, ktoré pošle postupne.
 
 \section{Meshtastic}
-Meshtastic \cite{meshtastic} vytvára mesh sieť za použitia lacných mikrokontrolérov s LoRa modulmi.
+Meshtastic vytvára mesh sieť za použitia lacných mikrokontrolérov s LoRa modulmi.
 Myšlienka tohto projektu spočíva v tom, že vytvára komunikačnú sieť na miestach kde neexistuje spoľahlivá infraštruktúra na bezdrôtovú komunikáciu (napr. v horách).
 
 Posielanie správ v sieti je založené na jednoduchom multi-hop flooding.

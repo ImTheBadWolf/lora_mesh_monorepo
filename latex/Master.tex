@@ -8,7 +8,7 @@
 \usepackage[backend=biber, style=iso-numeric, alldates=iso]{biblatex} % bibliografie
 \renewcommand{\thefootnote}{\arabic{footnote}}
 
-\ThesisAuthor{Matúš Ozaniak}
+\ThesisAuthor{Bc. Matúš Ozaniak}
 
 \ThesisSupervisor{Mgr. Ing. Michal Krumnikl, Ph.D.}
 
@@ -114,7 +114,7 @@ Tieto siete sú teda vhodné pre aplikácie, kde je potrebná dlhodobá prevádz
 LPWAN siete majú veľké pokrytie, v niektorých prípadoch to môžu byť až desiatky kilometrov v otvorenom priestranstve. Zväčša využívajú na prenos 
 Sub-GHz frekvenčné pásma, ktoré nevyžadujú na používanie žiadnu rádiovú licenciu.
 
-Technológii využívajúcich LPWAN siete je viacero. Medzi tie najznámejšie patria napríklad Sigfox \cite{sigfox}, LoRa \cite{lora}, NB-IoT a iné.
+Technológii využívajúcich LPWAN siete je viacero. Medzi tie najznámejšie patria napríklad Sigfox \cite{sigfox}, LoRa \cite{lora}, NB-IoT (NarrowBand Internet of Things) a iné.
 
 \section {LoRa}
 LoRa je proprietárna technológia na bezdrôtový prenos dát za pomoci rádiových vĺn.
@@ -136,7 +136,7 @@ Frekvenčné pásmo, v ktorom sa chirp signál prenáša je určené vybranou š
 Graf frekvenčnej charakteristiky a postupné zvyšovanie frekvencie chirp signálu môžme vidieť na Obr. \ref{fig:loraSymbols}.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.6\textwidth]{Figures/spreading factors.png}
+	\includegraphics[width=0.7\textwidth]{Figures/spreading factors.png}
 	\caption{Chirp signál a porovnanie rozprestieracích faktorov. Prevzaté z \cite{spreadfactorimage}}
 	\label{fig:spreadingfactors}
 \end{figure}
@@ -195,7 +195,7 @@ Je preto potreba synchronizovať prijímacie zariadenie aby hodnoty symbolov bol
 
 Zariadenie po prijatí nového paketu očakáva, že na začiatku paketu bude preambula definovanej dĺžky. Ak z paketu prečíta počet symbolov rovnakej hodnoty, zhodný 
 s definovanou dĺžkou preambuly, predpokladá že sa jedná o preambulu a synchronizuje čítacie okno tak aby bolo zarovnané so symbolmi preambuly. Tzn. tak, aby symboly preambuly boli 
-prečítané ako symbol 0. 
+prečítané ako symbol 0.
 
 Zjednodušené znázornenie procesu čítania symbolov a posun čítacieho okna môžme vidieť na Obr. \ref{fig:loraPreamble1}.
 
@@ -284,7 +284,11 @@ Sú nimi triedy A, B a C, kde do triedy A spadajú zariadenia väčšinou pohá�
 v ktorých čakajú na príjem dát z brány.
 Trieda B je rozšírením triedy A. Zariadenia v tejto triede môžu otvárať dodatočné prijímacie okna v naplánovaných časových intervaloch.
 Zariadenia z triedy C môžu prijímať neustále. Z tohto dôvodu majú vyššiu spotrebu energie a zvyčajne su pripojené k stálemu napájaniu.
-TODO tu este zo tri styri  vety aby strana nekoncila prazdnym miestom
+
+Zariadenia používané na realizáciu gateway bývajú zväčša výkonnejšie oproti koncovým zariadeniam. Okrem toho su schopné prijímať na viacerých frekvenciách a
+LoRa parametroch zároveň. Gateway môže byť pripojená ne nejakú cloudovú službu, cez ktorú je možne spravovať zariadenia v sieti. Medzi najznámejšie 
+služby patrí The Things Network (TTN) \cite{ttn}. Je však možné spojiť LoRaWAN aj s inými populárnymi cloudovými službami ako je napríklad Microsoft Azure \cite{azure} 
+alebo Google Cloud \cite{googleCloud}.
 
 \section{Legislatíva}
 V Európe sa k frekvenčnému pásmu používaného pri technológií LoRa viažu určité obmedzenia. 
@@ -320,7 +324,6 @@ Maximálny vysielací výkon týchto modemov je 100 mW.
 Vďaka použitej modulačnej technike je možné dosiahnuť vysokej citlivosti modemov.
 Výrobca uvádza citlivosť cez -137 dBm pri modemoch SX1272/73 a -148 dBm pri modemoch SX1276/78/79.
 
-%TODO vysvetlivka linkbudget do footnote
 Modemy SX1272 a SX1273 ponúkajú menší link budget 157 dB oproti 168 dB pri modemoch SX1276/77/78/79 a majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz.
 Okrem toho majú aj vyššiu spotrebu energie.
 
@@ -334,7 +337,6 @@ prípady použitia.
 
 Modemy obsahujú +22/+15 dBm zosilňovač, vďaka ktorému majú vyšší link budget oproti modemom zo série SX127x. 
 Ten je pri modemoch série SX126x výrobcom udávaný na 170 dBm, takže sú optimálne pre aplikácie vyžadujúce väčší dosah alebo robustnosť.
-%TODO este pripadne modem 1280/1281 - 2.4ghz
 
 \begin{table}[!h]
 	\centering
@@ -539,8 +541,7 @@ potrebuje SN prijímať a odosielať dáta. Komunikácia sa cez uzly šíri mult
 Protokol používa na riadenie komunikácie metódu TDMA. RN priradí každej SN časový slot, v ktorom SN môže vyslať alebo prijať dáta.
 Monitorovacie uzly su väčšinu času v režime spánku, zobudia sa len v ich určenom časovom slote a vďaka tomu majú tieto uzly nízku spotrebu energie.
 
-Novo pripojený uzol do siete musí čakať na periodický beacon, vysielaný RN uzlom. Všetky uzly si držia v sebe smerovaciu tabuľku. Po pripojení nového uzla sa sieťou sa propaguje 
-správa na aktualizovanie smerovacej tabuľky.
+Novo pripojený uzol do siete musí čakať na periodický beacon, vysielaný RN uzlom. Z beaconu sa zistí, aky časový slot je priradený danému uzlu a až po priradení slotu, môže uzol začať komunikovať v sieti.
 
 \begin{figure}
 	\centering
@@ -551,19 +552,20 @@ správa na aktualizovanie smerovacej tabuľky.
 
 
 \section{Porovnanie voči nášmu riešeniu}
-Niektoré zo spomenutých riešení využívajú smerovacie tabuľky na efektívnejší prenos dát v rámci siete. Smerovacie tabuľky môžu byť však limitáciou pokiaľ 
-chceme dosiahnuť vyššej mobility uzlov. V prípade, že by sme chceli spolu so smerovacími tabuľkami podporovať mobilitu uzlov, je potrebné zabezpečiť dostatočné časté aktualizácie smerovacích tabuliek.
-To pridáva do siete zaťaženie v podobe dodatočných dátových prenosov.
+Niektoré zo spomenutých riešení využívajú smerovacie tabuľky na efektívnejší prenos dát v rámci siete. Tie môžu byť však limitáciou pokiaľ 
+chceme dosiahnuť vyššej mobility uzlov. V prípade, že by sme chceli spolu so smerovacími tabuľkami podporovať mobilitu uzlov, je potrebné zabezpečiť 
+dostatočné časté aktualizácie smerovacích tabuliek.
 
 Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime. To môže byť 
 veľkou limitáciou pri niektorých aplikáciách, kde je potrebná komunikácia v reálnom čase  (napr. chat).
 
-Protokol navrhnutý v tejto práci nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá mobilita uzlov bez potreby 
-periodických aktualizácií smerovacích tabuliek. Hlavným využitím nášho protokolu bola komunikácia v reálnom čase, preto protokol nepoužíval 
-žiadnu časovú synchronizáciu ani časové okná vyhradené na komunikáciu, uzly siete tak mohli prijímať a odosielať dáta hocikedy.
+Protokol navrhnutý v tejto práci nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá vysoká mobilita uzlov. 
+Hlavným využitím nášho protokolu bola ad-hoc komunikácia, preto protokol nepoužíval 
+žiadnu časovú synchronizáciu a časové okná vyhradené na komunikáciu, uzly siete tak mohli prijímať a odosielať dáta kedykoľvek to bolo potrebné.
 To so sebou ale prinášalo nevýhodu v podobe vyššej spotreby energie.
 
-Funkcionalita navrhnutého protokolu, podobne ako niektoré zo spomínaných riešení, fungovala na základe multi hop flooding, kedy sa správa v sieti preposielala cez uzly siete až kým nedorazila do destinácie.
+Funkcionalita navrhnutého protokolu, podobne ako niektoré zo spomínaných riešení, fungovala na základe multi hop flooding, 
+kedy sa správa v sieti preposielala cez uzly siete až kým nedorazila do destinácie.
 Správa sa odoslala a uzol, ktorý túto správu prijal ako posledný ju preposlal ďalej. Toto sa opakovalo na ostatných uzloch v sieti až kým sa správa nedostala do destinácie alebo kym správe nedošiel limit preskokov, prípade TTL.
 
 Navrhnutý protokol nebol závislý na žiadnych špeciálnych centrálnych uzloch typu gateway, prípadne nejakých riadiacich uzloch. Každý uzol v sieti mohol byť jednoduchým uzlom, ktorý prijímal a preposielal dáta ďalej.
@@ -589,11 +591,10 @@ Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
     \hline
     Mobilita uzlov & Áno\footnotemark[7] & Áno & Áno\footnotemark[1] & Áno\footnotemark[7] & Áno\footnotemark[1] & Áno\\
     \hline
-    Smerovanie & \makecell{Distance \\ Vector} & Flooding & Flooding & \makecell{Distance \\ Vector} & TODO & Flooding\\
+    Smerovanie & \makecell{Distance \\ Vector} & Flooding & Flooding & \makecell{Distance \\ Vector} & Flooding & Flooding\\
     \hline
     Ad-hoc komunikácia & Áno & Áno & Nie & Áno & Nie & Áno \\
-    \hline
-    TODO  & nejake & dalsie  & atributy & ? \\
+    
     \midrule
   \end{tabular}
   \label{tab:compar}
@@ -601,8 +602,6 @@ Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
 \footnotetext[1]{Po zmene polohy mobilného uzla, je potrebné čakať pokým nastane ďalšia epocha}
 \footnotetext[7]{Po zmene polohy mobilného uzla, je potrebné nájsť a aktualizovať cestu k nemu v smerovacích tabuľkách}
 \renewcommand{\thefootnote}{\arabic{footnote}}
-TODO vyriesit tuto prazdnu stranu
-%TODO overit ci synchronous lora mesh je flooding
 
 \chapter{Vlastná implementácia}
 Ako sme už spomínali v predchádzajúcej kapitole, nami vytvorený protokol fungoval na základe multi hop flooding. Tento prístup so sebou ale niesol 
@@ -789,7 +788,7 @@ ktorú správa prešla vzduchom, produkovali len hrubé odhady a boli veľmi zá
 počítať iba s časom, ktorý správa strávila na určitom uzle. Mimo toho, keby sme počítali s maximálnou možnou vzdialenosťou medzi dvoma uzlami, ktorá sa pri LoRa 
 udáva okolo 15 kilometrov v otvorenom priestranstve, a rýchlosťou ktorou sa šíria rádiové vlny, ktorá je vo vákuu rovná rýchlosti svetla, tak by sme zistili, 
 že prenos správy medzi týmito dvoma uzlami by v ideálnom prípade trval okolo 50 mikrosekúnd. Táto hodnota bola v porovnaní s časom, ktorý správa strávi na určitom uzle, 
-zanedbateľná. %TODO footnote ze pocitame s casom od zaciatku vysielania do prveho prijatia
+zanedbateľná.
 
 \section{Funkcionalita protokolu}
 Navrhnutý protokol fungoval tak, že každý uzol si u seba uložil novo prijatú správu. Následne boli uložené správy spracovávané v hlavnom cykle programu. 
@@ -925,7 +924,6 @@ Pri pokuse o odoslanie mohlo dôjsť k situácií, kedy práve niekto iný vysie
 Po dokončení implementácie hlavnej funkcionality sme ju mohli otestovať. Na zariadeniach Armachat sme vytvorili jednoduché rozhranie, 
 ktoré zobrazovalo na displeji informácie o novo prijatej správe. Taktiež bolo možné využiť klávesnicu zariadenia, na napísanie vlastnej správy a jej odoslanie.
 Na obrázku \ref{fig:armRec} môžme vidieť, že zariadenie prijalo správu od odosielateľa s adresou 0xA1BC, ktoré bolo v tomto prípade druhé Armachat zariadenie.
-\newpage
 \begin{figure}
 	\centering
 	\includegraphics[width=0.6\textwidth]{Figures/armRec.jpg}
@@ -945,11 +943,10 @@ Taktiež si môžme všimnúť zmenu v podobe skrátenia názvov atribútov max 
 Okrem toho je na obrázku vidieť informačnú správu v podobe žltého textu na samom spodku displeja. V tejto informačnej správe sa zobrazujú 
 rôzne informačné hlášky počas behu programu. Zariadenie 0x0002 prijalo správu od zariadenia 0xA1BC a následne vytvorilo ACK správu, ktorej ID bolo 1787352650.
 V informačnej správe môžme vidieť, že v dobe vyhotovenia fotografie sa akurát táto ACK správa pridávala do message queue.
-\newpage
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.5\textwidth]{Figures/armRec2.jpg}
+	\includegraphics[width=0.6\textwidth]{Figures/armRec2.jpg}
 	\caption{Zariadenie Armachat prijalo spravu s jedným preskokom}
 	\label{fig:armRec2}
 \end{figure}
@@ -984,8 +981,6 @@ textový reťazec \uv{Ahoj}. V prvých 12 bajtoch, vidíme hlavičku paketu. V �
   \end{tabular}
   \label{tab:packet}
 \end{table}
-
-\newpage
 
 \section{Implementácia API pre webové rozhranie}
 Pri používaní nášho protokolu mal používateľ možnosť využiť webové rozhranie, cez ktoré bolo možné ovládať zariadenie a 
@@ -1052,7 +1047,6 @@ Na obrázku \ref{fig:figmaHome} zachytávajúcom návrh úvodnej stránky si mô
 
 Pri tvorbe návrhu stránky na konfiguráciu nastavení ( Obr. \ref{fig:figma2} ), nebolo ešte známe, aké všetky nastavenia 
 bude môcť používateľ meniť a tak sú tam iba nastavenia adresy, šifrovacieho kľúča a LoRa parametrov.
-\newpage
 
 \begin{figure}[h!]
   \centering
@@ -1067,9 +1061,9 @@ Ako databáza kontaktov bol použitý JSON súbor, do ktorého sa kontakty uklad
 
 \begin{figure}[h!]
   \centering
-  \subfloat[\centering Kontakty]{{\includegraphics[width=0.47\textwidth]{Figures/figmaContacts.png} }}
+  \subfloat[\centering Kontakty]{{\includegraphics[width=0.77\textwidth]{Figures/figmaContacts.png} }}
   \qquad
-  \subfloat[\centering Nastavenia]{{\includegraphics[width=0.45\textwidth]{Figures/figmaSettings.png} }}
+  \subfloat[\centering Nastavenia]{{\includegraphics[width=0.76\textwidth]{Figures/figmaSettings.png} }}
   \caption{Návrhy stránok kontaktov a nastavení}
   \label{fig:figma2}
 \end{figure}
@@ -1077,7 +1071,7 @@ Ako databáza kontaktov bol použitý JSON súbor, do ktorého sa kontakty uklad
 \section{Implementácia webového rozhrania}
 Na implementáciu webového rozhrania bola použitá kombinácia HTML, CSS a JavaScriptu. Na komunikáciu s API bolo použité fetch API, 
 ktoré je súčasťou JavaScriptu. Ukážku volania za použitia fetch API môžeme vidieť v nasledujúcom kóde.
-
+\newpage
 \begin{lstlisting}[language=Python, label={lst:fetch}]
   const newMessage = {
     "destination":"0xA1F4",
@@ -1126,13 +1120,6 @@ Pri niektorých nastaveniach bolo nutne reštartovať zariadenie, k týmto pribu
 Nastavenia vlastnej adresy bolo obmedzené na jednorázové nastavenie. Týmto sme sa snažili zamedziť tomu, aby si používateľ kedykoľvek 
 upravoval svoju adresu a tým sa mohol vydávať za iného používateľa. Finálnu stránku nastavení vidíme na obrázku \ref{fig:webConfig}.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.9\textwidth]{Figures/webConfig.png}
-  \caption{Stránka nastavení}
-  \label{fig:webConfig}
-\end{figure}
-
 Všetky nastaviteľné položky boli validované predtým, ako sa novo upravené nastavenia odoslali na server. Táto validácia bola potom redundantne 
 vykonávaná aj na strane serveru.
 
@@ -1140,7 +1127,13 @@ Na stránku nastavení sme pridali možnosť pridávať alebo odstraňovať WiFi
 po úspešnom pripojení sa spustil webový server. Pribudla aj možnosť definovať si vlastnú sieť typu access point. Pri použití tejto možnosti sa zariadenie pri spúštaní 
 nepokúšalo pripájať na žiadnu WiFi sieť, ale vytvorilo svoju vlastnú.
 
-
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Figures/webConfig.png}
+  \caption{Stránka nastavení}
+  \label{fig:webConfig}
+\end{figure}
+\newpage
 \begin{wrapfigure}{r}{0.5\textwidth}
   \begin{center}
     \includegraphics[width=0.5\textwidth]{Figures/mobileWeb.png}
@@ -1232,11 +1225,26 @@ o rôzne monitorovacie senzorové zariadenia, ktorých obstarávacia cena je vď
 \section{Testovanie funkčnosti}
 TODO
 
-test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\textwidth]{Figures/topology.png}
+  \caption{Rozmiestnenie zariadení použité pri testovaní}
+  \label{fig:topology}
+\end{figure}
 
-screenshoty z aplikacie
+- upravit nakres rozmiestnenia
 
-test vykonnosti, packet loss, ping, dosah atd
+- test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
+
+- screenshoty z aplikacie
+
+- test vykonnosti, packet loss, latency
+
+- ttgo budu periodicky posielat senzor data na broadcast pripadne na 0x0005
+
+- poslat traceroute z 0x0005 na 0x0001, ukazat vysledok
+
+- na zariadeniach menit resend count z 1 na 5 a porovnat ako sa zmensuje packetloss s vyssim resend countom, spravit graf - packet loss vs resend count
 
 \section{Problémy a limitácie}
 Najväčším problémom, na ktorý sme narazili pri implementácii, bol spomínaný nedostatok pamäti na zariadeniach. Tento problém sa nám podarilo 

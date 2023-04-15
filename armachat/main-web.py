@@ -48,7 +48,6 @@ for network in networks:
       break
     except Exception as e:
       print("Failed to start AP:", ssid)
-      print("Try power cycling the device.")
       print(e)
 
 if not wifi_connected:
@@ -63,11 +62,11 @@ if not wifi_connected:
         break
       except Exception as e:
         print(f"Failed to connect to: {ssid}.")
-        print("Try power cycling the device.")
         print(e)
 
 if not wifi_connected:
   print("Failed to connect or create network.")
+  print("Try power cycling the device.")
   sys.exit()
 
 sleep(1)
@@ -107,8 +106,8 @@ if initialised:
       if config.DEBUG:
         print("low datarate off")
 
-  node_process = NodeProcess(rfm9x, show_info_notification, config)
   address_book = AddressBook("data/contacts.json", "data/sensors.json")
+  node_process = NodeProcess(rfm9x, show_info_notification, config, update_contacts=True, address_book=address_book)
   try:
     address_book.add_contact("YOU", f"0x{config.MY_ADDRESS:04X}")
     address_book.add_contact("ALL", f"0x{config.BROADCAST_ADDRESS:04X}")

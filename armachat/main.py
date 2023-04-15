@@ -57,9 +57,10 @@ def send_sensor_message():
     uptime = int(uptime * 100) / 100
     voltage = int(voltage * 100) / 100
     sensor_message = f"Uptime: {uptime} Min\nFree mem: {gc.mem_free()} B\nCPU temp: {microcontroller.cpu.temperature} C\nVoltage: {voltage} V"
-    for contact in contacts:
+    """ for contact in contacts:
       node_process.new_sensor_message(int(contact, 16), sensor_message)
-      sleep(0.2)
+      sleep(0.2) """
+    node_process.new_sensor_message(int(TMP_CONTACT, 16), sensor_message)
 
 def handle_key_press(pressed_key):
   global message_to_send

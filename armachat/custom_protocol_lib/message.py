@@ -198,7 +198,7 @@ class Message():
     return self.maxHop
 
   def get_initialMaxHop(self):
-    if self.text_message is None:
+    if self.initialMaxHop is None:
       return 0
     return self.initialMaxHop
 

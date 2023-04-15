@@ -38,10 +38,10 @@ class AddressBook():
     for contact in self.contacts:
       if contact['address'] == address:
         self.contacts.remove(contact)
-        self.contacts.append({'address': address, 'name': name})
+        self.contacts.append({'address': address, 'name': name, 'last_snr': None, 'hop_count': None})
         self.save_contacts()
         return
-    self.contacts.append({'address': address, 'name': name})
+    self.contacts.append({'address': address, 'name': name, 'last_snr': None, 'hop_count': None})
     self.save_contacts()
 
   def add_sensor(self, name, address):
@@ -49,10 +49,10 @@ class AddressBook():
     for sensor in self.sensors:
       if sensor['address'] == address:
         self.sensors.remove(sensor)
-        self.sensors.append({'address': address, 'name': name})
+        self.sensors.append({'address': address, 'name': name, 'last_snr': None, 'hop_count': None})
         self.save_sensors()
         return
-    self.sensors.append({'address': address, 'name': name})
+    self.sensors.append({'address': address, 'name': name, 'last_snr': None, 'hop_count': None})
     self.save_sensors()
 
   def del_contact(self, address):
@@ -76,3 +76,20 @@ class AddressBook():
 
   def get_sensors(self):
     return self.sensors
+
+  def update_contact_info(self, address, last_snr, hop_count):
+    for contact in self.contacts:
+      if contact['address'] == address:
+        contact['last_snr'] = last_snr
+        contact['hop_count'] = hop_count
+        self.save_contacts()
+        return True
+    return False
+
+  def update_sensor_info(self, address, last_snr):
+    for sensor in self.sensors:
+      if sensor['address'] == address:
+        sensor['last_snr'] = last_snr
+        self.save_sensors()
+        return True
+    return False

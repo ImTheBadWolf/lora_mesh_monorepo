@@ -414,6 +414,11 @@ input:checked+.slider:before {
   align-items: flex-start;
 }
 
+.contact-stat {
+  font-size: 10px;
+  align-self: center;
+}
+
 #contactNameInput,
 #contactAddInput {
   border: none;

@@ -25,6 +25,9 @@
             let newSensor = `<button onclick="selectContact('${sensor.address}')" id="${sensor.address}" class="contact">
               <span class="contact-name">${sensor.name}</span>
               <span class="contact-address">${sensor.address}</span>
+               ${sensor.last_snr ? `
+                <span class="contact-stat">Last SNR: ${sensor.last_snr}</span>`:''
+              }
             </button>`;
             contactsElm.innerHTML += newSensor;
           })

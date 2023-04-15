@@ -5,7 +5,7 @@ from custom_protocol_lib.message_queue_item import *
 from custom_protocol_lib.base_utils import *
 
 class NodeProcess():
-  def __init__(self, rfm9x, notification_callback, config, queue_hard_limit=35):
+  def __init__(self, rfm9x, notification_callback, config, queue_hard_limit=35, update_contacts=False, address_book=None):
     self.message_queue = {}
     self.message_counter = 0
     self.config = config
@@ -13,6 +13,8 @@ class NodeProcess():
     self.notification_callback = notification_callback
     self.latest_message = None
     self.queue_hard_limit = queue_hard_limit
+    self.update_contacts = update_contacts
+    self.address_book = address_book
 
     self.received_counter = 0
     self.sent_counter = 0
@@ -158,6 +160,15 @@ class NodeProcess():
 
               self.add_message(traceroute_response_message_instance, 2500)
 
+            if self.update_contacts and self.address_book != None:
+              #Update last snr and hopcount if address is in address book
+              if message.get_sender() != self.config.MY_ADDRESS:
+                if message.get_header().get_message_type() == MessageType.SENSOR_DATA:
+                  self.address_book.update_sensor_info(f"0x{message.get_sender():04X}", self.rfm9x.last_snr)
+                elif message.get_header().get_message_type() != MessageType.TRACEROUTE and message.get_header().get_message_type() != MessageType.ACK:
+                  hop_count = message.get_initialMaxHop() - message.get_maxHop()
+                  self.address_book.update_contact_info(f"0x{message.get_sender():04X}", self.rfm9x.last_snr, hop_count)
+
             self.latest_message = (message, self.rfm9x.last_snr, self.rfm9x.last_rssi)
         else:
           #Received ACK message
@@ -242,6 +253,15 @@ class NodeProcess():
             message = Message(self.config, self.rfm9x.last_snr, self.rfm9x.last_rssi)
             message.construct_raw_packet(received_packet)
             self.add_message(message, 0, False, state=MessageState.DONE)
+
+          if self.update_contacts and self.address_book != None:
+              #Update last snr and hopcount if address is in address book
+              if message.get_sender() != self.config.MY_ADDRESS:
+                if message.get_header().get_message_type() == MessageType.SENSOR_DATA:
+                  self.address_book.update_sensor_info(f"0x{message.get_sender():04X}", self.rfm9x.last_snr)
+                elif message.get_header().get_message_type() != MessageType.TRACEROUTE and message.get_header().get_message_type() != MessageType.ACK:
+                  hop_count = message.get_initialMaxHop() - message.get_maxHop()
+                  self.address_book.update_contact_info(f"0x{message.get_sender():04X}", self.rfm9x.last_snr, hop_count)
 
   def get_timeout(self, snr):
     if self.config.RANDOMIZE_PATH:

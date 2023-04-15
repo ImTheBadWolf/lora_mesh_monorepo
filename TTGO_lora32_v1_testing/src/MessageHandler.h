@@ -8,7 +8,7 @@
 //Config variables
 
 #define MY_ADDRESS 0xC2F1
-#define SEND_INTERVAL 90 //Seconds, how often to send data
+#define SEND_INTERVAL 40 //Seconds, how often to send data
 #define AES_KEY "SuperTajne heslo" //Must be 16 characters long
 #define LORA_BW 500
 #define LORA_CR 6
@@ -16,7 +16,7 @@
 #define RESEND_COUNT 5 //How many times to resend single message
 #define RESEND_TIMEOUT 8 //Seconds, how long to wait before resending
 #define DEFAULT_TTL 120 //Seconds
-static uint16_t CONTACTS[] = { 0xFFFF, 0xA1BC, 0x0002 };
+static uint16_t CONTACTS[] = { 0xFFFF };
 #define BROADCAST_ADDRESS 0xFFFF
 //End of config variables
 ////////////////////////////////////////////////////////////////////////

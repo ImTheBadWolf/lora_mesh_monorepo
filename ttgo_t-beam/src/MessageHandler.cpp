@@ -73,7 +73,7 @@ uint16_t MessageHandler::calculateChecksum(byte *data)
   return crc;
 }
 
-byte *MessageHandler::createSensorMessage(uint16_t destinationAddress, uint32_t &byteArraySize, String message, uint16_t ttlIn = DEFAULT_TTL)
+byte *MessageHandler::createSensorMessage(uint16_t destinationAddress, uint32_t &byteArraySize, String message, uint16_t ttlIn)
 {
   const uint8_t SENSOR_DATA_PREFIX_LENGTH = 2;  // Sensor_data has 2 byte TTL
   byte *header = createHeader(destinationAddress, MY_ADDRESS);

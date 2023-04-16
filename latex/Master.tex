@@ -61,6 +61,9 @@ primarily intended for chat communication between users in a mesh network. Howev
 \AddAcronym{API}{Aplication Programming Interface - Rozhranie aplikácie}
 \AddAcronym{LPWAN}{Low Power Wide Area Network}
 \AddAcronym{FEC}{Forward Error Correction}
+\AddAcronym{LoRa}{Long Range}
+\AddAcronym{LoRaWAN}{Long Range Wide Area Network}
+\AddAcronym{SPI}{Serial Peripheral Interface}
 
 
 \addbibresource{biblatex.bib}
@@ -112,9 +115,9 @@ môže byť ich prevádzka ešte predĺžená.
 Tieto siete sú teda vhodné pre aplikácie, kde je potrebná dlhodobá prevádzka bez nutných servisných zásahov.
 
 LPWAN siete majú veľké pokrytie, v niektorých prípadoch to môžu byť až desiatky kilometrov v otvorenom priestranstve. Zväčša využívajú na prenos 
-Sub-GHz frekvenčné pásma, ktoré nevyžadujú na používanie žiadnu rádiovú licenciu.
+ultrakrátke ( sub-GHz ) frekvenčné pásma, ktoré nevyžadujú na používanie žiadnu rádiovú licenciu.
 
-Technológii využívajúcich LPWAN siete je viacero. Medzi tie najznámejšie patria napríklad Sigfox \cite{sigfox}, LoRa \cite{lora}, NB-IoT (NarrowBand Internet of Things) a iné.
+Medzi tie najznámejšie technológie na realizáciu LPWAN sieti patria napríklad Sigfox \cite{sigfox}, LoRa \cite{lora}, NB-IoT (NarrowBand Internet of Things) a iné.
 
 \section {LoRa}
 LoRa je proprietárna technológia na bezdrôtový prenos dát za pomoci rádiových vĺn.
@@ -161,7 +164,7 @@ ktorý je modulovaný do daného chirp signálu. Viď Obr. \ref{fig:loraSymbols}
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{Figures/loraSymbols.png}
-	\caption{Chirp signály, do ktorých boli modulované symboly. Prevzaté z TODO}
+	\caption{Chirp signály, do ktorých boli modulované symboly. \cite[Prevzaté z video prezentácie výrobcu GW Instek]{loratester}}
 	\label{fig:loraSymbols}
 \end{figure}
 
@@ -178,7 +181,7 @@ Ukážku môžme vidieť na Obr. \ref{fig:loraModulation}.
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{Figures/loraModulation2.png}
-	\caption{Proces spracovania odosielaných dát v LoRa (Binárne hodnoty su ukážkové, nezodpovedajú reálnej konverzií). Prevzaté z TODO}
+	\caption{Proces spracovania odosielaných dát v LoRa (Binárne hodnoty su ukážkové, nezodpovedajú reálnej konverzií). \cite[Prevzaté z video prezentácie výrobcu GW Instek]{loratester}}
 	\label{fig:loraModulation}
 \end{figure}
 
@@ -236,7 +239,7 @@ podporou daných frekvencií v nami použitom LoRa modeme. Bežné používané 
 \newpage
 
 Ostatné LoRa parametre sú vyberané na základe toho ako ďaleko, ako spoľahlivo a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu 
-a dosahom prenosu.
+a dosahom prenosu. Pri výbere parametrov je ale taktiež potrebné dbať na to, aby nebol prekročený povolený kľučovací pomer. O tom si povieme viac v sekcii legislatíva.
 
 Parameter bandwidth (BW) určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššej šírke pásma sa zvyšuje rýchlosť prenosu, avšak znižuje sa použiteľný dosah.
 Najbežnejšie používané šírky pásma sú 125 kHz, 250 kHz a 500 kHz.
@@ -273,10 +276,10 @@ Rýchlosť prenosu dát (Data rate -- DR) môžme vyjadriť vzťahom:
 
 \section{LoRaWAN}
 Technológia LoRa je definovaná len na fyzickej vrstve. Na používanie LoRa v IoT sieťach sú však potrebné aj vyššie vrstvy sieťového modelu.
-K tomu vznikol protokol LoRaWAN, ktorý je spravovaný organizáciou LoRa Alliance \cite{lora}.
+K tomu vznikol protokol LoRaWAN \cite{lorawan}, ktorý je spravovaný organizáciou LoRa Alliance \cite{lora}.
 
 LoRaWAN definuje komunikačný protokol a architektúru IoT sieti. Siete používajú hviezdicovú topológiu, prípadne topológiu hviezdu hviezd, kde 
-centrálnym uzlom je LoRaWAN brána -- gateway, ktorá je pripojená k internetu a pevnému napájaniu. Ostatne uzly siete posielajú dáta do tejto brány, 
+centrálnym uzlom je LoRaWAN brána -- gateway, ktorá je pripojená k internetu a pevnému napájaniu. Ostatné uzly siete posielajú dáta do tejto brány, 
 ktorá ich potom preposiela na internet. Tam sú už dáta dostupné odkiaľkoľvek.
 
 LoRaWAN definuje tri základne triedy zariadení, ktoré sa v sieti vyskytujú. Triedy špecifikujú funkciu zariadenia a jeho vlastnosti.
@@ -307,15 +310,15 @@ Pre pásmo 869,40--869,65 MHz je ale udelená výnimka, ktorá umožňuje vysiel
 Pri práci s technológiou LoRa máme na výber z rôznych modulov od rôznych výrobcov.
 Moduly môžme rozdeliť podla použitia na moduly pre koncové zariadenia a moduly pre gateway.
 Moduly pre koncové zariadenia obvykle dokážu prijímať a odosielať iba na jednom kanále ( kombinácia LoRa parametrov --  BW, SF, CR a frekvencia ) súčasne a majú 
-nízku spotrebu energie. Moduly pre gateway dokážu prijímať a odosielať na viacerých kanáloch súčasne ale majú vyššiu spotrebu energie.
+nízku spotrebu energie. Moduly pre gateway dokážu prijímať a odosielať na viacerých kanáloch súčasne.
 
 V tejto časti sa budeme zaoberať dostupnými modulmi pre koncové zariadenia.
 Keďže je technológia LoRa patentovaná výrobcom Semtech \cite{semtech}, tak všetky dostupné LoRa čipy su práve od tohto výrobcu a moduly od iných výrobcov 
 sú založené na používaní týchto čipov. Kompletné porovnanie parametrov najpouživanejších modulov je možné vidieť v tabuľke \ref{tab:semtechModules}.
 
 \section{SX127x/SX126x}
-Výrobca Semtech \cite{semtech}, prináša LoRa čipy série SX127x a SX126x. Ponúkajú vysoký výkon za pomerne nízku cenu a ako sme už spomínali, ostatné LoRa moduly 
-iba implementujú tieto LoRa čipy -- modemy a rozširujú ich o ďalšiu funkcionalitu.
+Výrobca Semtech \cite{semtech}, prináša LoRa čipy -- modemy série SX127x a SX126x. Ponúkajú vysoký výkon za pomerne nízku cenu a ako sme už spomínali, ostatné LoRa moduly 
+iba implementujú tieto LoRa modemy a rozširujú ich o ďalšiu funkcionalitu.
 
 \subsection{SX127x}
 SX127x LoRa modemy používajú LoRa modulačnú techniku frequency hopping spread-spectrum, patentovanú firmou Semtech.
@@ -324,10 +327,14 @@ Maximálny vysielací výkon týchto modemov je 100 mW.
 Vďaka použitej modulačnej technike je možné dosiahnuť vysokej citlivosti modemov.
 Výrobca uvádza citlivosť cez -137 dBm pri modemoch SX1272/73 a -148 dBm pri modemoch SX1276/78/79.
 
-Modemy SX1272 a SX1273 ponúkajú menší link budget 157 dB oproti 168 dB pri modemoch SX1276/77/78/79 a majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz.
-Okrem toho majú aj vyššiu spotrebu energie.
 
-Pri modemoch SX1276/77/78/79 je možné vybrať frekvenčné pásma z rozsahu 137 až 1020 MHz.
+Modemy SX1272 a SX1273 ponúkajú menší link budget \footnotemark[1] 157 dB oproti 168 dB pri modemoch SX1276/77/78/79. 
+\footnotetext[1]{Súčet zisku a strát signálu medzi vysielačom a prijímačom v bezdrôtovom prenose.}
+\newpage
+Majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz oproti modemom SX1276/77/78/79, kde 
+je možné vybrať frekvenčné pásma z rozsahu 137 až 1020 MHz.
+
+Okrem toho majú aj vyššiu spotrebu energie.
 
 \subsection{SX126x}
 
@@ -380,11 +387,17 @@ Okrem mikrokontrolérov TTGO boli použité aj mikrokontroléry Raspberry Pi Pic
 Nami použité mikrokontroléry môžu byť neskôr rozšírene o batériu a stať sa tak mobilnými.
 
 \subsection{TTGO LoRa32}
-Tento mikrokontrolér je založený na module ESP32. Obsahuje Wi-Fi, bluetooth a LoRa moduly. 
-Konkrétne obsahuje SX1276 LoRa modem.
+TTGO LoRa32 je multifunkčný mikrokontrolér postavený na module ESP32, ktorý poskytuje 
+potrebné moduly pre bezdrôtovú komunikáciu, vrátane Wi-Fi, Bluetooth a SX1276 LoRa modulu. 
 
-Dá sa prepnúť do úsporného režimu spánku, ktorý znižuje spotrebu mikrokontroléru na 0,6 mA.
-Mikrokontrolér obsahuje aj 0,96 palcový čiernobiely displej, ktorý je pripojený cez I2C rozhranie.
+Tento mikrokontrolér je špeciálne navrhnutý pre projektovanie internetu vecí (IoT), senzorov a ďalších podobných aplikácií, 
+ktoré vyžadujú spoľahlivú a energeticky úspornú bezdrôtovú komunikáciu.
+
+Jednou z výhod tohto mikrokontroléru je jeho úsporný režim spánku, ktorý umožňuje znížiť spotrebu až na 0,6 mA. 
+Tento režim je ideálny pre aplikácie, ktoré potrebujú byť v prevádzke čo najdlhšie, bez nutnosti pravidelného nabíjania batérie.
+
+Okrem toho TTGO LoRa32 obsahuje aj 0,96 palcový čiernobiely displej pripojený cez I2C rozhranie. 
+Tento displej môže slúžiť ako zobrazovací panel pre aplikácie, ktoré potrebujú zobrazovať textové a grafické informácie.
 
 \subsection{TTGO T-Beam}
 Tento mikrokontrolér je taktiež založený na module ESP32 a obsahuje Wi-Fi, bluetooth a LoRa modul.
@@ -406,7 +419,7 @@ Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
 \newpage
 
 \subsection{Raspberry Pi Pico RP2040}
-Mikrokontrolér od známej organizácie Raspberry Pi \cite{rpiOrg}, založený na dvoj-jadrovom Arm procesore. 
+Mikrokontrolér od známej organizácie Raspberry Pi \cite{rpiOrg}, založený na dvoj-jadrovom ARM procesore. 
 Existuje verzia s Wi-Fi modulom aj bez. Na programovanie sa využíva jazyk C alebo MicroPython, 
 prípadne derivát MicroPythonu -- CircuitPython. V tejto práci bol použitý práve CircuitPython.
 
@@ -425,10 +438,11 @@ Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 \end{figure}
 
 \subsection{Raspberry Pi 2B}
-Jednodoskový, štvor-jadrový počítač vytvorený organizáciou Raspberry Pi.
-
-Zariadenie obsahuje eternetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
+Jednodoskový, štvor-jadrový počítač vytvorený organizáciou Raspberry Pi. 
+Toto zariadenie obsahuje eternetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
 Počítač sam o sebe neobsahuje žiaden modul a tak bol pre prácu s LoRa pridaný RFM96W modul, pripojený do vstupno-výstupných pinov počítača.
+
+Na pripojenie bola použitá SPI zbernica. Raspberry Pi ponúka dva SPI porty, v našom prípade bol použitý ten prvý na pinoch 11, 10, 9 a 8.
 
 Na rozdiel od predchádzajúcich mikrokontrolérov disponuje tento jednodoskový počítač oveľa väčším výkonom a pamäťou, 
 avšak ma oveľa vyššiu spotrebu energie. Z tohto dôvodu tento počítač plnil rolu nemobilného uzlu v sieti, ktorý bol pripojený cez ethernet do internetovej siete.
@@ -438,8 +452,14 @@ Vďaka tomu, že CircuitPython je možne spojazdniť aj na Raspberry Pi, bolo mo
 
 \chapter{Existujúce riešenia}
 Téma mesh sietí je v tejto dobe veľmi aktuálna a vývojári sa snažia vytvoriť rôzne riešenia, ktoré by nahradili aktuálne používane 
-prístupy topológie hviezda v IoT sieťach. Použitie mesh topológie môže so sebou prinášať rôzne výhody oproti bežne zaužívaným topológiam typu hviezda.
+prístupy topológie hviezda v IoT sieťach. 
 
+V rámci sieťového prenosu je kľúčové zabezpečiť správne smerovanie, aby správy mohli byť úspešne doručené 
+od odosielateľa k príjemcovi. Je k dispozícii celé množstvo rôznych smerovacích algoritmov, ktoré môžu byť využité 
+s cieľom dosiahnuť tento cieľ, pričom každý z nich prináša svoje výhody a nevýhody \cite{ALOTAIBI2012940}. Preto je dôležité zvážiť 
+konkrétne požiadavky a okolnosti siete a zvoliť ten najlepší algoritmus pre danú situáciu
+
+Použitie mesh topológie môže so sebou prinášať rôzne výhody oproti bežne zaužívaným topológiam typu hviezda.
 Vo výskume od Ochoa et al. \cite{8115793} porovnávali spotrebu energie medzi 
 topológiou typu mesh a hviezdicovou topológiou v sieti LoRa. A z týchto štúdií možno vyvodiť, že pre rozsiahlejšie siete je viac
 efektívnejšie, z hľadiska spotreby energie, použiť topológiu mesh. 
@@ -447,10 +467,6 @@ efektívnejšie, z hľadiska spotreby energie, použiť topológiu mesh.
 Okrem toho je možné optimalizovať výber rádiových nastavení v súlade s hustotou siete tak, 
 aby sa v mesh sieťach ešte viac optimalizovala spotreba energie.
 
-V rámci sieťového prenosu je kľúčové zabezpečiť správne smerovanie, aby správy mohli byť úspešne doručené 
-od odosielateľa k príjemcovi. Je k dispozícii celé množstvo rôznych smerovacích algoritmov, ktoré môžu byť využité 
-s cieľom dosiahnuť tento cieľ, pričom každý z nich prináša svoje výhody a nevýhody \cite{ALOTAIBI2012940}. Preto je dôležité zvážiť 
-konkrétne požiadavky a okolnosti siete a zvoliť ten najlepší algoritmus pre danú situáciu
 
 Existujú rozvinuté projekty ako napríklad Meshtastic \cite{meshtastic}, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť na miestach bez inej dostupnej konektivity, 
 za použitia lacných zariadení.
@@ -461,6 +477,10 @@ Zariadenia Armachat su poháňané mikrokontrolérmi Raspberry Pi Pico, obsahuj�
 
 Originálny projekt avšak sám o sebe zatiaľ nepodporuje využívanie mesh topológie. Používa ale rovnakú štruktúru správ ako projekt Meshtastic a vďaka tomu je možné 
 v projekte Armachat využívať mesh sieť projektu Meshtastic.
+
+Teoretických návrhov ako realizovať smerovanie v mesh sieťach je mnoho, avšak v praxi sa najčastejšie stretávame s 
+distance vector smerovaním alebo flooding prístupom. Najzaujímavejšie riešenia si bližšie popíšeme 
+v následujúcich sekciách.
 
 \section{LoRa mesher}
 LoRaMesher \cite{loramesher} je C++ knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieťach.
@@ -534,12 +554,12 @@ tabuliek uzlov. Následne môže uzol vyslať pôvodný paket do destinácie.
 Projekt Synchronous LoRa Mesh \cite{synchronouslorameshnetwork} vznikol z potreby získavania real-time dát z podzemných kanalizácií. Tieto dáta sú potrebné k monitorovaniu a predikcií kritických situácií akými 
 sú napríklad záplavy.
 
-LoRaWan však nemá moc veľký dosah do podzemia. Z toho dôvodu by bolo potrebné v podzemných priestoroch implementovať LoRaWan gateway-e, ktoré su ale energeticky náročne, drahé a vyžadujú 
+LoRaWAN však nemá moc veľký dosah do podzemia. Z toho dôvodu by bolo potrebné v podzemných priestoroch implementovať LoRaWAN gateway-e, ktoré su ale energeticky náročne, drahé a vyžadujú 
 pevné pripojenie do elektrickej a prípadne aj internetovej siete, ktoré v kanalizáciách niesu dostupné. Okrem toho, by museli byť všetky ostatné uzly v podzemnej sieti v dosahu danej gateway a pri väčšej podzemnej sieti 
-by teda bolo potrebné implementovať viacero LoRaWan gateway.
+by teda bolo potrebné implementovať viacero LoRaWAN gateway.
 
-Tento projekt sa snaží vyriešiť tieto problémy. Prináša protokol, ktorý rozširuje LoRaWan o tzv. repeater uzly (RN) viď Obr. \ref{fig:synchronouslora}. Tieto uzly sa vyskytujú na povrchu a preposielajú dáta z 
-podzemných monitorovacích uzlov (sensor node  - SN) do LoRaWan siete. Monitorovacie uzly pod zemou tvoria mesh sieť a RN plní funkciu riadiaceho uzlu pre podzemnú mesh sieť. 
+Tento projekt sa snaží vyriešiť tieto problémy. Prináša protokol, ktorý rozširuje LoRaWAN o tzv. repeater uzly (RN) viď Obr. \ref{fig:synchronouslora}. Tieto uzly sa vyskytujú na povrchu a preposielajú dáta z 
+podzemných monitorovacích uzlov (sensor node  - SN) do LoRaWAN siete. Monitorovacie uzly pod zemou tvoria mesh sieť a RN plní funkciu riadiaceho uzlu pre podzemnú mesh sieť. 
 Komunikácia medzi RN a SN je synchronizovaná pomocou presného časovania, čo umožňuje koordináciu zmeny stavov SN z režimu spánku do normálneho režimu v čase, kedy 
 potrebuje SN prijímať a odosielať dáta. Komunikácia sa cez uzly šíri multi-hop prístupom, za použitia smerovacej tabuľky.
 
@@ -556,7 +576,7 @@ Novo pripojený uzol do siete musí čakať na periodický beacon, vysielaný RN
 \end{figure}
 
 
-\section{Porovnanie voči nášmu riešeniu}
+\section{Porovnanie a návrh rozšírenia}
 Niektoré zo spomenutých riešení využívajú smerovacie tabuľky na efektívnejší prenos dát v rámci siete. Tie môžu byť však limitáciou pokiaľ 
 chceme dosiahnuť vyššej mobility uzlov. V prípade, že by sme chceli spolu so smerovacími tabuľkami podporovať mobilitu uzlov, je potrebné zabezpečiť 
 dostatočné časté aktualizácie smerovacích tabuliek.
@@ -564,7 +584,7 @@ dostatočné časté aktualizácie smerovacích tabuliek.
 Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime. To môže byť 
 veľkou limitáciou pri niektorých aplikáciách, kde je potrebná komunikácia v reálnom čase  (napr. chat).
 
-Protokol navrhnutý v tejto práci nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá vysoká mobilita uzlov. 
+V tejto práci sme navrhli protokol, ktorý nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá vysoká mobilita uzlov. 
 Hlavným využitím nášho protokolu bola ad-hoc komunikácia, preto protokol nepoužíval 
 žiadnu časovú synchronizáciu a časové okná vyhradené na komunikáciu, uzly siete tak mohli prijímať a odosielať dáta kedykoľvek to bolo potrebné.
 To so sebou ale prinášalo nevýhodu v podobe vyššej spotreby energie.
@@ -599,7 +619,6 @@ Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
     Smerovanie & \makecell{Distance \\ Vector} & Flooding & Flooding & \makecell{Distance \\ Vector} & Flooding & Flooding\\
     \hline
     Ad-hoc komunikácia & Áno & Áno & Nie & Áno & Nie & Áno \\
-    
     \midrule
   \end{tabular}
   \label{tab:compar}
@@ -614,7 +633,7 @@ niekoľko nevýhod, ktoré sme museli zohľadniť pri navrhovaní implementácie
 
 Jednou z nevýhod bolo, že ak sme poslali niekam správu, a destinácia práve nebola v dosahu, tak sme o správu prišli. Tento problém bol vyriešený tak, 
 že odosielateľ si odoslané správy ukladá a v prípade, že sa nepodarí správu doručiť, môže ju opätovne 
-odoslať niekedy neskôr. To, že sa správu nepodarilo doručiť do destinácie, sme zisťovali vďaka potvrdzovacím ACK správam. Tieto správy sa odosielali v opačnom smere ako správa, ktorá bola potvrdzovaná. 
+odoslať niekedy neskôr. To, že sa správu nepodarilo doručiť do destinácie, sme zisťovali vďaka potvrdzovacím ACK správam. 
 
 Ďalším z problémov mohlo byť potenciálne zahltenie siete správami. Keby každý uzol v sieti preposielal ďalej každú správu, ktorú prijal, tak by sme sa rýchlo dostali 
 do stavu kedy by množstvo uzlov preposielalo rovnaké správy a sieť by sa tym pádom zahltila.
@@ -691,7 +710,7 @@ Navrhnutú štruktúru hlavičky paketu môžme vidieť v tabuľke \ref{tab:pack
   \caption{Štruktúra hlavičky paketu a dĺžka jednotlivých polí v bajtoch.}
   \begin{tabular}{|c|c|c|c|c|c|c|}
     \toprule
-    2B & 2B & 4B & 2B & 1B & 1B & 0 -- 240B \\
+    2B uint & 2B uint & 4B uint & 2B uint & 1B uint & 1B uint & 0 -- 240B \\
     \midrule
     Destinácia & Odosielateľ & ID správy & Kontrolný súčet & Typ správy & Priorita & Dátový rámec \\
     \midrule
@@ -699,14 +718,16 @@ Navrhnutú štruktúru hlavičky paketu môžme vidieť v tabuľke \ref{tab:pack
   \label{tab:packetHeader}
 \end{table}
 
-Pre adresy odosielateľa a destinácie boli využité dvoj bajtové adresy. Štvor bajtový identifikátor správy bol náhodne generovaný pri každom vytvorení novej správy.
+Pre adresy odosielateľa a destinácie boli využité dvoj bajtové adresy. Pre broadcast adresu bola rezervovaná hodnota 0xFFFF. 
+Štvor bajtový identifikátor správy bol náhodne generovaný pri každom vytvorení novej správy.
 
 Z adresy destinácie, adresy odosielateľa a identifikátoru správy bol vytvorený dvoj bajtový kontrolný súčet. Tento kontrolný súčet bol používaný na overenie, či prijatá správa 
 patrila do nášho protokolu. Overovať integritu dát na základe kontrolného súčtu nie je za potreby, pretože táto kontrola je už zahrnutá na fyzickej vrstve LoRa technológie.
 
 Položka typ správy obsahovala číslo, ktoré definovalo typ danej správy. Číslo reprezentovalo jeden z typov spomínaných v predošlej sekcii.
 
-Správam bolo možné v hlavičke paketu určiť vyššiu prioritu. Na túto prioritu sa následne bral ohľad pri spracovávaní správ a správy s vyššou prioritou boli odbavené prioritne.
+Správam bolo možné v hlavičke paketu určiť vyššiu prioritu. Na túto prioritu sa následne bral ohľad pri spracovávaní správ a správy s vyššou prioritou boli odbavené prioritne. 
+Rozhodli sme sa poskytovať iba dva stupne priority správ a to normálna priorita a vysoká priorita. 
 
 Dátové rámce sa líšili na základe typu správy. V tabuľkách \ref{tab:textFrame}, \ref{tab:trFrames} a \ref{tab:frames} 
 sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
@@ -717,7 +738,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \caption{Štruktúra dátového rámcu pre textové správy.}
   \begin{tabular}{|c|c|c|}
     \toprule
-    1B & 1B & 0 -- 238B \\
+    1B uint & 1B uint & 0 -- 238B String \\
     \midrule
     Počet skokov & Pôvodný počet skokov & Textové dáta \\
     \midrule
@@ -730,7 +751,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \subfloat[\centering Správa typu žiadosť o traceroute.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B & 1B \\
+      1B uint & 1B uint \\
       \midrule
       Počet skokov & Pôvodný počet skokov \\
       \midrule
@@ -740,7 +761,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \subfloat[\centering Správa typu odpoveď na traceroute.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B & 0 -- 239B \\
+      1B uint & 0 -- 239B String\\
       \midrule
       Počet skokov & Navštívené adresy \\
       \midrule
@@ -763,7 +784,7 @@ následne použiť na správne nastavenie maximálneho počtu skokov pre odoslan
   \subfloat[\centering Potvrdzovacie ACK správy.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B & 4B \\
+      1B uint & 4B uint \\
       \midrule
       Počet skokov & ID potvrdzovanej správy \\
       \midrule
@@ -773,7 +794,7 @@ následne použiť na správne nastavenie maximálneho počtu skokov pre odoslan
   \subfloat[\centering Správy pre senzorové dáta.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      2B & 0 -- 238B \\
+      2B uint & 0 -- 238B String \\
       \midrule
       TTL & Senzorové dáta \\
       \midrule
@@ -1029,7 +1050,7 @@ Vznikla na to routa \uv{/api/config}. Táto routa mohla byť volaná prostrední
 alebo prostredníctvom HTTP PUT požiadavku, kedy nastavila novú konfiguráciu z poskytnutého JSON objektu, zachytávajúceho nové nastavenia.
 
 Používateľ má možnosť nastaviť rôzne parametre, ktoré ovplyvňujú správanie protokolu. Nastavené hodnoty parametrov boli ukladané do 
-JSON súboru na zariadení. Tieto nastavenia si bližšie popíšeme v časti implementácie 
+JSON súboru na zariadení, konkrétne na umiestnení /data/settings.json. Tieto nastavenia si bližšie popíšeme v časti implementácie 
 konfiguračného rozhrania.
 
 \section{Návrh webového rozhrania}
@@ -1060,9 +1081,9 @@ bude môcť používateľ meniť a tak sú tam iba nastavenia adresy, šifrovaci
   \label{fig:figmaHome}
 \end{figure}
 
-Keďže sme pridali novú funkciu v podobe pridávania kontaktov, bolo potrebné vytvoriť novú API routu, ktorá vraciala 
+Keďže bola pridaná novú funkciu v podobe pridávania kontaktov, bolo potrebné vytvoriť novú API routu, ktorá vraciala 
 zoznam kontaktov. Okrem toho bola vytvorená ďalšia routa, slúžiaca na pridávanie nových alebo mazanie starých kontaktov. 
-Ako databáza kontaktov bol použitý JSON súbor, do ktorého sa kontakty ukladali priamo na zariadení.
+Ako databáza kontaktov bol použitý JSON súbor, do ktorého sa kontakty ukladali priamo na zariadení do súborov /data/contacts.json a /data/sensors.json. 
 
 \begin{figure}[h!]
   \centering
@@ -1159,7 +1180,6 @@ menilo sa aj celkové usporiadanie prvkov na stránke tak, aby bolo používanie
 Aby boli odlíšené nami odoslané správy od správ, ktoré sme prijali od nejakého iného uzlu, bolo pridané farebné označenie jednotlivých správ. Správy, ktoré sme 
 prijali od iného používateľa boli zobrazené v sivej farbe. Správy ktoré sme prijali od senzorových uzlov, boli zobrazené v žltej farbe. A správy, ktoré sme odoslali 
 my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy boli zobrazené v zelenej farbe.
-
 
 \section{Optimalizácia}
 Po sfunkčnení celej aplikácie sme narazil na problém, v podobe nepostačujúceho miesta na zariadeniach. Dochádzalo k tomu, že ak zariadenie prijalo 
@@ -1269,7 +1289,8 @@ nepracovala veľmi efektívne. Keď aktuálne LoRa modul prijímal nejaký paket
 
 Použitá knižnica na ovládanie LoRa modulu so sebou priniesla ešte dodatočnú limitáciu. Táto knižnica nesprávne pracovala s LoRa modulom a nebolo možné stabilne používať 
 LoRa prenos pokiaľ bol nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky znížila. Pri 
-našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z desiatich pokusov pri použití najvyššieho rozprestieracieho faktoru.
+našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z desiatich pokusov pri použití najvyššieho rozprestieracieho faktoru. 
+K tejto chybe existuje aj oficiálna chybová správa na GitHub stránke CircuitPython knižnice \cite{rfmIssue}.
 
 Chybu v knižnici sme sa bezvýsledne snažili opraviť. Jedným z dôvodov, ktoré ku chybe prispievali bol nesprávne nastavený časový limit pre posielanie paketu. Knižnica odpočítavala časový limit dvoch sekúnd 
 pri čítaní novo prijímaného paketu. Ak sa paket nestihol prečítať v tomto intervale tak sa čítanie prerušilo a prijatý paket sa zahodil. 

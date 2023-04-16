@@ -64,6 +64,8 @@ primarily intended for chat communication between users in a mesh network. Howev
 \AddAcronym{LoRa}{Long Range}
 \AddAcronym{LoRaWAN}{Long Range Wide Area Network}
 \AddAcronym{SPI}{Serial Peripheral Interface}
+\AddAcronym{MQTT}{Message Queuing Telemetry Transport}
+\AddAcronym{AODV}{Ad hoc On-Demand Distance Vector}
 
 
 \addbibresource{biblatex.bib}
@@ -151,7 +153,9 @@ down-chirp zase naopak.
 Ako rýchlo sa chirp posúva po frekvenčnom pásme - tzn. ako rýchlo chirp signál mení svoju frekvenciu, je určené parametrom rozprestierací faktor -- spreading factor (SF). 
 Rozprestierací faktor zároveň vyjadruje, koľko bitov informácie je v každom symbole prenesených. Pri nižšom rozprestieracom faktore sa chirp signál posúva po 
 frekvenčnom pásme rýchlejšie (viď Obr. \ref{fig:spreadingfactors}) a tým sa zvyšuje rýchlosť dátového prenosu, 
-avšak zhoršuje sa citlivosť, ktorou dokáže prijímač prijať signál a dôsledkom toho je menší použiteľný dosah.
+avšak zhoršuje sa citlivosť, ktorou dokáže prijímač prijať signál a dôsledkom toho je menší použiteľný dosah. Citlivosť sa zhoršuje kvôli 
+tomu, že je vysielaný signál menej rozšírený v čase a signál môže byť v porovnaní so šumom, ktorý je prítomný v prostredí, relatívne slabší. 
+Hodnota šumu voči signálu je vyššia a môže to viesť k zhoršeniu citlivosti prijímača.
 
 Každý chirp signál je rozdelený na X častí -- tzv. chips. Tieto chips predstavujú skoky vo vysielacej frekvencii signálu. 
 Koľko týchto chips jeden chirp obsahuje je závisle od vybraného rozprestieracieho faktoru. 
@@ -257,6 +261,7 @@ sa ku prenášaným dátam pridávajú korekčné bity. Tieto bity sú potom na 
 K nastaveniu korekcie chýb slúži parameter kódovací pomer -- coding rate (CR).
 
 V technológií LoRa máme na výber zo štyroch možností pre parameter coding rate: 4/5, 4/6, 4/7 a 4/8. 
+Tieto možnosti su niekedy označované aj ako čísla x = 1 až 4, kde kódovací pomer je 4/4+x.
 Označenie vyjadruje pomer bitov, ktoré nesú informáciu, ku bitom, ktoré budú reálne použité na prenos informácie. 
 Napríklad pri kódovacom pomere 4/5 sa na každé 4 bity informácie pridáva 1 korekčný bit.
 Vyšší kódovací pomer zabezpečí spoľahlivejší prenos dát ak sa nachádzame v rušivom prostredí, avšak zníži rýchlosť prenosu dát, 
@@ -388,9 +393,9 @@ Nami použité mikrokontroléry môžu byť neskôr rozšírene o batériu a sta
 
 \subsection{TTGO LoRa32}
 TTGO LoRa32 je multifunkčný mikrokontrolér postavený na module ESP32, ktorý poskytuje 
-potrebné moduly pre bezdrôtovú komunikáciu, vrátane Wi-Fi, Bluetooth a SX1276 LoRa modulu. 
+moduly pre bezdrôtovú komunikáciu, vrátane Wi-Fi, Bluetooth a SX1276 LoRa modulu. 
 
-Tento mikrokontrolér je špeciálne navrhnutý pre projektovanie internetu vecí (IoT), senzorov a ďalších podobných aplikácií, 
+Tento mikrokontrolér je navrhnutý pre projektovanie internetu vecí (IoT), senzorov a ďalších podobných aplikácií, 
 ktoré vyžadujú spoľahlivú a energeticky úspornú bezdrôtovú komunikáciu.
 
 Jednou z výhod tohto mikrokontroléru je jeho úsporný režim spánku, ktorý umožňuje znížiť spotrebu až na 0,6 mA. 
@@ -400,12 +405,14 @@ Okrem toho TTGO LoRa32 obsahuje aj 0,96 palcový čiernobiely displej pripojený
 Tento displej môže slúžiť ako zobrazovací panel pre aplikácie, ktoré potrebujú zobrazovať textové a grafické informácie.
 
 \subsection{TTGO T-Beam}
-Tento mikrokontrolér je taktiež založený na module ESP32 a obsahuje Wi-Fi, bluetooth a LoRa modul.
-Rovnako používa SX1276 LoRa modem no okrem spomínaných modulov obsahuje aj GPS modul.
+TTGO T-Beam je mikrokontrolér taktiež založený na module ESP32 s integrovaným Wi-Fi, Bluetooth a LoRa modulom. 
+V porovnaní s predošlým mikrokontrolérom je však tento vybavený aj GPS modulom, ktorý umožňuje určovanie polohy zariadenia.
 
-Mikrokontrolér ma na zadnej strane držiak na batériu, z ktorej môže byť napájaný a taktiež aj nabíjací modul 
-pre bezpečné nabíjanie a ochranu lítiových batérií.
-V režime spánku ma spotrebu 0,2 mA. Podporuje pripojenie dodatočného displeju, avšak nami používaný mikrokontrolér tento displej nemal.
+Mikrokontrolér má na zadnej strane držiak na batériu, z ktorej môže byť napájaný. Taktiež je vybavený nabíjacím modulom, 
+ktorý umožňuje bezpečné nabíjanie a ochranu lítiových batérií. TTGO T-Beam je v režime spánku schopný spotreby iba 0,2 mA. 
+
+Okrem toho, TTGO T-Beam je tiež schopný pripojenia dodatočného displeja, ktorý môže byť použitý na zobrazovanie informácií. 
+Nami použivaný mikrokontrolér však tento displej nemal.
 
 Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
 \begin{figure}[h!]
@@ -416,7 +423,6 @@ Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
   \caption{Mikrokontroléry TTGO. Prevzaté z \cite{lilygo}}
   \label{fig:ttgo-moduly}
 \end{figure}
-\newpage
 
 \subsection{Raspberry Pi Pico RP2040}
 Mikrokontrolér od známej organizácie Raspberry Pi \cite{rpiOrg}, založený na dvoj-jadrovom ARM procesore. 
@@ -436,18 +442,27 @@ Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 	\caption{Zariadenie Armachat. Prevzaté z \cite{armachatObr}}
 	\label{fig:armachat}
 \end{figure}
+\newpage
 
 \subsection{Raspberry Pi 2B}
 Jednodoskový, štvor-jadrový počítač vytvorený organizáciou Raspberry Pi. 
 Toto zariadenie obsahuje eternetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
 Počítač sam o sebe neobsahuje žiaden modul a tak bol pre prácu s LoRa pridaný RFM96W modul, pripojený do vstupno-výstupných pinov počítača.
 
-Na pripojenie bola použitá SPI zbernica. Raspberry Pi ponúka dva SPI porty, v našom prípade bol použitý ten prvý na pinoch 11, 10, 9 a 8.
+Na pripojenie bola použitá SPI zbernica. Raspberry Pi ponúka dva SPI porty, v našom prípade bol použitý ten prvý na pinoch 11, 10, 9 a 8. 
+Výsledné zostavenie môžme vidieť na Obr \ref{fig:rpi2b}.
 
 Na rozdiel od predchádzajúcich mikrokontrolérov disponuje tento jednodoskový počítač oveľa väčším výkonom a pamäťou, 
 avšak ma oveľa vyššiu spotrebu energie. Z tohto dôvodu tento počítač plnil rolu nemobilného uzlu v sieti, ktorý bol pripojený cez ethernet do internetovej siete.
 
 Vďaka tomu, že CircuitPython je možne spojazdniť aj na Raspberry Pi, bolo možné čast implementácie zdielať medzi Raspberry Pi Pico a Raspberry Pi 2B.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.9\textwidth]{Figures/rpi2b.jpg}
+	\caption{Zariadenie Raspberry Pi 2B s LoRa modulom}
+	\label{fig:rpi2b}
+\end{figure}
 
 
 \chapter{Existujúce riešenia}
@@ -456,7 +471,7 @@ prístupy topológie hviezda v IoT sieťach.
 
 V rámci sieťového prenosu je kľúčové zabezpečiť správne smerovanie, aby správy mohli byť úspešne doručené 
 od odosielateľa k príjemcovi. Je k dispozícii celé množstvo rôznych smerovacích algoritmov, ktoré môžu byť využité 
-s cieľom dosiahnuť tento cieľ, pričom každý z nich prináša svoje výhody a nevýhody \cite{ALOTAIBI2012940}. Preto je dôležité zvážiť 
+k dosiahnutiu tohto cieľu, pričom každý z nich prináša svoje výhody a nevýhody \cite{ALOTAIBI2012940}. Preto je dôležité zvážiť 
 konkrétne požiadavky a okolnosti siete a zvoliť ten najlepší algoritmus pre danú situáciu
 
 Použitie mesh topológie môže so sebou prinášať rôzne výhody oproti bežne zaužívaným topológiam typu hviezda.
@@ -483,9 +498,9 @@ distance vector smerovaním alebo flooding prístupom. Najzaujímavejšie rieše
 v následujúcich sekciách.
 
 \section{LoRa mesher}
-LoRaMesher \cite{loramesher} je C++ knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieťach.
+LoRaMesher \cite{loramesher} \cite{9930341} je C++ knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieťach.
 
-Na smerovanie v sieti používa distance vector routing protokol. Tento protokol vyberá cestu, kadiaľ bude správa v sieti preposlaná od odosielateľa k príjemcovi, na základe 
+Na smerovanie v sieti používa proaktívny \footnote[1]{Smerovacia tabuľka sa pravidelne aktualizuje}  distance vector routing protokol. Tento protokol vyberá cestu, kadiaľ bude správa v sieti preposlaná od odosielateľa k príjemcovi, na základe 
 najlepšej cesty. Najlepšiu cestu definuje ako cestu s najmenším počtom hopov -- preskokov medzi uzlami v mesh sieti.
 
 K realizácií distance vector smerovania je potrebné udržiavať smerovaciu tabuľku, ktorá obsahuje informácie o ID uzlov, cez ktoré susedné uzly sa dané uzly dajú dosiahnuť a 
@@ -496,8 +511,8 @@ LoRaMesher používa FreeRTOS, čo je operačný systém reálneho času. Takét
 FreeRTOS je použitý na zabezpečenie plánovania úloh. Rozličné úlohy sa starajú o prijatie a odoslanie paketov, iné úlohy sa starajú o samotne 
 spracovanie prijatých paketov.
 
-LoRaMesher dokáže nájsť novo vytvorené uzly v sieti vďaka smerovaciemu protokolu. Pri odoslaní správ čaká na prijatie potvrdzujúcej ACK správy, ktorá potvrdzuje, 
-že správa bola prijatá a tým zaisťuje spoľahlivosť. Správy väčšie ako 222 bajtov rozdeľuje na viacero správ, ktoré pošle postupne.
+Pri odoslaní správ čaká na prijatie potvrdzujúcej ACK správy, ktorá potvrdzuje, 
+že správa bola prijatá a tým zaisťuje spoľahlivosť. Správy väčšie ako 222 bajtov sú rozdeľované na viacero správ, ktoré sa pošlú postupne.
 
 \section{Meshtastic}
 Meshtastic vytvára mesh sieť za použitia lacných mikrokontrolérov s LoRa modulmi.
@@ -511,11 +526,11 @@ Zariadenia používane v projekte Meshtastic majú okrem LoRa modulu zabudovaný
 užívateľa. Cez aplikáciu v mobilnom telefóne môže používateľ vytvárať a prijímať správy. Správy sa cez bluetooth prenášajú z telefónu do zariadenia kde sa následne odošlú cez 
 LoRa do siete.
 
-Meshtastic poskytuje možnosť pripojenia sa k oficiálnemu meshtastic mqtt brokerovi. Toto umožňuje prepojiť malé lokálne mesh siete do väčšej globálnej siete a 
+Meshtastic poskytuje možnosť pripojenia sa k oficiálnemu meshtastic MQTT brokerovi. Toto umožňuje prepojiť malé lokálne mesh siete do väčšej globálnej siete a 
 tak rozšíriť dosah siete.
 
 \section{LoRaBlink}
-Ďalší multi-hop protokol, ktorý používa časovú synchronizáciu medzi uzlami. Časová synchronizácia definuje sloty, v ktorých môže uzol pristupovať ku prenosovému médiu a 
+Ďalší multi-hop flooding protokol, ktorý používa časovú synchronizáciu medzi uzlami. Časová synchronizácia definuje sloty, v ktorých môže uzol pristupovať ku prenosovému médiu a 
 vysielať svoje dáta. Správy sa sieťou šíria pomocou multi-hop flooding.
 
 Sieť sa skladá z jedného uzlu, ktorý plní rolu takzvaného datasinku (gateway alebo brána) a ostatných uzlov. Uzly siete posielajú dáta do datasinku alebo dáta z neho prijímajú.
@@ -536,7 +551,7 @@ ekosystémom. Zariadenia obsahujú WiFi, bluetooth a LoRa, prípadne SigFox modu
 
 PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway su označované ako Border Routers a prepájajú LoRa sieť s 
 internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncové 
-zariadenia.
+zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny \footnote[1]{Smerovacie informácie su zasielané iba na vyžiadanie} distance vector smerovanie (AODV).
 
 Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
 Aby sa zabránilo takýmto situáciám, je použitá metóda Listen Before Talk, pri ktorej sa pred vysielaním signálu overí, či nie je v sieti už niekto iný, kto by práve 
@@ -544,7 +559,7 @@ vysielal. Pokiaľ áno, tak sa posielaná správa vyšle neskôr.
 
 PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na inom zariadení by vyžadovalo väčšie úpravy zdrojového kódu.
 
-Na smerovanie paketov v sieti využíva kombináciu dvoch prístupov. Ak chce uzol vyslať nejaký paket a destinácia toho paketu je v dosahu daného uzla, tak sa paket priamo odošle. 
+Ak chce uzol vyslať nejaký paket a destinácia toho paketu je v dosahu daného uzla, tak sa paket priamo odošle. 
 Pokiaľ ale destinácia nie je v dosahu, uzol najskôr vyšle požiadavok na vytvorenie trasy ku destinácií všetkým svojím susedom. Títo susedia to prepošlú ďalej svojím susedom. 
 Takto sa bude paket preposielať, až kým sa nedostane ku uzlu, ktorého susedom je hľadaná destinácia prípadne destinácia samotná. Následne sa nájde najkratšia cesta ku destinácii a táto cesta sa uloží do smerovacích 
 tabuliek uzlov. Následne môže uzol vyslať pôvodný paket do destinácie.
@@ -576,7 +591,7 @@ Novo pripojený uzol do siete musí čakať na periodický beacon, vysielaný RN
 \end{figure}
 
 
-\section{Porovnanie a návrh rozšírenia}
+\section{Porovnanie a návrh nášho rozšírenia}
 Niektoré zo spomenutých riešení využívajú smerovacie tabuľky na efektívnejší prenos dát v rámci siete. Tie môžu byť však limitáciou pokiaľ 
 chceme dosiahnuť vyššej mobility uzlov. V prípade, že by sme chceli spolu so smerovacími tabuľkami podporovať mobilitu uzlov, je potrebné zabezpečiť 
 dostatočné časté aktualizácie smerovacích tabuliek.
@@ -584,7 +599,7 @@ dostatočné časté aktualizácie smerovacích tabuliek.
 Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime. To môže byť 
 veľkou limitáciou pri niektorých aplikáciách, kde je potrebná komunikácia v reálnom čase  (napr. chat).
 
-V tejto práci sme navrhli protokol, ktorý nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá vysoká mobilita uzlov. 
+V tejto práci sme navrhli protokol, ktorý nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá vysoká mobilita uzlov a dynamickosť siete. 
 Hlavným využitím nášho protokolu bola ad-hoc komunikácia, preto protokol nepoužíval 
 žiadnu časovú synchronizáciu a časové okná vyhradené na komunikáciu, uzly siete tak mohli prijímať a odosielať dáta kedykoľvek to bolo potrebné.
 To so sebou ale prinášalo nevýhodu v podobe vyššej spotreby energie.
@@ -689,7 +704,15 @@ presunul do stavu preposlaná alebo do stavu zmazaná.
 To či sa správa presunula do stavu zmazaná alebo preposlaná bolo závisle od toho, či bol aktuálny uzol zároveň aj autorom danej správy. V prípade, že bol autorom, 
 správa sa presunula do stavu preposlaná.
 
-Správy v stave preposlaná, pri ktorých nepotrebujeme sledovať, či správa dorazila do destinácie, sa následne presunuli do stavu hotová.
+Správy v stave preposlaná, pri ktorých nepotrebujeme sledovať, či správa dorazila do destinácie, sa následne presunuli do stavu hotová. Prechody medzi týmito stavmi 
+su znázornené v časti stavového diagramu na obrázku \ref{fig:stateFlowMin}. Kompletný stavový diagram prechodov medzi stavmi správ je vyobrazený na obrázku v prílohe \ref{fig:stateDiagram}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{Figures/state_flow_Min.png}
+	\caption{Časť stavového diagramu}
+	\label{fig:stateFlowMin}
+\end{figure}
 
 Pokiaľ aktuálny uzol vyčerpal všetky pokusy o odoslanie správy, prípadne pri správe typu senzorové dáta došiel časový limit, správa sa presunula do stavu neúspešná alebo zmazaná.
 To či sa presunula do stavu neúspešná alebo zmazaná bolo znovu závisle na tom, či bol aktuálny uzol autorom danej správy alebo nie.
@@ -699,7 +722,6 @@ správa presunula do stavu nepotvrdená (NAK). V opačnom prípade sa presunula 
 
 Stav zmazaná značil, že správu považujeme za vymazanú. Ďalej s ňou už nebudeme pracovať a po uplynutí určitého intervalu sa reálne vymazala z pamäti.
 
-Zjednodušený diagram prechodu medzi jednotlivými stavmi správ je vyobrazený na obrázku v prílohe \ref{fig:stateDiagram}.
 
 \section{Návrh paketu}
 Paket obsahoval hlavičku a dátový rámec. Štruktúra dátového rámcu bola závislá od typu správy.
@@ -710,7 +732,7 @@ Navrhnutú štruktúru hlavičky paketu môžme vidieť v tabuľke \ref{tab:pack
   \caption{Štruktúra hlavičky paketu a dĺžka jednotlivých polí v bajtoch.}
   \begin{tabular}{|c|c|c|c|c|c|c|}
     \toprule
-    2B uint & 2B uint & 4B uint & 2B uint & 1B uint & 1B uint & 0 -- 240B \\
+    2B \emph{uint} & 2B \emph{uint} & 4B \emph{uint} & 2B \emph{uint} & 1B \emph{uint} & 1B \emph{uint} & 0 -- 240B \\
     \midrule
     Destinácia & Odosielateľ & ID správy & Kontrolný súčet & Typ správy & Priorita & Dátový rámec \\
     \midrule
@@ -738,7 +760,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \caption{Štruktúra dátového rámcu pre textové správy.}
   \begin{tabular}{|c|c|c|}
     \toprule
-    1B uint & 1B uint & 0 -- 238B String \\
+    1B \emph{uint} & 1B \emph{uint} & 0 -- 238B \emph{String} \\
     \midrule
     Počet skokov & Pôvodný počet skokov & Textové dáta \\
     \midrule
@@ -751,7 +773,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \subfloat[\centering Správa typu žiadosť o traceroute.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B uint & 1B uint \\
+      1B \emph{uint} & 1B \emph{uint} \\
       \midrule
       Počet skokov & Pôvodný počet skokov \\
       \midrule
@@ -761,7 +783,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \subfloat[\centering Správa typu odpoveď na traceroute.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B uint & 0 -- 239B String\\
+      1B \emph{uint} & 0 -- 239B \emph{String}\\
       \midrule
       Počet skokov & Navštívené adresy \\
       \midrule
@@ -784,7 +806,7 @@ následne použiť na správne nastavenie maximálneho počtu skokov pre odoslan
   \subfloat[\centering Potvrdzovacie ACK správy.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B uint & 4B uint \\
+      1B \emph{uint} & 4B \emph{uint} \\
       \midrule
       Počet skokov & ID potvrdzovanej správy \\
       \midrule
@@ -794,7 +816,7 @@ následne použiť na správne nastavenie maximálneho počtu skokov pre odoslan
   \subfloat[\centering Správy pre senzorové dáta.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      2B uint & 0 -- 238B String \\
+      2B \emph{uint} & 0 -- 238B \emph{String} \\
       \midrule
       TTL & Senzorové dáta \\
       \midrule
@@ -810,7 +832,7 @@ si overil ako dlho už bola správa uložená u neho v pamäti a na základe toh
 
 Pri odčítavaní TTL bol braný do úvahy iba čas, ktorý daná správa strávila na určitom uzle. Nebral sa do úvahy čas, ktorý správe zabralo preniesť sa rádiovými vlnami z jedného uzlu 
 na ďalší. A to z toho dôvodu, že sme neboli schopní presne určiť, aku vzdialenosť prekonala vysielaná správa rádiovými vlnami. Existujúce spôsoby merania vzdialenosti, 
-ktorú správa prešla vzduchom, produkovali len hrubé odhady a boli veľmi závisle od aktuálnych atmosférických podmienok. Preto sme sa rozhodli, že v našom riešení budeme 
+ktorú správa prešla vzduchom, produkovali len hrubé odhady a boli veľmi závisle od aktuálnych atmosférických podmienok \cite{Simka2021thesis}. Preto sme sa rozhodli, že v našom riešení budeme 
 počítať iba s časom, ktorý správa strávila na určitom uzle. Mimo toho, keby sme počítali s maximálnou možnou vzdialenosťou medzi dvoma uzlami, ktorá sa pri LoRa 
 udáva okolo 15 kilometrov v otvorenom priestranstve, a rýchlosťou ktorou sa šíria rádiové vlny, ktorá je vo vákuu rovná rýchlosti svetla, tak by sme zistili, 
 že prenos správy medzi týmito dvoma uzlami by v ideálnom prípade trval okolo 50 mikrosekúnd. Táto hodnota bola v porovnaní s časom, ktorý správa strávi na určitom uzle, 
@@ -843,8 +865,8 @@ Jedna sa o symetrickú šifru, takže zašifrované dáta bolo možné rovnakým
 V protokole bolo možné odosielať správy aj na broadcast adresu. Tieto správy boli potom prijaté každým uzlom.
 
 \section{Implementácia protokolu}
-Hlavnou súčasťou nami navrhnutého protokolu bol zoznam správ. Do tohto zoznamu boli pridávané novo vytvorené, 
-prípadne novo prijaté správy. Následne bol tento zoznam správ v hlavnom cykle programu prechádzaný a každá správa sa bola spracovávaná.
+Hlavnou súčasťou nami navrhnutej implementácie protokolu bol dynamický zoznam správ. Do tohto zoznamu boli pridávané novo vytvorené, 
+prípadne novo prijaté správy. Následne bol tento zoznam správ v hlavnom cykle programu prechádzaný a každá správa bola spracovávaná.
 
 Na to aby bolo možné správy do tohoto zoznamu ukladať, bolo potrebné vytvoriť istú dátovú štruktúru, do ktorej by sa ukladali jednotlivé správy.
 Správy v zozname so sebou držali rôzne informácie. Okrem tých základných informácií o správe akými boli napríklad jej identifikátor, odosielateľ a prijímateľ, obsah správy atď., 
@@ -879,34 +901,34 @@ Rozhodli sme sa implementáciu protokolu začať na zariadeniach Armachat. Keď�
 boli vhodné na zobrazovanie informácií o prebiehajúcich procesoch a komunikácií v sieti. Na programovanie zariadení Armachat bol použitý CircuitPython, ktorý ma ale rovnakú syntax ako 
 programovací jazyk Python.
 
-Ako prvé bolo potrebné vytvoriť vhodnú dátovú štruktúru, ktorá by uchovávala v sebe správu. K tomu bola vytvorená trieda Message. Trieda obsahovala všetky potrebné informácie o správe. 
+Ako prvé bolo potrebné vytvoriť vhodnú dátovú štruktúru, ktorá by uchovávala v sebe správu. K tomu bola vytvorená trieda \emph{Message}. Trieda obsahovala všetky potrebné informácie o správe. 
 Taktiež obsahovala metódy na vytváranie rôznych typov a obsahov správ. Tieto metódy slúžili na prvotné vytvorenie nových správ, na autorskom uzle. Okrem týchto metód bolo 
 ale potrebné mať aj metódy, ktoré dokázali z prijatých dát vytvoriť správu. Pri prijatí nového paketu v LoRa, sme dostali dáta vo forme bajtového poľa. Tieto dáta boli potom predané 
 do metódy, ktorá z nich vytvorila správu.
 
-Po implementácií triedy Message, sme teda boli schopní vytvoriť novu správu alebo prijať bajtové pole z LoRa, z ktorého sa následne poskladala správa. Na to aby sme 
+Po implementácií triedy \emph{Message}, sme teda boli schopní vytvoriť novu správu alebo prijať bajtové pole z LoRa, z ktorého sa následne poskladala správa. Na to aby sme 
 mohli správy ukladať do zoznamu správ bolo ale potrebné vytvoriť ešte akýsi kontajner, ktorý by v sebe uchovával správu plus dodatočne informácie potrebne k ďalšiemu spracovávaniu.
-K tomu vznikla trieda MessageQueueItem. Tá v sebe držala inštanciu triedy Message, počítadlo opakovaných odoslaní, časový odpočet, časové razítko, ktoré zachytávalo čas, kedy bola 
+K tomu vznikla trieda \emph{MessageQueueItem}. Tá v sebe držala inštanciu triedy \emph{Message}, počítadlo opakovaných odoslaní, časový odpočet, časové razítko, ktoré zachytávalo čas, kedy bola 
 správa naposledy spracovávaná, aktuálny stav správy a ďalšie užitočné informácie. Okrem toho obsahovala táto trieda metódy, ktoré boli využívane pri spracovávaní správ. Sem patria metódy na zníženie maximálneho počtu preskokov alebo 
 TTL, metóda na zmenu stavu správy, metóda na aktualizovanie časového razítka, ktorá časové razítko nastavila na aktuálny čas a mnoho ďalších.
 
-Po implementácii triedy MessageQueueItem sme mohli začať implementovať samotný proces funkcionality nášho protokolu. Zoznam správ bol realizovaný ako slovník, 
-kde kľúčom bol identifikátor správy, a hodnota pod daným kľúčom bola inštanciou triedy MessageQueueItem. To nám umožnilo rýchlo vyhľadávať správy na základe jej identifikátora. 
-Tento slovník sme pomenovali message queue a tak ku nemu budeme referovať aj vo zvyšku tejto práce.
+Po implementácii triedy \emph{MessageQueueItem} sme mohli začať implementovať samotný proces funkcionality nášho protokolu. Zoznam správ bol realizovaný ako dynamický slovník, 
+kde kľúčom bol identifikátor správy, a hodnota pod daným kľúčom bola inštanciou triedy \emph{MessageQueueItem}. To nám umožnilo rýchlo vyhľadávať správy na základe jej identifikátora. 
+Tento slovník sme pomenovali \emph{message queue} a tak ku nemu budeme referovať aj vo zvyšku tejto práce.
 
-Hlavný proces protokolu pozostával z cyklu, v ktorom bolo najskôr skontrolované či náhodou nebol prijatý nový LoRa paket a následne boli prejdené všetky správy z message queue. Ak to bolo 
-potrebné tak sa určité správy spracovali. K tomu vznikli dve hlavné funkcie. Funkcia receive(), ktorá slúžila na skontrolovanie či nebol prijatý nový LoRa paket a funkcia tick(), v ktorej boli prejdené všetky správy z message queue.
+Hlavný proces protokolu pozostával z cyklu, v ktorom bolo najskôr skontrolované či náhodou nebol prijatý nový LoRa paket a následne boli prejdené všetky správy z \emph{message queue}. Ak to bolo 
+potrebné tak sa určité správy spracovali. K tomu vznikli dve hlavné funkcie. Funkcia \emph{receive()}, ktorá slúžila na skontrolovanie či nebol prijatý nový LoRa paket a funkcia \emph{tick()}, v ktorej boli prejdené všetky správy z \emph{message queue}.
 
-Funkcia receive() prečítala novo prijatý paket z LoRa a následne overila, či daný paket spĺňa dĺžku aspoň 12 bajtov. Vychádza to z toho, že všetky správy nášho protokolu obsahujú predom definovanú 
+Funkcia \emph{receive()} prečítala novo prijatý paket z LoRa a následne overila, či daný paket spĺňa dĺžku aspoň 12 bajtov. Vychádza to z toho, že všetky správy nášho protokolu obsahujú predom definovanú 
 hlavičku paketu (viď. Tab. \ref{tab:packetHeader} ), ktorá mala veľkosť 12 bajtov. Ak bol paket kratší ako 12 bajtov, bolo možné s istotou povedať, že sa nejednalo o správu nášho protokolu a teda ho nebolo 
 nutné ďalej spracovávať. Po kontrole dĺžky paketu, nasledovalo overenie kontrolného súčtu. Funkcia zobrala prvých 8 bajtov paketu a vypočítal sa z nich kontrolný súčet. 
 Ak sa vypočítaný kontrolný súčet zhodoval s kontrolným súčtom, ktorý bol v pakete, tak bolo možné správu považovať za 
 súčasť nášho protokolu. Na výpočet kontrolného súčtu bola použitá funkcia cyklicky redundantného súčtu typu CRC-16/CCITT-FALSE. Overovanie, či paket prisluhuje do nášho protokolu bolo pomerné dôležité, 
 pretože na rovnakých LoRa parametroch mohli byť vysielané aj pakety iných protokolov a tieto pakety by sa nam nepodarilo správne spracovať keďže by nespĺňali našu štruktúru paketu.
 
-Potom čo sa vo funkcii receive() overilo, že paket spĺňa naše požiadavky, bola z neho vytvorená nova inštancia triedy Message. Bola k tomu využitá metóda triedy Message určená na vytvorenie správy z 
+Potom čo sa vo funkcii \emph{receive()} overilo, že paket spĺňa naše požiadavky, bola z neho vytvorená nova inštancia triedy Message. Bola k tomu využitá metóda triedy Message určená na vytvorenie správy z 
 poľa bajtov. Pri novo prijatej správe nás zaujímalo či je správa určená nám. Ak bola správa určená nám, bolo potrebné zistiť o aky typ správy sa jednalo. Pokiaľ bola prijatá správa typu ACK, tak bolo 
-nutné vyhľadať v message queue korešpondujúcu správu a zmeniť jej stav na ACK. Pokiaľ sa nejednalo o ACK správu, nasledovala kontrola, či sa daná správa už nenachádzala v message queue a ak nie tak tam bola pridaná.
+nutné vyhľadať v \emph{message queue} korešpondujúcu správu a zmeniť jej stav na ACK. Pokiaľ sa nejednalo o ACK správu, nasledovala kontrola, či sa daná správa už nenachádzala v \emph{message queue} a ak nie tak tam bola pridaná.
 
 Bolo dôležité, aby uzol po prijatí správy, odoslal naspäť ACK správu. A to aj v prípade, že sa nejednalo o typ správy, ktorý vyžadoval potvrdenie o doručení. Dôvodom bolo to, že ak by 
 uzol neposlal naspäť ACK správu, tak by predošlý uzol pokračoval v opakovanom vysielaní správy, a tieto vysielania by zbytočne obsadzovali prenos v sieti. Uzol teda po prijatí vyslal ACK správu. 
@@ -915,20 +937,20 @@ Tým pádom sa správa neposunula ďalej v sieti ako k najbližšiemu uzlu. Ak s
 hodnotu, ktorá bola uložená v prijatej správe pod položkou pôvodný počet skokov. 
 Tym bolo zaručené, že správa bude mať dostatočný počet dostupných skokov aby sa dostala naspäť k uzlu, ktorý pôvodnú správu poslal.
 
-V prípadnom scenári, že prijatá správa nebola určená nám, bolo skontrolované či sa rovnaká správa už nenachádzala v message queue a ak nie tak tam bola pridaná za predpokladu, že mala ešte dostupný 
+V prípadnom scenári, že prijatá správa nebola určená nám, bolo skontrolované či sa rovnaká správa už nenachádzala v \emph{message queue} a ak nie tak tam bola pridaná za predpokladu, že mala ešte dostupný 
 nejaký počet skokov alebo TTL. Správe bolo zároveň nastavené prvotné časové pozdržanie na základe hodnoty SNR, s ktorou bola prijatá.
 
-V opačnom prípade, kedy sa sprava už nachádzala v message queue, bolo nutné znova vykonať sériu overení a na základe nich zmeniť stav správy.
+V opačnom prípade, kedy sa sprava už nachádzala v \emph{message queue}, bolo nutné znova vykonať sériu overení a na základe nich zmeniť stav správy.
 Prvé z overení bolo, či daná správa bola vytvorená nami. To či bola vytvorená nami, sme zistili na základe toho, či sa adresa odosielateľa správy zhodovala s tou našou. 
 V tom prípade nastala situácia kedy našu správu preposlal nejaký iny uzol. Bolo možné teda správe zmeniť stav na hotovo, prípadne na stav preposlaná ak sa jednalo o správu s potrebným 
 potvrdením o doručení.
 
 Ak sa ukázalo, že správa nebola vytvorená nami ale niekým iným, tak bola správa presunutá do stavu zmazaná. Do tohto stavu bola ale presunutá iba v prípade overenia, že hodnota počtu preskokov alebo TTL 
-z prijatej správy bola nižšia ako hodnota správy v message queue. %TODO tu mozno vysvetlit preco sa to tak robi
+z prijatej správy bola nižšia ako hodnota správy v \emph{message queue}. %TODO tu mozno vysvetlit preco sa to tak robi
 
-Po dokončení funkcie receive(), nasledovala funkcia tick(). V tejto funkcii bolo postupne prechádzane všetkými spravami z message queue. Pri každej správe bol overený jej stav 
+Po dokončení funkcie \emph{receive()}, nasledovala funkcia \emph{tick()}. V tejto funkcii bolo postupne prechádzane všetkými spravami z \emph{message queue}. Pri každej správe bol overený jej stav 
 a ak bola v stave preposlaná alebo zmazaná tak sa následne skontrolovalo, či jej už nevypršal časový limit. Pokiaľ limit vypršal, tak sa správa 
-skutočne vymazala z message queue ak bola v stave zmazaná. Ak bola v stave preposlaná, tak sa jej stav zmenil na nepotvrdená -- NAK.
+skutočne vymazala z \emph{message queue} ak bola v stave zmazaná. Ak bola v stave preposlaná, tak sa jej stav zmenil na nepotvrdená -- NAK.
 
 V prípade, že bol stav správy nová alebo odoslaná, tak sa pokračovalo v jej spracovávaní, ktoré pozostávalo z následujúcich krokov.
 Ako prvé bolo overené, či už nadišiel čas danú správu spracovať. To bolo zistené tak, že sme sa pozreli či správe už vypršal časový limit. Ak áno, znamenalo to, že správa bola pripravená na spracovávanie 
@@ -947,6 +969,7 @@ Pri pokuse o odoslanie mohlo dôjsť k situácií, kedy práve niekto iný vysie
 časové pozdržanie na hodnotu konfiguračnej premennej a bolo aktualizované jej časové razítko. Výsledkom bolo, že táto správa sa pokúšala znovu odoslať až po uplynutí 
 časového intervalu.
 
+\subsection{Overenie jednoduchej funkcionality}
 Po dokončení implementácie hlavnej funkcionality sme ju mohli otestovať. Na zariadeniach Armachat sme vytvorili jednoduché rozhranie, 
 ktoré zobrazovalo na displeji informácie o novo prijatej správe. Taktiež bolo možné využiť klávesnicu zariadenia, na napísanie vlastnej správy a jej odoslanie.
 Na obrázku \ref{fig:armRec} môžme vidieť, že zariadenie prijalo správu od odosielateľa s adresou 0xA1BC, ktoré bolo v tomto prípade druhé Armachat zariadenie.
@@ -968,7 +991,7 @@ Zariadenia mali nastavené adresy 0x0001, 0x0002 a 0xA1BC. Správa bola odoslan�
 Taktiež si môžme všimnúť zmenu v podobe skrátenia názvov atribútov max hop a initial max hop, z dôvodu, že sa na displeji nezmestili do jedného riadku.
 Okrem toho je na obrázku vidieť informačnú správu v podobe žltého textu na samom spodku displeja. V tejto informačnej správe sa zobrazujú 
 rôzne informačné hlášky počas behu programu. Zariadenie 0x0002 prijalo správu od zariadenia 0xA1BC a následne vytvorilo ACK správu, ktorej ID bolo 1787352650.
-V informačnej správe môžme vidieť, že v dobe vyhotovenia fotografie sa akurát táto ACK správa pridávala do message queue.
+V informačnej správe môžme vidieť, že v dobe vyhotovenia fotografie sa akurát táto ACK správa pridávala do \emph{message queue}.
 
 \begin{figure}
 	\centering
@@ -1159,14 +1182,16 @@ nepokúšalo pripájať na žiadnu WiFi sieť, ale vytvorilo svoju vlastnú.
   \caption{Stránka nastavení}
   \label{fig:webConfig}
 \end{figure}
+
 \newpage
-\begin{wrapfigure}{r}{0.5\textwidth}
+\begin{figure}[h!]
   \begin{center}
-    \includegraphics[width=0.5\textwidth]{Figures/mobileWeb.png}
+    \subfloat[\centering Hlavná stránka]{{\includegraphics[width=0.4\textwidth]{Figures/mobileWeb.png} }}
+    \subfloat[\centering Stránka nastavení TODO]{{\includegraphics[width=0.4\textwidth]{Figures/mobileWeb.png} }}
   \end{center}
-  \caption{Stránka na mobilnom zariadení}
+  \caption{Stránky na mobilnom zariadení}
   \label{fig:mobileWeb}
-\end{wrapfigure}
+\end{figure}
 
 V našej LoRa mesh sieti sa mohli vyskytovať senzorové uzly, ktoré obsahovali GPS modul. Z toho dôvodu sme pridali do webového rozhrania funkciu, 
 ktorá zobrazovala na mape aktuálnu polohu zariadenia. Správy, ktoré sme chceli zobraziť ako polohu na mape, museli dodržiavať určitý formát 

@@ -269,8 +269,9 @@ class NodeProcess():
 
     SNR_min = -20
     SNR_max = 20
-    return int(((snr - SNR_min) / (SNR_max - SNR_min)) * 5000)+1000
-    #Output min: 1000, max: 6000 (with snr range of -20 to 20)
+    timeout = int(((snr - SNR_min) / (SNR_max - SNR_min)) * 5000)+1000
+    return timeout if timeout > 0 else 0
+    #Output min: 1000, max: 6000 (with SNR range of -20 to 20)
 
   def tick(self):
     self.latest_message = None

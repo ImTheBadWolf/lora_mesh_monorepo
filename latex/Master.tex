@@ -888,10 +888,22 @@ preposielala medzi dvoma uzlami až kým by jej nedošiel limit skokov prípadne
 
 Aby bolo v mesh sieti dosiahnuté čo najlepšieho dosahu, bolo nutné nejak zabezpečiť, aby sa odosielané správy dostali k čo najvzdialenejším uzlom a aby tieto 
 najvzdialenejšie uzly boli tie ktoré propagujú prenášanú správu ďalej. To bolo zabezpečene tak, že každej novo prijatej správe bolo nastavené prvotné časové oneskorenie na základe 
-toho s akou hodnotou SNR bola daná správa prijatá. Hodnota SNR vyjadruje pomer signálu k šumu. Čím je hodnota SNR vyššia, tým je signál silnejší oproti okolitému šumu.
+toho s akou hodnotou SNR bola daná správa prijatá. 
+
+Hodnota SNR vyjadruje pomer signálu k šumu. Čím je hodnota SNR vyššia, tým je signál silnejší oproti okolitému šumu.
 Vďaka tomu, bolo možné približne odhadnúť, ktorý uzol bol vzdialenejší. Uzly ktoré boli vzdialenejšie mali nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
 To poviedlo k tomu, že vzdialenejšie uzly odvysielali správu skôr, ako uzly ktoré boli bližšie. Ostatné uzly toto vysielanie prijali, a u seba označili danú správu ako zmazanú, 
-keďže už nebolo potrebné aby ju oni preposielali.
+keďže už nebolo potrebné aby ju oni preposielali. Na určenie časového oneskorenia bol použitý následovný výpočet vyobrazený na Obr \ref{fig:getTimeout}. Výpočet transformuje hodnotu 
+SNR prijatého paketu na časové oneskorenie v intervale od 1 do 6 sekúnd, pričom ráta s minimálnou hodnotou SNR -20 dB a maximálnou hodnotou 20 dB. 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/getTimeout.png}
+	\caption{Výpočet časového oneskorenia}
+	\label{fig:getTimeout}
+\end{figure}
+
+Na obrázku \ref{fig:getTimeout} môžme taktiež vidieť, že ak je v konfigurácii zapnutá možnosť náhodnej cesty (\emph{RANDOMIZE\_PATH}), tak sa hodnota časového oneskorenia nastavuje náhodne. 
+Jedná sa o experimentálne nastavenie a jeho funkčnosť si bližšie popíšeme v kapitole testovania funkčnosti.
 
 Ďalší z potrebných aspektov správneho fungovania nášho protokolu bolo zabezpečiť aby nedošlo k situácií kedy by dva alebo viac uzlov v sieti začalo vysielať signály v rovnakom čase.
 K tomu bol využitý takzvaný prístup listen before talk, kedy sa uzol predtým ako začal vysielať presvedčil, či náhodou práve nevysielal niekto iný v jeho dosahu. Ak áno tak tak sa vyslanie správy pozdržalo 
@@ -973,7 +985,7 @@ Pri pokuse o odoslanie mohlo dôjsť k situácií, kedy práve niekto iný vysie
 Po dokončení implementácie hlavnej funkcionality sme ju mohli otestovať. Na zariadeniach Armachat sme vytvorili jednoduché rozhranie, 
 ktoré zobrazovalo na displeji informácie o novo prijatej správe. Taktiež bolo možné využiť klávesnicu zariadenia, na napísanie vlastnej správy a jej odoslanie.
 Na obrázku \ref{fig:armRec} môžme vidieť, že zariadenie prijalo správu od odosielateľa s adresou 0xA1BC, ktoré bolo v tomto prípade druhé Armachat zariadenie.
-\begin{figure}
+\begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.6\textwidth]{Figures/armRec.jpg}
 	\caption{Rozhranie zariadenia Armachat}
@@ -1119,23 +1131,15 @@ Ako databáza kontaktov bol použitý JSON súbor, do ktorého sa kontakty uklad
 
 \section{Implementácia webového rozhrania}
 Na implementáciu webového rozhrania bola použitá kombinácia HTML, CSS a JavaScriptu. Na komunikáciu s API bolo použité fetch API, 
-ktoré je súčasťou JavaScriptu. Ukážku volania za použitia fetch API môžeme vidieť v nasledujúcom kóde.
-\newpage
-\begin{lstlisting}[language=Python, label={lst:fetch}]
-  const newMessage = {
-    "destination":"0xA1F4",
-    "message":"Ahoj",
-    "max_hop":"3",
-    "priority":"0",
-    "wack":false
-  };
-  const requestOptions = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newMessage)
-  };
-  fetch('/api/send_text_message', requestOptions)
-\end{lstlisting}
+ktoré je súčasťou JavaScriptu. Ukážku volania za použitia fetch API môžeme vidieť na obrázku \ref{fig:fetchApi}.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Figures/fetchApi.png}
+  \caption{Volanie cez fetch API}
+  \label{fig:fetchApi}
+\end{figure}
+
 
 Webové stránky sme implementovali podľa pripravených návrhov. Avšak pri implementácii sme sa rozhodli, že 
 niektoré veci trochu pozmeníme a pridáme. Ukážku finálnej implementácie webového rozhrania bude možné vidieť v časti testovania.
@@ -1149,8 +1153,8 @@ neúspešných správach.
 \begin{figure}[h!]
   \centering
   \subfloat{{
-    \subfloat[\centering Správa bez potvrdenia o doručení]{{\includegraphics[width=0.4\textwidth]{Figures/nonWackMsg.png} }}
-    \subfloat[\centering Správa čakajúca na potvrdenie o doručení]{{\includegraphics[width=0.4\textwidth]{Figures/ackWaiting.png} }}
+    \subfloat[\centering Správa bez potvrdenia o doručení]{{\includegraphics[width=0.45\textwidth]{Figures/nonWackMsg.png} }}
+    \subfloat[\centering Správa čakajúca na potvrdenie o doručení]{{\includegraphics[width=0.45\textwidth]{Figures/ackWaiting.png} }}
   }}
   \newline
   \subfloat{{
@@ -1167,30 +1171,27 @@ bolo potrebné pridať ďalšiu API routu. Táto routa prijímala ako parameter 
 Stránku nastavení sme voči návrhu rozšírili o ďalšie nastavenia a spolu s tym sme rozšírili aj popis jednotlivých nastavení a čo robia. 
 Pri niektorých nastaveniach bolo nutne reštartovať zariadenie, k týmto pribudol popis s informáciou o nutnom reštarte. 
 Nastavenia vlastnej adresy bolo obmedzené na jednorázové nastavenie. Týmto sme sa snažili zamedziť tomu, aby si používateľ kedykoľvek 
-upravoval svoju adresu a tým sa mohol vydávať za iného používateľa. Finálnu stránku nastavení vidíme na obrázku \ref{fig:webConfig}.
+upravoval svoju adresu a tým sa mohol vydávať za iného používateľa. Prvú časť stránky nastavení vidíme na obrázku \ref{fig:webConfig1}.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/webConfig1.png}
+  \caption{Stránka nastavení - časť 1}
+  \label{fig:webConfig1}
+\end{figure}
 
+\newpage
 Všetky nastaviteľné položky boli validované predtým, ako sa novo upravené nastavenia odoslali na server. Táto validácia bola potom redundantne 
 vykonávaná aj na strane serveru.
 
 Na stránku nastavení sme pridali možnosť pridávať alebo odstraňovať WiFi siete. Na tieto siete sa zariadenie snažilo pripojiť pri spustení a 
 po úspešnom pripojení sa spustil webový server. Pribudla aj možnosť definovať si vlastnú sieť typu access point. Pri použití tejto možnosti sa zariadenie pri spúštaní 
-nepokúšalo pripájať na žiadnu WiFi sieť, ale vytvorilo svoju vlastnú.
+nepokúšalo pripájať na žiadnu WiFi sieť, ale vytvorilo svoju vlastnú. Časť stránky nastavení určená pre správu WiFi sieti vidíme na obrázku \ref{fig:webConfig2}.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.9\textwidth]{Figures/webConfig.png}
-  \caption{Stránka nastavení}
-  \label{fig:webConfig}
-\end{figure}
-
-\newpage
-\begin{figure}[h!]
-  \begin{center}
-    \subfloat[\centering Hlavná stránka]{{\includegraphics[width=0.4\textwidth]{Figures/mobileWeb.png} }}
-    \subfloat[\centering Stránka nastavení TODO]{{\includegraphics[width=0.4\textwidth]{Figures/mobileWeb.png} }}
-  \end{center}
-  \caption{Stránky na mobilnom zariadení}
-  \label{fig:mobileWeb}
+  \includegraphics[width=1\textwidth]{Figures/webConfig2.png}
+  \caption{Stránka nastavení - časť 2}
+  \label{fig:webConfig2}
 \end{figure}
 
 V našej LoRa mesh sieti sa mohli vyskytovať senzorové uzly, ktoré obsahovali GPS modul. Z toho dôvodu sme pridali do webového rozhrania funkciu, 
@@ -1206,13 +1207,36 @@ Aby boli odlíšené nami odoslané správy od správ, ktoré sme prijali od nej
 prijali od iného používateľa boli zobrazené v sivej farbe. Správy ktoré sme prijali od senzorových uzlov, boli zobrazené v žltej farbe. A správy, ktoré sme odoslali 
 my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy boli zobrazené v zelenej farbe.
 
+\begin{figure}[h!]
+  \begin{center}
+    \subfloat[\centering Hlavná stránka]{{\includegraphics[width=0.5\textwidth]{Figures/mobileWeb.png} }}
+    \subfloat[\centering Stránka nastavení]{{\includegraphics[width=0.43\textwidth]{Figures/mobileConfig.png} }}
+  \end{center}
+  \caption{Stránky na mobilnom zariadení}
+  \label{fig:mobileWeb}
+\end{figure}
+
+\newpage
 \section{Optimalizácia}
 Po sfunkčnení celej aplikácie sme narazil na problém, v podobe nepostačujúceho miesta na zariadeniach. Dochádzalo k tomu, že ak zariadenie prijalo 
 väčšie množstvo správ, tak mu došla pamäť a beh programu sa ukončil.
 
-V zoznam správ boli uložené všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny, a časom ako 
+V zozname správ boli uložené všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny, a časom ako 
 uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a volná pamäť zariadenia sa postupne znižovala.
 
+Vykonali sme experiment, pri ktorom sme merali veľkosť volnej pamäte pred a po vytvorení textovej správy. Dĺžka textovej správy bola postupne zvyšovaná. Výsledky merania 
+môžme vidieť na obrázku \ref{fig:memoryUsage}.
+správ.
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=1\textwidth]{Figures/memAnalyze.png}
+  \end{center}
+  \caption{Graf závislosti veľkosti pamäte na dĺžke správy}
+  \label{fig:memoryUsage}
+\end{figure}
+
+Z merania bolo zistené, že pri maximálnej povolenej dĺžke správy, ktorá je 238 znakov, bolo alokovaných približne 2390 bajtov pre každú novú správu. Samotný bežiaci program 
+zaberá zhruba 30 kB a tak nám neostáva miesto na viac ako 12 správ (Rátame so správami maximálnej dĺžky). 
 Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahol určeného limitu, tak sa z neho odstránila najposlednejšia správa.
 Po tejto úprave už nedochádzalo k spomínanému problému.
 
@@ -1235,10 +1259,11 @@ Nami použité Raspberry Pi avšak neobsahuje WiFi modul. Miesto toho ponúka et
 aby sa nepripájala na WiFi sieť, ale použila vstavané ethernetové pripojenie. A tým pádom bolo tiež potrebné, z webovej stránky nastavení, odstrániť možnosť 
 pridávania WiFi siete keďže už nebola potrebná.
 
-Vďaka tomu, že Raspberry Pi má väčšiu pamäť, sme mohli zvýšiť limit dĺžky zoznamu správ.
+Vďaka tomu, že Raspberry Pi má väčšiu pamäť, sme mohli zvýšiť limit dĺžky zoznamu správ. Tento limit bol nastavený úpravou v zdrojovom kóde programu a to konkrétne v 
+súbore \emph{base\_utils.py} bola upravená hodnota premennej \emph{MESSAGE\_QUEUE\_SIZE}.
 
-CircuitPython na Raspberry Pi nemal podporu pre všetky knižnice, ktoré boli používané v implementácií pre Armachat zariadenia. Bolo nutné nájsť vhodné náhrady pre 
-knižnice, ktoré nemali podporu a prispôsobiť implementáciu náhradným knižniciam. Jednalo sa o knižnicu na šifrovanie pomocou AES šifry a knižnicu na webový server. 
+CircuitPython verzia pre Raspberry Pi nemala podporu pre všetky knižnice, ktoré boli používané v implementácií pre Armachat zariadenia. Bolo nutné nájsť vhodné náhrady pre 
+knižnice, ktoré nemali podporu a prispôsobiť implementáciu náhradným knižniciam. Jednalo sa o knižnicu na šifrovanie pomocou AES šifry (Cryptography\cite{cryptography}) a knižnicu na webový server (Flask\cite{flask}). 
 
 \section{Implementácia pre zariadenia TTGO}
 Z dôvodu menšieho výkonu a hlavne menšej pamäti sme sa rozhodli implementáciu pre TTGO zariadenia zjednodušiť. Keďže zariadenia TTGO nepodporujú 
@@ -1247,11 +1272,12 @@ CircuitPython, bolo nutné vytvoriť kompletne novú implementáciu v jazyku C++
 Určili sme, že zariadenia TTGO budu v našej mesh sieti reprezentovať jednoduché samostatné uzly, ktoré v určitých intervaloch posielali nejaké senzorové dáta. Implementácia preto 
 neobsahovala žiadne užívateľské rozhranie, server ani webové rozhranie. Implementácia obsahovala iba základné funkcie, ktoré boli potrebné pre 
 odosielanie senzorových správ. Senzorové uzly posielali správy iba jednosmerne, nebola potreba aby senzorové uzly nejaké správy prijímali. 
-Kvôli tomu, že senzorové uzly nami možnosť prijímať žiadne správy, neboli schopné ani preposielať ďalej cudzie správy. Dosah mesh siete teda nebolo možné 
+Kvôli tomu, že senzorové uzly nemali možnosť prijímať žiadne správy, neboli schopné ani preposielať ďalej cudzie správy. Dosah mesh siete teda nebolo možné 
 rozšíriť pomocou týchto uzlov.
 
 Rovnako ako pri predošlých verziách pre Armachat a Raspberry Pi, bolo možné konfigurovať určité nastavenia. Táto konfigurácia sa vykonávala upravovaním konfiguračných 
-premenných, predtým ako bol program preložený a nahraný do zariadenia. Súčasťou konfigurácie bol aj zoznam kontaktov, na ktoré senzorový uzol odosielal správy.
+premenných, predtým ako bol program preložený a nahraný do zariadenia. Súčasťou konfigurácie bol aj zoznam kontaktov, na ktoré senzorový uzol odosielal správy. 
+Táto konfigurácia sa nachádzala v súbore \emph{MessageHandler.h}.
 
 Implementácia pozostávala z funkcií, ktoré postupne poskladali hlavičku paketu a k nej pridali obsah senzorovej správy. Tieto novo vytvorené správy sa uložili do zoznamu 
 a rovnako ako pri plnej verzii programu, sa zoznam správ cyklicky prechádzal a správy z neho sa odosielali, keď nadišiel ich čas.
@@ -1296,63 +1322,10 @@ TODO
 
 - na zariadeniach menit resend count z 1 na 5 a porovnat ako sa zmensuje packetloss s vyssim resend countom, spravit graf - packet loss vs resend count
 
-\section{Problémy a limitácie}
-Najväčším problémom, na ktorý sme narazili pri implementácii, bol spomínaný nedostatok pamäti na zariadeniach. Tento problém sa nám podarilo 
-vyriešiť, ale nesie to so sebou istý kompromis v podobe obmedzeného počtu správ, ktoré môže jedno zariadenie u seba držať. Kvôli tomu, že na 
-zariadení Armachat s WiFi modulom nám musel bežať webový server, bola pamäť zariadenia veľmi vyťažená. Limit na počet správ, ktoré môže zariadenie u seba držať, bol nastavený 
-na 10 správ. 
+TODO daky predtext ktory bude navazovat na toto:
 
-Tento limit 10 správ, však v realite neznamenal až taký problém. Pokiaľ mal používateľ otvorené webové rozhranie tak sa správy ukladali aj na strane webovej aplikácie 
-bežiacej v prehliadači používateľa. Ak došlo k dosiahnutiu maximálneho limitu správ tak sa z pamäte zariadenia odstránila najstaršia správa. V pamäti prehliadača na webovej aplikácii 
-ale táto správa ostala. Takže používateľ bol schopný vidieť aj správy staršie ako posledných 10 správ.
-
-Na zariadeniach Armachat bez WiFi modulu bolo možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu taktiež nebol problémom.
-
-Veľkou limitáciou našej implementácie bolo, že CircuitPython nemá podporu pre externé prerušenia. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
-nepracovala veľmi efektívne. Keď aktuálne LoRa modul prijímal nejaký paket, tak sa pozdržal cely zvyšok bežiaceho programu, až kým sa paket neprijal a neprečítal celý alebo kým nedošlo k vypršaniu 
-časového limitu. Toto nam spomaľovalo beh programu zakaždým keď bol v sieti vysielaný nejaký paket.
-
-Použitá knižnica na ovládanie LoRa modulu so sebou priniesla ešte dodatočnú limitáciu. Táto knižnica nesprávne pracovala s LoRa modulom a nebolo možné stabilne používať 
-LoRa prenos pokiaľ bol nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky znížila. Pri 
-našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z desiatich pokusov pri použití najvyššieho rozprestieracieho faktoru. 
-K tejto chybe existuje aj oficiálna chybová správa na GitHub stránke CircuitPython knižnice \cite{rfmIssue}.
-
-Chybu v knižnici sme sa bezvýsledne snažili opraviť. Jedným z dôvodov, ktoré ku chybe prispievali bol nesprávne nastavený časový limit pre posielanie paketu. Knižnica odpočítavala časový limit dvoch sekúnd 
-pri čítaní novo prijímaného paketu. Ak sa paket nestihol prečítať v tomto intervale tak sa čítanie prerušilo a prijatý paket sa zahodil. 
-Avšak, keď sme si zobrali prípad paketu, ktorý mal veľkosť 100 bajtov a bol vysielaný s rozprestieracím faktorom 12, kódovacím pomerom 4/8, a šírkou pásma 125 kHz, zistili sme 
-že čas potrebný na vyslanie tohto paketu sa blížil k 6 sekundám. Časový limit bol teda nedostačujúci na vysielanie paketov s vyššími rozprestieracími faktormi. Po 
-zvýšení časového limitu v knižnici sme znovu otestovali spoľahlivosť prenosu. Tentokrát sa nam podarilo doručiť 2 správy z 10 pokusov. To avšak stále nebolo dostatočné a 
-naznačovalo to, že problém bol ešte niekde inde. Ten sa nam už ale nepodarilo nájsť.
-
-Zariadenie Raspberry Pi pico s WiFi modulom, bolo pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií a ma veľa nedostatkov.
-Neumožňovala prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nebolo možné prepnúť modul do režimu station ak bol 
-už prepnutý do režimu AP. Jediný spôsob ako bolo možné WiFi modul úspešne prepnúť medzi režimami bolo tvrdé resetovanie zariadenia. 
-
-Pôvodne sme mali v pláne implementovať štartovací proces zariadenia tak, že najskôr by sa zariadenie pokúsilo pripojiť k WiFi sieťam, ktoré malo uložené v zozname a ak sa mu nepodarilo 
-pripojiť ku žiadnej z týchto sieti, tak vytvorilo svoju vlastnú WiFi sieť, na ktorú sa mohol používateľ pripojiť. Kvôli chybnému správaniu WiFi knižnice však tento prístup nebolo možné 
-realizovať. V momente kedy sa snažil WiFi modul pripojiť na nejakú sieť zo zoznamu WiFi sieti, prepol sa do režimu station. Potom už nebolo možné modul prepnúť do režimu AP ak sa nepodarilo pripojiť 
-k žiadnej zo sieti.
-
-K WiFi knižnici sa viazal ešte jeden problém a to taký, že pokiaľ sa snažil používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojilo na WiFi sieť, 
-zariadenie sa dostalo do zamrznutého stavu a prestalo reagovať na čokoľvek. Na obnovenie funkcionality bol potrebný tvrdý reštart zariadenia. 
-Tomuto problému sme sa snažili vyhýbať tak, že zariadenie zobrazovalo informáciu o spustenom web serveri až po určitom oneskorení a spoliehali sme na to, že používateľ 
-sa bude pripájať na webový server až po zobrazení tejto informácie.
-
-\chapter{Záver}
-V tejto práci sa nam podarilo vytvoriť funkčný komunikačný protokol pre bezdrôtovú komunikáciu medzi zariadeniami v LoRa mesh sieti.
-Funkcionalita protokolu bola otestovaná na rôznych zariadeniach kde bolo potvrdené, že protokol funguje správne. 
-
-K obsluhe protokolu vzniklo webové rozhranie, na ktoré sa používateľ pripájal a mohol cez neho prijímať a odosielať správy, konfigurovať 
-rôzne nastavenia, ktoré ovplyvňovali správanie protokolu, a spravovať zoznam kontaktov. Zoznam kontaktov slúžil na prekladanie 
-hexadecimálnych adries zariadení na používateľom definované názvy.
-
-Nami vytvorené riešenie je vhodné pre použitie v rôznych oblastiach, a ponúka oproti iným riešeniam isté výhody ako aj nevýhody.
-Ak porovnáme naše riešenie voči niektorým spomínaným protokolom, ako napríklad LoRaBlink alebo Synchronous LoRa Mesh, 
-tak náš protokol nie je závislý na žiadnych centrálnych uzloch, potrebných k riadeniu siete.
-
-Naše riešenie by sa dalo prirovnať k projektu Meshtastic, ale oproti tomuto projektu ponúka naš protokol rôzne typy správ, ktoré umožňujú 
-rozlične spracovávať správy zo senzorov a správy od používateľov. Okrem toho v našom protokole riešime aj slabinu projektu Meshtastic, ktorá 
-sa prejavuje napríklad v situácií kedy by malo rozmiestnenie uzlov v sieti tvár písmena V.
+Okrem toho v našom protokole riešime aj slabinu projektu Meshtastic, ktorá sa
+prejavuje napríklad v situácií kedy by malo rozmiestnenie uzlov v sieti tvár písmena V.
 
 Na obrázku \ref{fig:mestasticV} môžme vidieť takúto situáciu. Ak by sme z uzla číslo 0 chceli posielať správu do uzla číslo 4, nikdy by sa nám to nepodarilo.
 A to z toho dôvodu, že vyslaná správa z uzlu 0 by bola prijatá uzlami 1 a 2, a keďže uzol 1 je od uzla 0 vzdialenejší ako uzol 2, bude mat horšiu hodnotu SNR.
@@ -1360,7 +1333,7 @@ Na základe horšej hodnoty SNR uzol 1 správu odvysiela skôr a správa sa ďal
 
 Na obrázku môžme vidieť rozmiestnenie uzlov a dosah ich signálu v simulátore Meshtasticator, patriaceho ku projektu Meshtastic. Taktiež môžme vidieť časový priebeh šírenia správy medzi uzlami. 
 V tomto časovom priebehu su modrou farbou označené vysielania správy a zelenou prijatia správy.
-\newpage
+
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.8\textwidth]{Figures/meshtasticV.png}
@@ -1384,9 +1357,70 @@ aby používal náhodnú trasu. Správa sa v tomto prípade už správne dostala
   \label{fig:randomizePath}
 \end{figure}
 
+\section{Problémy a limitácie}
+Najväčším problémom, na ktorý sme narazili pri implementácii, bol spomínaný nedostatok pamäti na zariadeniach. Tento problém sa nám podarilo 
+vyriešiť, ale nesie to so sebou istý kompromis v podobe obmedzeného počtu správ, ktoré môže jedno zariadenie u seba držať. Kvôli tomu, že na 
+zariadení Armachat s WiFi modulom nám musel bežať webový server, bola pamäť zariadenia veľmi vyťažená. Limit na počet správ, ktoré môže zariadenie u seba držať, bol nastavený 
+na 10 správ. 
+
+Tento limit 10 správ, však v realite neznamenal až taký problém. Pokiaľ mal používateľ otvorené webové rozhranie tak sa správy ukladali aj na strane webovej aplikácie 
+bežiacej v prehliadači používateľa. Ak došlo k dosiahnutiu maximálneho limitu správ tak sa z pamäte zariadenia odstránila najstaršia správa. V pamäti prehliadača na webovej aplikácii 
+ale táto správa ostala. Takže používateľ bol schopný vidieť aj správy staršie ako posledných 10 správ.
+
+Na zariadeniach Armachat bez WiFi modulu bolo možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu taktiež nebol problémom.
+
+Veľkou limitáciou našej implementácie bolo, že CircuitPython nemá podporu pre externé prerušenia \footnote[1]{https://github.com/adafruit/circuitpython/issues/4542}. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
+nepracovala veľmi efektívne. Keď aktuálne LoRa modul prijímal nejaký paket, tak sa pozdržal cely zvyšok bežiaceho programu, až kým sa paket neprijal a neprečítal celý alebo kým nedošlo k vypršaniu 
+časového limitu. Toto nam spomaľovalo beh programu zakaždým keď bol v sieti vysielaný nejaký paket.
+
+Použitá knižnica na ovládanie LoRa modulu so sebou priniesla ešte dodatočnú limitáciu. Táto knižnica nesprávne pracovala s LoRa modulom a nebolo možné stabilne používať 
+LoRa prenos pokiaľ bol nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky znížila. Pri 
+našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z desiatich pokusov pri použití najvyššieho rozprestieracieho faktoru. 
+K tejto chybe existuje aj oficiálna chybová správa na GitHub stránke CircuitPython knižnice \footnote[2]{https://github.com/adafruit/Adafruit\_CircuitPython\_RFM9x/issues/70}.
+
+Chybu v knižnici sme sa bezvýsledne snažili opraviť. Jedným z dôvodov, ktoré ku chybe prispievali bol nesprávne nastavený časový limit pre posielanie paketu. Knižnica odpočítavala časový limit dvoch sekúnd 
+pri čítaní novo prijímaného paketu. Ak sa paket nestihol prečítať v tomto intervale tak sa čítanie prerušilo a prijatý paket sa zahodil. 
+Avšak, keď sme si zobrali prípad paketu, ktorý mal veľkosť 100 bajtov a bol vysielaný s rozprestieracím faktorom 12, kódovacím pomerom 4/8, a šírkou pásma 125 kHz, zistili sme 
+že čas potrebný na vyslanie tohto paketu sa blížil k 6 sekundám. Časový limit bol teda nedostačujúci na vysielanie paketov s vyššími rozprestieracími faktormi. Po 
+zvýšení časového limitu v knižnici sme znovu otestovali spoľahlivosť prenosu. Tentokrát sa nam podarilo doručiť 2 správy z 10 pokusov. To avšak stále nebolo dostatočné a 
+naznačovalo to, že problém bol ešte niekde inde. Ten sa nam už ale nepodarilo nájsť.
+
+Zariadenie Raspberry Pi pico s WiFi modulom, bolo pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií obsahovala isté nedostatky \footnote[3]{https://github.com/adafruit/circuitpython/issues?q=is\%3Aissue+wifi}.
+Neumožňovala prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nebolo možné prepnúť modul do režimu station ak bol 
+už prepnutý do režimu AP. Jediný spôsob ako bolo možné WiFi modul úspešne prepnúť medzi režimami bolo tvrdé resetovanie zariadenia \footnote[4]{https://github.com/adafruit/circuitpython/issues/7620}.
+
+Pôvodne sme mali v pláne implementovať štartovací proces zariadenia tak, že najskôr by sa zariadenie pokúsilo pripojiť k WiFi sieťam, ktoré malo uložené v zozname a ak sa mu nepodarilo 
+pripojiť ku žiadnej z týchto sieti, tak vytvorilo svoju vlastnú WiFi sieť, na ktorú sa mohol používateľ pripojiť. Kvôli chybnému správaniu WiFi knižnice však tento prístup nebolo možné 
+realizovať. V momente kedy sa snažil WiFi modul pripojiť na nejakú sieť zo zoznamu WiFi sieti, prepol sa do režimu station. Potom už nebolo možné modul prepnúť do režimu AP ak sa nepodarilo pripojiť 
+k žiadnej zo sieti.
+
+K WiFi knižnici sa viazal ešte jeden problém a to taký, že pokiaľ sa snažil používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojilo na WiFi sieť, 
+zariadenie sa dostalo do zamrznutého stavu a prestalo reagovať na čokoľvek. Na obnovenie funkcionality bol potrebný tvrdý reštart zariadenia. 
+Tomuto problému sme sa snažili vyhýbať tak, že zariadenie zobrazovalo informáciu o spustenom web serveri až po určitom oneskorení a spoliehali sme na to, že používateľ 
+sa bude pripájať na webový server až po zobrazení tejto informácie. K tejto chybe existuje report v zozname chýb na GitHub stránke CircuitPythonu \footnote[5]{https://github.com/adafruit/circuitpython/issues/7790}.
+
+\chapter{Záver}
+V tejto práci sa nam podarilo vytvoriť funkčný komunikačný protokol pre bezdrôtovú komunikáciu medzi zariadeniami v LoRa mesh sieti.
+Funkcionalita protokolu bola otestovaná na rôznych zariadeniach kde bolo potvrdené, že protokol funguje správne. 
+
+K obsluhe protokolu vzniklo webové rozhranie, na ktoré sa používateľ pripájal a mohol cez neho prijímať a odosielať správy, konfigurovať 
+rôzne nastavenia, ktoré ovplyvňovali správanie protokolu, a spravovať zoznam kontaktov. Zoznam kontaktov slúžil na prekladanie 
+hexadecimálnych adries zariadení na používateľom definované názvy.
+
+Nami vytvorené riešenie je vhodné pre použitie v rôznych oblastiach, a ponúka oproti iným riešeniam isté výhody ako aj nevýhody.
+Ak porovnáme naše riešenie voči niektorým spomínaným protokolom, ako napríklad LoRaBlink alebo Synchronous LoRa Mesh, 
+tak náš protokol nie je závislý na žiadnych centrálnych uzloch, potrebných k riadeniu siete. Taktiež ponúka vyššiu dynamickosť siete oproti 
+niektorým riešeniam.
+
+Naše riešenie by sa dalo prirovnať k projektu Meshtastic, ale oproti tomuto projektu ponúka naš protokol rôzne typy správ, ktoré umožňujú 
+rozlične spracovávať správy zo senzorov a správy od používateľov. Okrem toho v našom protokole riešime aj slabinu projektu Meshtastic, ktorú sme 
+popísali v kapitole testovania funkčnosti.
+
 Náš protokol môže byť v budúcnosti rozšírený o ďalšie typy správ. Napríklad by bolo možné pridať nový typ správy určený pre binárne dáta, 
 ktorá by sa mohla hodiť pri určitých aplikáciach. 
-Taktiež by mohla byť funkcionalita rozšírená o možnosť rozdeľovať dlhšie správy na viacero menších správ, ktoré by sa potom posielali postupne.
+Taktiež by mohla byť funkcionalita rozšírená o možnosť rozdeľovania dlhších správa na viacero menších správ, ktoré by sa potom posielali postupne. Tým by sa 
+vyriešila limitácia maximálnej dĺžky správy. Ďalšou možnosťou rozšírenia, by mohlo byť pridanie merania vysielacieho času správ behom jednej hodiny. Túto informáciu 
+by bolo možné následne použiť na zabezpečenie neprekročenia povoleného limitu klúčovacieho pomeru.
 
 % Seznam literatury
 \printbibliography[title={Literatura}, heading=bibintoc]

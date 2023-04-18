@@ -1299,26 +1299,127 @@ o rôzne monitorovacie senzorové zariadenia, ktorých obstarávacia cena je vď
 
 
 \section{Testovanie funkčnosti}
-TODO
+Testovanie bolo vykonávané so zariadeniami TTGO T-Beam, TTGO LoRa32 a troma zariadeniami Armachat. Jedno z týchto Armachat zariadení 
+bolo pripojené na WiFi hotspot vytvorený našim mobilným telefónom. Toto Armachat zariadenie bolo ovládané cez mobilný telefón prostredníctvom webového rozhrania. 
 
-\begin{figure}[h]
+Testovanie prebiehalo v lese a tak nebolo možné použiť zariadenie Raspberry Pi 2b, keďže toto zariadenie vyžaduje pripojenie do ethernetu a silnejšie napájanie. 
+Použité zariadenia boli napájane z externej powerbanky a v prípade zariadenia TTGO LoRa32 bol použitý aj solárny panel (Viď Obr. \ref{fig:ttgoSolar}).
+
+\begin{figure}[h!]
   \centering
-  \includegraphics[width=0.8\textwidth]{Figures/topology.png}
-  \caption{Rozmiestnenie zariadení použité pri testovaní}
+  \includegraphics[width=0.8\textwidth]{Figures/ttgoLora32solar.jpg}
+  \caption{Zariadenie TTGO LoRa32 napájane solárnym panelom}
+  \label{fig:ttgoSolar}
+\end{figure}
+
+
+Zariadenia Armachat boli rozmiestnené tak aby mali dosah len ku najbližšiemu ďalšiemu zariadeniu Armachat. Vďaka tomu sme mohli otestovať správne 
+preposielanie správy cez viacero uzlov. Približné rozmiestnenie a dosah zariadení je uvedené na obrázku \ref{fig:topology}.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{Figures/topology.png}
+  \caption{Rozmiestnenie zariadení a ich približný dosah  pri testovaní}
   \label{fig:topology}
 \end{figure}
 
-- upravit nakres rozmiestnenia
+\newpage
+Webový server bežal na zariadení s adresou 0x0005. Ako prvé sme overili topológiu siete pomocou traceroute paketov. 
+Následne sme z ostatných Armachat zariadení odoslali správu, ktorej adresátom bol uzol 0x0005 a broadcast.
 
-- test ze to funguje, rozmiestnenie zariadeni, posielanie sprav, simulovanie sensorovych uzlov atd
+Na obrázku \ref{fig:testingTR} môžme vidieť prijaté odpovede na traceroute od uzlov 0x0001 a 0x0002. Tieto adresy boli uložené 
+v kontaktoch pod názvami \emph{Armachat \#1} a \emph{Armachat \#2} a preto môžme vidieť, že sa pri prijatých správach miesto hexadecimálnej adresy 
+zobrazujú práve tieto názvy kontaktov.
 
-- screenshoty z aplikacie
+Z traceroute odpovedi môžme vidieť, že spojenie medzi uzlom 0x0005 a 0x0001 nie je priamo, ale prechádza cez uzol 0x0002. Taktiež môžme vidieť, 
+že zo zariadenia \emph{Armachat \#2} bola odoslaná textová správa do zariadenia 0x0005. Pri tejto správe si môžme všimnúť, že počet skokov 
+zobrazený v informáciach nad správou je 0, čož sedí s predošlými traceroute správami.
 
-- test vykonnosti, packet loss, latency
+Druhá správa odoslaná zo zariadenia \emph{Armachat \#1} bola odoslaná na broadcast adresu. Môžme vidieť ze v informáciách nad správou je počet 
+preskokov 1, čož znova sedí s predošlými traceroute správami. Táto textová správa preskakovala cez uzol 0x0002 predtým ako bola doručená 
+uzlu 0x0005.
 
-- ttgo budu periodicky posielat senzor data na broadcast pripadne na 0x0005
 
-- poslat traceroute z 0x0005 na 0x0001, ukazat vysledok
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{Figures/testingTR.png}
+  \caption{Zariadenie 0x0005 prijalo traceroute a textové správy}
+  \label{fig:testingTR}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.6\textwidth]{Figures/contactsLastSNR.png}
+  \caption{Kontaktom boli aktualizované hodnoty SNR a počet skokov}
+  \label{fig:contactsLastSNR}
+\end{figure}
+
+Na stránku kontaktov bola pridaná funkcionalita, ktorá ku každému kontaktu aktualizuje posledné hodnoty SNR a počtu skokov. 
+Keď uzol prijal nejakú správu a adresu odosielateľa danej správy mal uloženú v kontaktoch, tak sa aktualizovala hodnota SNR a počet skokov na 
+základe posledne prijatej správy od danej adresy. Keďže pri senzorových správach nebolo používane rátanie skokov ale odpočet TTL, tak pri 
+senzorových kontaktoch sa aktualizovali iba hodnoty SNR. Na Obr \ref{fig:contactsLastSNR} vidíme kontakty 0x0001 a 0x0002 s aktualizovanými hodnotami SNR a počtom skokov.
+Táto dodatočná informácia môže byť užitočná na zistenie kvality spojenia medzi uzlami.
+
+Otestovali sme aj funkcionalitu senzorových správ. Tieto senzorové správy boli odosielané zo zariadenia TTGO LoRa32 s hodnotou hall effect senzoru, 
+zo zariadenia TTGO T-Beam s GPS polohou a zo zariadení Armachat s informáciami o dobe behu, teplote procesora atď. 
+Na obrázkoch \ref{fig:testingSensors} môžme vidieť prijaté senzorové správy.
+\begin{figure}[h!]
+  \centering
+  \subfloat[\centering Senzorové správy zo zariadeni TTGO]{{\includegraphics[width=0.45\textwidth]{Figures/testingSensor1.png} }}
+  \subfloat[\centering Senzorové správy zo zariadeni Armachat]{{\includegraphics[width=0.5\textwidth]{Figures/testingSensor2.png} }}
+  \caption{Senzorové správy prijate zariadením 0x0005}
+  \label{fig:testingSensors}
+\end{figure}
+
+Taktiež bola otestovaná možnosť odosielať textové správy prostredníctvom webového rozhrania. Na obrázku \ref{fig:testingFull} môžme vidieť, 
+že zo zariadenia 0x0005 boli odoslané správy uzlom \emph{Armachat \#1}, \emph{Armachat \#2} a neexistujúcej vymyslenej adrese 0x1234. 
+
+Pri testovaní odosielania bolo taktiež overené či označovanie statusu správ funguje správne. Správa určená zariadeniu \emph{Armachat \#1} bola 
+odoslaná s vyžiadaným potvrdením o doručení. Toto vyžiadanie potvrdenia o doručení sa nastavuje prepínačom v webovom rozhraní pod označením \emph{Receive ACK}.
+Pri tejto správe môžme vidieť status modrej fajky, ktorý symbolizuje, že správa bola doručená zariadeniu \emph{Armachat \#1} a zariadenie 0x0005 
+prijalo naspäť potvrdenie o doručení. 
+
+Správa pre zariadenie \emph{Armachat \#2} bola odoslaná bez vyžiadania potvrdenia o doručení a tak sa pri tejto 
+správe nezobrazila žiadna status ikona. Správa pre neexistujúcu adresu 0x1234 bola odoslaná s vyžiadaným potvrdením o doručení ale keďže tento uzol v sieti neexistuje, tak sa 
+k nemu správa nedoručila a po uplynutí časového intervalu bola označená statusom failed.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/testingFull.png}
+  \caption{Testovanie odosielania správ}
+  \label{fig:testingFull}
+\end{figure}
+
+Bola otestovaná aj priepustnosť siete. Tento test bol realizovaný tak, že zo zariadenia \emph{Armachat \#1} bolo odoslaných celkovo 26 správ. Do každej ďalšej správy 
+bolo pridávané následujúce písmeno abecedy. Tieto správy boli odoslane tesne za sebou, a následne sme sledovali či sa podarilo doručiť všetky tieto správy uzlu 0x0005.
+
+Na obrázkoch \ref{fig:packetLoss} môžme vidieť prijaté správy. Z výpisu zoznamu správ ( Obr. \ref{fig:packetLossSum} ) sme sa dozvedeli, že sme prijali celkovo 23 správ. Taktiež si môžme všimnúť, že správy 
+môžu doraziť do destinácie v inom poradí v akom boli odoslané.
+
+Na základe získaných údajov môžme povedať, že sa nám podarilo doručiť 23 správ z 26, z čoho vyplýva pravdepodobnosť doručenia správy približne 88,5\%.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Figures/packetLoss.png}
+  \caption{Čast výpisu správ z webového rozhrania a počet všetkých správ}
+  \label{fig:packetLossSum}
+\end{figure}
+
+
+\newpage
+\begin{figure}[h!]
+  \centering
+  \subfloat{{
+    \subfloat[\centering Prijaté správy - čast 1]{{\includegraphics[width=0.45\textwidth]{Figures/packetLoss2part1.png} }}
+    \subfloat[\centering Prijaté správy - čast 2]{{\includegraphics[width=0.5\textwidth]{Figures/packetLoss2part2.png} }}
+  }}
+  \caption{Správy prijate zariadením 0x0005}
+  \label{fig:packetLoss}
+\end{figure}
+
+
+
+- test latency
 
 - na zariadeniach menit resend count z 1 na 5 a porovnat ako sa zmensuje packetloss s vyssim resend countom, spravit graf - packet loss vs resend count
 

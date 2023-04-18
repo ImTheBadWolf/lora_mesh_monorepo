@@ -438,7 +438,7 @@ Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.4\textwidth]{Figures/armachat.jpg}
+	\includegraphics[width=0.5\textwidth]{Figures/armachat.jpg}
 	\caption{Zariadenie Armachat. Prevzaté z \cite{armachatObr}}
 	\label{fig:armachat}
 \end{figure}
@@ -1417,18 +1417,42 @@ Na základe získaných údajov môžme povedať, že sa nám podarilo doručiť
   \label{fig:packetLoss}
 \end{figure}
 
+Vytvorili sme testovací scenár na zmeranie času potrebného na doručenie správy. Z uzlu 0x0005 sme odosielali správy rôznej dĺžky. Pri každom odoslaní 
+bol uložený čas odoslania každej konkrétnej správy. Správy boli posielané uzlu 0x0001, ktorý po ich prijatí poslal nazad ACK správu. Keď táto ACK správa dorazila 
+k uzlu 0x0005 tak sa zaznamenal čas prijatia správy a na základe rozdielu medzi časom odoslania a časom prijatia sa vypočítal čas potrebný na doručenie správy.
 
+Meranie bolo vykonané pre správy rôznych dĺžok, a pri každej dĺžke správy bolo odoslaných 16 správ. Na základe týchto údajov sme vytvorili graf, ktorý je 
+zobrazený na obrázku \ref{fig:latencyGraph}. Z merania sme zistili, že čas doručenia správy sa zvyšuje s dĺžkou správy a že pri správach dĺžky 200 znakov sa čas doručenia 
+pohybuje okolo 25 sekúnd. 
 
-- test latency
+Tieto merania boli vykonávane s nastavenou hodnotou \emph{Resend timeout} 8 sekúnd. Následne sme znížili hodnotu tejto konfiguračnej premennej na 2 sekundy 
+a opakovali meranie pri správach dĺžky 200 znakov. Pri skrátení času medzi opakovanými odoslaniami správ na 2 sekundy sa čas doručenia správy znížil približne 
+na 19 sekúnd. TODO pridat do prilohy namerane hodnoty do dakej tabulky a referencovat ich tu.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/latencyGraph.png}
+  \caption{Graf závislosti času doručenia správy od dĺžky správy}
+  \label{fig:latencyGraph}
+\end{figure}
 
-- na zariadeniach menit resend count z 1 na 5 a porovnat ako sa zmensuje packetloss s vyssim resend countom, spravit graf - packet loss vs resend count
+Ďalším testovaním, ktoré sme realizovali bolo zistenie aky vplyv má konfiguračná premenná \emph{Resend count} na stratovosť paketov v sieti. Toto meranie bolo vykonávane 
+v inom prostredí ako predchádzajúce meranie stratovosti. Topológia siete bola rovnaká, ale v tomto prípade neobsahovala sieť senzorové uzly a sieť bola realizovaná v 
+interiéri budovy. Na obrázku \ref{fig:plResend} vidíme zobrazený graf závislosti stratovosti paketov od počtu opakovaných odoslaní správy. Z grafu môžme vidieť, že ak 
+je správa opätovne odosielaná každým uzlom iba jeden krát, tak dochádza k vysokej stratovosti paketov. Zvýšením počtu opakovaní odosielania správy sa stratovosť 
+znižuje.
 
-TODO daky predtext ktory bude navazovat na toto:
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/packetLossResendCount.png}
+  \caption{Graf závislosti času doručenia správy od dĺžky správy}
+  \label{fig:plResend}
+\end{figure}
 
-Okrem toho v našom protokole riešime aj slabinu projektu Meshtastic, ktorá sa
-prejavuje napríklad v situácií kedy by malo rozmiestnenie uzlov v sieti tvár písmena V.
+\newpage
+Spomínali sme isté nastavenie \emph{RANDOMIZE\_PATH}. Toto nastavenie vzniklo ako pokus o zlepšenie slabiny 
+projektu Meshtastic, ktorá sa prejavuje napríklad v situácií kedy by malo rozmiestnenie uzlov v sieti tvár písmena V.
 
-Na obrázku \ref{fig:mestasticV} môžme vidieť takúto situáciu. Ak by sme z uzla číslo 0 chceli posielať správu do uzla číslo 4, nikdy by sa nám to nepodarilo.
+Na obrázku \ref{fig:mestasticV} môžme vidieť takúto situáciu znázornenú v simulátore. Ak by sme z uzla číslo 0 chceli posielať správu do uzla číslo 4, nikdy by sa nám to nepodarilo.
 A to z toho dôvodu, že vyslaná správa z uzlu 0 by bola prijatá uzlami 1 a 2, a keďže uzol 1 je od uzla 0 vzdialenejší ako uzol 2, bude mat horšiu hodnotu SNR.
 Na základe horšej hodnoty SNR uzol 1 správu odvysiela skôr a správa sa ďalej bude šíriť už len v pravej vetve siete.
 
@@ -1437,15 +1461,15 @@ V tomto časovom priebehu su modrou farbou označené vysielania správy a zelen
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.8\textwidth]{Figures/meshtasticV.png}
-  \caption{Meshtasticator simulátor}
+  \includegraphics[width=1\textwidth]{Figures/meshtasticV.png}
+  \caption{Simulátor Meshtasticator}
   \label{fig:mestasticV}
 \end{figure}
 
 V našom riešení bolo pridané experimentálne nastavenie, ktoré po jeho zapnutí spôsobilo to, že poradie v ktorom sa správa odosielala z ďalších uzlov 
-nebolo závislé na hodnote SNR ale bolo určovaná náhodne. Toto riešenie nebolo však úplne optimálne a vzhľadom na to, že poradie bolo určované 
-náhodne,mohla nastať situácia, že náhodne vybraná trasa sa zhodovala s trasou vybranou 
-na základe hodnôt SNR a správa sa teda tiež nedostala do cieľa. V tomto prípade bolo potrebné správu odoslať znovu. 
+nebolo závislé na hodnote SNR ale bolo určované náhodne. Toto riešenie nebolo však úplne optimálne a vzhľadom na to, že poradie bolo určované 
+náhodne, mohla nastať situácia, že náhodne vybraná trasa sa zhodovala s trasou vybranou 
+na základe hodnôt SNR a správa sa teda taktiež nedostala do cieľa. V tomto prípade bolo potrebné správu odoslať znovu. 
 Tento problém by šlo optimálnejšie vyriešiť smerovacími tabuľkami, ktoré ale v našom protokole neboli použité.
 
 Na obrázku \ref{fig:randomizePath} môžme vidieť časový priebeh šírenia správy medzi uzlami potom, čo sme upravili implementáciu simulátoru Meshtasticator tak, 
@@ -1453,7 +1477,7 @@ aby používal náhodnú trasu. Správa sa v tomto prípade už správne dostala
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.4\textwidth]{Figures/randomizePath.png}
+  \includegraphics[width=0.5\textwidth]{Figures/randomizePath.png}
   \caption{Priebeh šírenia správy s náhodnou trasou}
   \label{fig:randomizePath}
 \end{figure}

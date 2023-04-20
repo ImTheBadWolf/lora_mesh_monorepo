@@ -1,6 +1,7 @@
 \documentclass[slovak,master]{diploma}
 \usepackage{subfig}
 \usepackage{makecell}
+\usepackage{multirow}
 \usepackage[symbol]{footmisc}
 \usepackage{wrapfig}
 \usepackage{listings}
@@ -530,7 +531,7 @@ Meshtastic poskytuje možnosť pripojenia sa k oficiálnemu meshtastic MQTT brok
 tak rozšíriť dosah siete.
 
 \section{LoRaBlink}
-Ďalší multi-hop flooding protokol, ktorý používa časovú synchronizáciu medzi uzlami. Časová synchronizácia definuje sloty, v ktorých môže uzol pristupovať ku prenosovému médiu a 
+Ďalší multi-hop flooding protokol \cite{lorablink}, ktorý používa časovú synchronizáciu medzi uzlami. Časová synchronizácia definuje sloty, v ktorých môže uzol pristupovať ku prenosovému médiu a 
 vysielať svoje dáta. Správy sa sieťou šíria pomocou multi-hop flooding.
 
 Sieť sa skladá z jedného uzlu, ktorý plní rolu takzvaného datasinku (gateway alebo brána) a ostatných uzlov. Uzly siete posielajú dáta do datasinku alebo dáta z neho prijímajú.
@@ -551,13 +552,22 @@ ekosystémom. Zariadenia obsahujú WiFi, bluetooth a LoRa, prípadne SigFox modu
 
 PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway su označované ako Border Routers a prepájajú LoRa sieť s 
 internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncové 
-zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny \footnote[1]{Smerovacie informácie su zasielané iba na vyžiadanie} distance vector smerovanie (AODV).
+zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny \footnote[1]{Smerovacie informácie su zasielané iba na vyžiadanie} distance vector smerovanie (AODV). 
+Príklad zloženia Pymesh siete môžme vidieť na obrázku \ref{fig:pymeshTop}.
 
 Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
 Aby sa zabránilo takýmto situáciám, je použitá metóda Listen Before Talk, pri ktorej sa pred vysielaním signálu overí, či nie je v sieti už niekto iný, kto by práve 
 vysielal. Pokiaľ áno, tak sa posielaná správa vyšle neskôr.
 
 PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na inom zariadení by vyžadovalo väčšie úpravy zdrojového kódu.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.75\textwidth]{Figures/pymesh_roles.png}
+	\caption{Ukážková schéma Pymesh siete. Prevzaté z \cite{pycom}}
+	\label{fig:pymeshTop}
+\end{figure}
+
 
 Ak chce uzol vyslať nejaký paket a destinácia toho paketu je v dosahu daného uzla, tak sa paket priamo odošle. 
 Pokiaľ ale destinácia nie je v dosahu, uzol najskôr vyšle požiadavok na vytvorenie trasy ku destinácií všetkým svojím susedom. Títo susedia to prepošlú ďalej svojím susedom. 
@@ -578,17 +588,18 @@ podzemných monitorovacích uzlov (sensor node  - SN) do LoRaWAN siete. Monitoro
 Komunikácia medzi RN a SN je synchronizovaná pomocou presného časovania, čo umožňuje koordináciu zmeny stavov SN z režimu spánku do normálneho režimu v čase, kedy 
 potrebuje SN prijímať a odosielať dáta. Komunikácia sa cez uzly šíri multi-hop prístupom, za použitia smerovacej tabuľky.
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/synchronouslorameshnetwork.png}
+	\caption{Schéma Synchronous LoRa Mesh. Prevzaté z \cite{synchronouslorameshnetwork}}
+	\label{fig:synchronouslora}
+\end{figure}
+
 Protokol používa na riadenie komunikácie metódu TDMA. RN priradí každej SN časový slot, v ktorom SN môže vyslať alebo prijať dáta.
 Monitorovacie uzly su väčšinu času v režime spánku, zobudia sa len v ich určenom časovom slote a vďaka tomu majú tieto uzly nízku spotrebu energie.
 
 Novo pripojený uzol do siete musí čakať na periodický beacon, vysielaný RN uzlom. Z beaconu sa zistí, aky časový slot je priradený danému uzlu a až po priradení slotu, môže uzol začať komunikovať v sieti.
 
-\begin{figure}
-	\centering
-	\includegraphics[width=0.6\textwidth]{Figures/synchronouslorameshnetwork.png}
-	\caption{Schéma Synchronous LoRa Mesh. Prevzaté z \cite{synchronouslorameshnetwork}}
-	\label{fig:synchronouslora}
-\end{figure}
 
 
 \section{Porovnanie a návrh nášho rozšírenia}
@@ -1417,17 +1428,17 @@ Na základe získaných údajov môžme povedať, že sa nám podarilo doručiť
   \label{fig:packetLoss}
 \end{figure}
 
-Vytvorili sme testovací scenár na zmeranie času potrebného na doručenie správy. Z uzlu 0x0005 sme odosielali správy rôznej dĺžky. Pri každom odoslaní 
+Vytvorili sme testovací scenár na zmeranie času potrebného na doručenie správy - latencie. Z uzlu 0x0005 sme odosielali správy rôznej dĺžky. Pri každom odoslaní 
 bol uložený čas odoslania každej konkrétnej správy. Správy boli posielané uzlu 0x0001, ktorý po ich prijatí poslal nazad ACK správu. Keď táto ACK správa dorazila 
 k uzlu 0x0005 tak sa zaznamenal čas prijatia správy a na základe rozdielu medzi časom odoslania a časom prijatia sa vypočítal čas potrebný na doručenie správy.
 
 Meranie bolo vykonané pre správy rôznych dĺžok, a pri každej dĺžke správy bolo odoslaných 16 správ. Na základe týchto údajov sme vytvorili graf, ktorý je 
 zobrazený na obrázku \ref{fig:latencyGraph}. Z merania sme zistili, že čas doručenia správy sa zvyšuje s dĺžkou správy a že pri správach dĺžky 200 znakov sa čas doručenia 
-pohybuje okolo 25 sekúnd. 
+pohybuje okolo 25 sekúnd. Kompletné namerané hodnoty je možné nájsť v prílohe \ref{fig:latencyTable1}.
 
 Tieto merania boli vykonávane s nastavenou hodnotou \emph{Resend timeout} 8 sekúnd. Následne sme znížili hodnotu tejto konfiguračnej premennej na 2 sekundy 
 a opakovali meranie pri správach dĺžky 200 znakov. Pri skrátení času medzi opakovanými odoslaniami správ na 2 sekundy sa čas doručenia správy znížil približne 
-na 19 sekúnd. TODO pridat do prilohy namerane hodnoty do dakej tabulky a referencovat ich tu.
+na 19 sekúnd. 
 \begin{figure}[h!]
   \centering
   \includegraphics[width=1\textwidth]{Figures/latencyGraph.png}
@@ -1552,12 +1563,41 @@ by bolo možné následne použiť na zabezpečenie neprekročenia povoleného l
 
 % Prilohy
 \appendix
+\chapter{}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|c|c|}
+  \hline
+      Dĺžka správy & 1 & 10 & 50 & 100 & 150 & 200 \\ \hline
+      Priemerná latencia (ms) & 14767 & 13069 & 13666 & 17915 & 19308 & 25207 \\ \hline
+      \multirow{16}{*}{\rotatebox[origin=c]{ 90}{Namerané hodnoty latencie (ms)}} & 8056 & 8077 & 9192 & 9332 & 8663 & 9098 \\ \cline{2-7}
+      ~ & 7838 & 8358 & 8526 & 16836 & 18186 & 25444 \\ \cline{2-7}
+      ~ & 15912 & 8324 & 17137 & 8828 & 9300 & 25890 \\ \cline{2-7}
+      ~ & 8074 & 16334 & 16640 & 17336 & 17336 & 17236 \\ \cline{2-7}
+      ~ & 17532 & 25596 & 16883 & 26146 & 16832 & 26446 \\ \cline{2-7}
+      ~ & 16982 & 8730 & 25049 & 26394 & 17634 & 25946 \\ \cline{2-7}
+      ~ & 8173 & 8480 & 8079 & 35010 & 17385 & 24942 \\ \cline{2-7}
+      ~ & 8178 & 8022 & 8130 & 26194 & 26986 & 26552 \\ \cline{2-7}
+      ~ & 17282 & 25530 & 8128 & 8862 & 9310 & 25494 \\ \cline{2-7}
+      ~ & 16834 & 24896 & 16653 & 8460 & 16737 & 35400 \\ \cline{2-7}
+      ~ & 25392 & 8500 & 16852 & 8626 & 17438 & 45429 \\ \cline{2-7}
+      ~ & 17080 & 8626 & 17368 & 8090 & 17286 & 8828 \\ \cline{2-7}
+      ~ & 17686 & 8034 & 8252 & 17184 & 35602 & 17757 \\ \cline{2-7}
+      ~ & 17434 & 16985 & 8477 & 17437 & 25644 & 18186 \\ \cline{2-7}
+      ~ & 17186 & 16246 & 8228 & 26043 & 36104 & 26695 \\ \cline{2-7}
+      ~ & 16634 & 8372 & 25065 & 25877 & 18489 & 43982 \\
+  \hline
+  \end{tabular}
+  \caption{Namerané hodnoty latencie pri nastavení \emph{Resend timeout} = 8 sekúnd}
+  \label{fig:latencyTable1}
+\end{table}
+
 \begin{figure}[]
   \centering
   \includegraphics[width=1\textwidth]{Figures/state_flow_W.png}
   \caption{Zjednodušený stavový diagram}
   \label{fig:stateDiagram}
 \end{figure}
-
 
 \end{document}

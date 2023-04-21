@@ -13,6 +13,7 @@ import os
 import spidev
 import sys
 import threading
+import logging
 
 config = protocol_config.ProtocolConfig('data/settings.json')
 initialised = config.is_initialised()
@@ -47,8 +48,8 @@ else:
       print("low datarate off")
 
 if initialised:
-  node_process = NodeProcess(rfm9x, show_info_notification, config, queue_hard_limit=1000)
   address_book = AddressBook("data/contacts.json", "data/sensors.json")
+  node_process = NodeProcess(rfm9x, show_info_notification, config, queue_hard_limit=1000, update_contacts=True, address_book=address_book)
   try:
     address_book.add_contact("YOU", f"0x{config.MY_ADDRESS:04X}")
     address_book.add_contact("ALL", f"0x{config.BROADCAST_ADDRESS:04X}")
@@ -61,6 +62,8 @@ else:
   print("Not initialised, set your address first. Then restart the device.")
 
 server = Flask(__name__, static_url_path='/web', static_folder='web')
+log = logging.getLogger('werkzeug')
+log.disabled = True
 
 @server.route("/")
 def base():

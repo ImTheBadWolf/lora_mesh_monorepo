@@ -25,6 +25,10 @@
             let newContact = `<button onclick="selectContact('${contact.address}')" id="${contact.address}" class="contact">
               <span class="contact-name">${contact.name}</span>
               <span class="contact-address">${contact.address}</span>
+              ${contact.last_snr ? `
+                <span class="contact-stat">Last SNR: ${contact.last_snr}</span>
+                <span class="contact-stat">Last HopCount: ${contact.hop_count}</span>`:''
+              }
             </button>`;
             contactsElm.innerHTML += newContact;
           })

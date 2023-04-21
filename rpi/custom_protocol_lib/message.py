@@ -127,8 +127,8 @@ class Message():
 
     if self.header.get_message_type() == MessageType.TRACEROUTE:
       #Adding my address to the traceroute message
+      my_address = f"{self.config.MY_ADDRESS:04x}"
       if len(self.text_message.decode("utf-8")) + len(my_address) + 4 < 238:
-        my_address = f"{self.config.MY_ADDRESS:04x}"
         strMyAddress = f'{self.text_message.decode("utf-8")}=>0x{my_address.upper()}'
         self.payload = list(bytes(self.maxHop.to_bytes(1, 'big'))) + list(bytes(strMyAddress, "utf-8"))
         self.text_message = bytes(strMyAddress, "utf-8")

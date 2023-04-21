@@ -367,12 +367,14 @@ input:checked+.slider:before {
   background: #9ca4ab;
   box-shadow: none;
 }
+
 #tracerouteBtn:disabled {
   background: #97cdbf;
   box-shadow: none;
 }
 
-#removeBtn:disabled, #removeWifiBtn:disabled {
+#removeBtn:disabled,
+#removeWifiBtn:disabled {
   background: #ab9c9c;
   box-shadow: none;
 }
@@ -414,6 +416,11 @@ input:checked+.slider:before {
   align-items: flex-start;
 }
 
+.contact-stat {
+  font-size: 10px;
+  align-self: center;
+}
+
 #contactNameInput,
 #contactAddInput {
   border: none;
@@ -428,7 +435,8 @@ input:checked+.slider:before {
   margin-right: 3px;
 }
 
-.contact, .network {
+.contact,
+.network {
   border-radius: 13px;
   display: flex;
   flex-direction: row;
@@ -471,12 +479,14 @@ input:checked+.slider:before {
   align-items: center;
 }
 
-.config-item .info-label{
+.config-item .info-label {
   width: 135px;
   display: inline-block;
 }
 
-.config-item input, .config-item select, .add-wifi input {
+.config-item input,
+.config-item select,
+.add-wifi input {
   border: none;
   background: #fff;
   padding: 0 4px;
@@ -492,7 +502,9 @@ input:checked+.slider:before {
   width: 120px;
 }
 
-#resendCount, #resendTimeout, #ackWait {
+#resendCount,
+#resendTimeout,
+#ackWait {
   width: 40px;
 }
 
@@ -545,7 +557,7 @@ input:checked+.slider:before {
   margin-bottom: 8px;
 }
 
-.add-wifi input{
+.add-wifi input {
   width: 198px;
 }
 
@@ -554,11 +566,14 @@ input:checked+.slider:before {
   width: 270px;
 }
 
-#saveCfgBtn, #addWifiBtn, #removeWifiBtn {
+#saveCfgBtn,
+#addWifiBtn,
+#removeWifiBtn {
   border-radius: 10px;
 }
 
-#addWifiBtn, #removeWifiBtn {
+#addWifiBtn,
+#removeWifiBtn {
   margin-top: 12px;
 }
 

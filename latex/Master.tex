@@ -553,7 +553,7 @@ ekosystémom. Zariadenia obsahujú WiFi, bluetooth a LoRa, prípadne SigFox modu
 PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway su označované ako Border Routers a prepájajú LoRa sieť s 
 internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncové 
 zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny \footnote[1]{Smerovacie informácie su zasielané iba na vyžiadanie} distance vector smerovanie (AODV). 
-Príklad zloženia Pymesh siete môžme vidieť na obrázku \ref{fig:pymeshTop}.
+Príklad Pymesh siete, obsahujúcej uzly rôznych roli, môžme vidieť na obrázku \ref{fig:pymeshTop}.
 
 Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
 Aby sa zabránilo takýmto situáciám, je použitá metóda Listen Before Talk, pri ktorej sa pred vysielaním signálu overí, či nie je v sieti už niekto iný, kto by práve 

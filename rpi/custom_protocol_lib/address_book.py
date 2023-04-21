@@ -76,3 +76,20 @@ class AddressBook():
 
   def get_sensors(self):
     return self.sensors
+
+  def update_contact_info(self, address, last_snr, hop_count):
+    for contact in self.contacts:
+      if contact['address'] == address:
+        contact['last_snr'] = last_snr
+        contact['hop_count'] = hop_count
+        self.save_contacts()
+        return True
+    return False
+
+  def update_sensor_info(self, address, last_snr):
+    for sensor in self.sensors:
+      if sensor['address'] == address:
+        sensor['last_snr'] = last_snr
+        self.save_sensors()
+        return True
+    return False

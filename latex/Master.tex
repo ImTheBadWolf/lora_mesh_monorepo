@@ -1460,6 +1460,17 @@ znižuje.
 \end{figure}
 
 \newpage
+Taktiež sme otestovali funkcionalitu monitorovacieho módu. Po zapnutí monitorovacieho módu sme z jedného zariadenia vyslali LoRa pakety, 
+ktoré nespĺňali špecifikáciu nášho protokolu. Na zariadení 0x0005 sa následne zobrazili dva nespracované pakety v podobe hexadecimálnych hodnôt 
+jednotlivých bajtov. Tie je možné vidieť na obrázku \ref{fig:rawPacket}.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth]{Figures/rawPacket.png}
+  \caption{Nespracovaný paket}
+  \label{fig:rawPacket}
+\end{figure}
+
+
 Spomínali sme isté nastavenie \emph{RANDOMIZE\_PATH}. Toto nastavenie vzniklo ako pokus o zlepšenie slabiny 
 projektu Meshtastic, ktorá sa prejavuje napríklad v situácií kedy by malo rozmiestnenie uzlov v sieti tvár písmena V.
 

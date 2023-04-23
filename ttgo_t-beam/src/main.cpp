@@ -1,7 +1,12 @@
+// TTGO T-beam T22_V1.1
+#include <SparkFun_Ublox_Arduino_Library.h>
+#include <MicroNMEA.h>
 #include "main.h"
 #include "boards.h"
-//TTGO T-beam T22_V1.1
 
+char nmeaBuffer[100];
+MicroNMEA nmea(nmeaBuffer, sizeof(nmeaBuffer));
+SFE_UBLOX_GPS myGPS;
 SX1262 radio = new Module(RADIO_CS_PIN, RADIO_DIO1_PIN, RADIO_RST_PIN, RADIO_BUSY_PIN);
 
 MessageHandler messageHandler = MessageHandler();
@@ -21,11 +26,23 @@ void setFlag(void){
 }
 
 void createSensorMessage() {
-  // For each contact in CONTACTS[] create sensor message
-  // Get random latitude and longitude in Slovakia
-  float lat = random(48000000, 49000000) / 1000000.0;
-  float lon = random(17000000, 18000000) / 1000000.0;
+  float lat, lon;
+  myGPS.checkUblox(); // See if new data is available. Process bytes as they come in.
 
+  if (nmea.isValid() == true){
+    lat = nmea.getLatitude() / 1000000.;
+    lon = nmea.getLongitude() / 1000000.;
+  }
+  else {
+    // No fix
+    // Get random latitude and longitude in Slovakia
+    //Serial.print("Nofix");
+    //Serial.println(nmea.getNumSatellites());
+    lat = random(48000000, 49000000) / 1000000.0;
+    lon = random(17000000, 18000000) / 1000000.0;
+  }
+  //Serial.println("Lat: " + String(lat) + ", Lon: " + String(lon));
+  // For each contact in CONTACTS[] create sensor message
   for (int i = 0; i < sizeof(CONTACTS) / sizeof(uint16_t); i++)
   {
     uint32_t byteArraySize;
@@ -55,6 +72,20 @@ void setup()
   }
 
   radio.setDio1Action(setFlag);
+
+  do
+  {
+    if (myGPS.begin(Serial1))
+    {
+      Serial.println("Connected to GPS");
+      myGPS.setUART1Output(COM_TYPE_NMEA); // Set the UART port to output NMEA only
+      myGPS.saveConfiguration();           // Save the current settings to flash and BBR
+      Serial.println("GPS serial connected, output set to NMEA");
+      break;
+    }
+    delay(1000);
+  } while (1);
+
   digitalWrite(BOARD_LED, LED_OFF);
 }
 
@@ -89,7 +120,7 @@ void loop()
     }
   }
   // Remove items from queue
-  //While loop in itemsToRemove is necessary because removing items from queue changes the size of the queue
+  // While loop in itemsToRemove is necessary because removing items from queue changes the size of the queue
   while (itemsToRemove.size() > 0) {
     //Find the highest index to remove first
     uint8_t highestIndex = 0;
@@ -105,4 +136,8 @@ void loop()
     itemsToRemove.remove(highestIndex);
   }
   itemsToRemove.clear();
+}
+void SFE_UBLOX_GPS::processNMEA(char incoming)
+{
+  nmea.process(incoming);
 }

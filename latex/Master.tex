@@ -91,33 +91,32 @@ K realizácií takejto siete je potrebné mať niečo, čo by zariadenia spájal
 v tejto oblasti je práve technológia LoRa, ktorá umožňuje bezdrôtovú komunikáciu na veľmi veľké vzdialenosti.
 
 Často je využívané riešenie LoRaWAN, ktoré sa skladá z centrálnych uzlov pripojených k internetu a zariadení, ktoré sú pripojené k centrálnym uzlom pomocou LoRa. 
-Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svoje dáta. Centrálny uzol dáta môže posielať cez internet na nejakú službu kde 
+Zariadenia potom komunikujú len s centrálnym uzlom a predávajú mu svoje dáta. Centrálny uzol môže dáta ďalej posielať cez internet na nejakú službu kde 
 k ním môžu užívatelia pristupovať z internetu.
 
 Pri LoRaWAN je potrebné mať nejaký centrálny uzol a ak chceme nejaké zariadenie pripojiť do siete, musí mať dosah na daný centrálny uzol. 
-Takto sme limitovaní existenciou a dosahom centrálnych uzlov, a hviezdicovou topológiou, čož nie je v niektorých prípadoch užitia vhodné. Neustále vznikajú nové 
+Takto sme limitovaní existenciou a dosahom týchto centrálnych uzlov, a hviezdicovou topológiou, čo nie je v niektorých prípadoch užitia vhodné. Neustále vznikajú nové 
 protokoly, ktoré by tieto problémy riešili, napríklad za použitia mesh topológii \cite{9385408}.
 
 V tejto práci sa venujeme návrhu a vytvoreniu protokolu, ktorý umožňuje komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
-bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol vytvára sieťovú topológiu typu mesh, ktorá ma oproti hviezdicovej topológii, 
-využívanej pri LoRaWAN, niekoľko výhod. Su nimi napríklad škálovatelnosť siete, kedy sa môžu zo siete odoberať alebo do nej pridávať nové zariadenia, 
-bez nutnosti akejkoľvek konfigurácie na ostatných zariadeniach. Z toho vyplýva aj vyššia mobilita zariadení. Zariadenia sa môžu fyzicky pohybovať a 
-pokiaľ sa nachádzajú v dosahu hocijakého iného uzla, majú prístup do siete.
+bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol vytváral sieťovú topológiu typu mesh, ktorá mala oproti hviezdicovej topológii, 
+využívanej pri LoRaWAN, niekoľko výhod. Boli nimi napríklad škálovatelnosť siete, kedy sa mohli zo siete odoberať alebo do nej pridávať nové zariadenia, 
+bez nutnosti akejkoľvek konfigurácie na ostatných zariadeniach. Z toho vyplývala aj vyššia mobilita zariadení. Zariadenia sa mohli fyzicky pohybovať a 
+pokiaľ sa nachádzali v dosahu hocijakého iného uzla, mali prístup do siete.
 
 \chapter{LoRa a spôsob prenosu dát}
 V dnešnej dobe sa na trhu nachádza veľa rôznych technológií, ktoré umožňujú bezdrôtovú komunikáciu. Niektoré technológie, ako napríklad Bluetooth, sú vhodné pre komunikáciu na malé 
-vzdialenosti, napríklad komunikácia medzi mobilným telefónom a smart hodinkami. Zatiaľ čo iné technológie ako napríklad WiFi nám ponúkajú možnosť komunikácie na väčšie vzdialenosti. 
-Nie všetky technológie su však vhodné pre použitie v IoT sieťach. V IoT sieťach sa často dbá na predpoklad nízkej spotreby energie. Okrem nízkej spotreby energie je taktiež vhodné 
+vzdialenosti. Napríklad komunikácia medzi mobilným telefónom a smart hodinkami. Zatiaľ čo iné technológie, ako napríklad WiFi, nám ponúkajú možnosť komunikácie na väčšie vzdialenosti. 
+Nie všetky technológie sú však vhodné pre použitie v IoT sieťach. V IoT sieťach sa často dbá na predpoklad nízkej spotreby energie. Okrem nízkej spotreby energie je taktiež vhodné 
 aby mal bezdrôtový prenos veľký dosah. Z týchto dôvodov sa pri IoT sieťach využívajú takzvané LPWAN siete.
 \section {LPWAN}
 LPWAN (Low Power Wide Area Network) je kategória sieti s veľkou rozlohou a nízkou spotrebou energie. Tieto siete sa vyznačujú nízkymi obstarávacími 
-nákladmi a dlhodobou prevádzkou. Siete sú tvorené jednoduchými a často pomerné lacnými zariadeniami, ktoré vďaka nízkej spotrebe energie dokážu pracovať dlhú dobu bez 
+nákladmi a dlhodobou prevádzkou. Siete sú tvorené jednoduchými a často pomerne lacnými zariadeniami, ktoré vďaka nízkej spotrebe energie dokážu pracovať dlhú dobu bez 
 nutnosti stáleho pripojenia do elektrickej siete. Zariadenia bývajú napájane batériami a môžu nepretržite fungovať aj niekoľko rokov. V kombinácií so solárnymi panelmi 
 môže byť ich prevádzka ešte predĺžená. 
 
 Tieto siete sú teda vhodné pre aplikácie, kde je potrebná dlhodobá prevádzka bez nutných servisných zásahov.
-
-LPWAN siete majú veľké pokrytie, v niektorých prípadoch to môžu byť až desiatky kilometrov v otvorenom priestranstve. Zväčša využívajú na prenos 
+LPWAN siete majú veľké pokrytie. V niektorých prípadoch to môžu byť až desiatky kilometrov v otvorenom priestranstve. Zväčša využívajú na prenos 
 ultrakrátke ( sub-GHz ) frekvenčné pásma, ktoré nevyžadujú na používanie žiadnu rádiovú licenciu.
 
 Medzi tie najznámejšie technológie na realizáciu LPWAN sieti patria napríklad Sigfox \cite{sigfox}, LoRa \cite{lora}, NB-IoT (NarrowBand Internet of Things) a iné.
@@ -125,14 +124,14 @@ Medzi tie najznámejšie technológie na realizáciu LPWAN sieti patria napríkl
 \section {LoRa}
 LoRa je proprietárna technológia na bezdrôtový prenos dát za pomoci rádiových vĺn.
 Používa bez-licenčné rádiové pásma, ktoré sú odlišné medzi Európou, Amerikou a Áziou \cite{loraRegionalParameters}, a poskytuje rádiový prenos na veľkú vzdialenosť s nízkou spotrebou energie.
-V otvorenom priestranstve môže mať rádiový prenos dosah až 10--15 km \cite{loraDoc}. LoRa má však veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
+V otvorenom priestranstve môže mať rádiový prenos dosah až 10 -- 15 km \cite{loraDoc}. LoRa má však veľkú limitáciu v podobe nízkej rýchlosti prenosu dát.
 Rýchlosti prenosu sa pohybujú medzi 0,3 až 37,5 kbps v závislosti na vybraných parametroch.
 
 Vďaka týmto aspektom je vhodná pre použitie v IoT senzorových sieťach, kde sa často vyskytujú senzory poháňané batériami a je potrebné aby vydržali dlhú dobu 
 bez výmeny batérií. Okrem toho senzory väčšinou odosielajú veľmi malý obsah dát a dáta posielajú iba v určitých časových intervaloch (napr. raz za hodinu), 
 takže nízka prenosová rýchlosť v tomto prípade nie je až tak veľkou limitáciou.
 
-Na prenos dát v LoRa, je použitá proprietárna frequency hopping chirp spread-spectrum modulácia -- modulácia rozprestreného spektra s preskokom frekvencií, pri ktorej sú prenášané dáta kódovane do symbolov 
+Na prenos dát v LoRa, je použitá proprietárna frequency hopping chirp spread-spectrum modulácia -- modulácia rozprestretého spektra s preskokom frekvencií, pri ktorej sú prenášané dáta kódovane do symbolov 
 a každý vysielaný symbol je prenášaný takzvaným chirp signálom, do ktorého sa daný symbol moduluje.
 
 Chirp signál ma konštantnú amplitúdu ale mení svoju frekvenciu lineárne s časom. 
@@ -151,8 +150,8 @@ Existujú dva druhy chirp signálov, sú nimi up-chirp signál a down-chirp sign
 down-chirp zase naopak.
 
 \newpage
-Ako rýchlo sa chirp posúva po frekvenčnom pásme - tzn. ako rýchlo chirp signál mení svoju frekvenciu, je určené parametrom rozprestierací faktor -- spreading factor (SF). 
-Rozprestierací faktor zároveň vyjadruje, koľko bitov informácie je v každom symbole prenesených. Pri nižšom rozprestieracom faktore sa chirp signál posúva po 
+Ako rýchlo sa chirp posúva po frekvenčnom pásme, tzn. ako rýchlo chirp signál mení svoju frekvenciu, je určené parametrom rozprestierací faktor -- spreading factor (SF). 
+Rozprestierací faktor zároveň vyjadruje koľko bitov informácie je v každom symbole prenesených. Pri nižšom rozprestieracom faktore sa chirp signál posúva po 
 frekvenčnom pásme rýchlejšie (viď Obr. \ref{fig:spreadingfactors}) a tým sa zvyšuje rýchlosť dátového prenosu, 
 avšak zhoršuje sa citlivosť, ktorou dokáže prijímač prijať signál a dôsledkom toho je menší použiteľný dosah. Citlivosť sa zhoršuje kvôli 
 tomu, že je vysielaný signál menej rozšírený v čase a signál môže byť v porovnaní so šumom, ktorý je prítomný v prostredí, relatívne slabší. 
@@ -186,7 +185,7 @@ Ukážku môžme vidieť na Obr. \ref{fig:loraModulation}.
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{Figures/loraModulation2.png}
-	\caption{Proces spracovania odosielaných dát v LoRa (Binárne hodnoty su ukážkové, nezodpovedajú reálnej konverzií). \cite[Prevzaté z video prezentácie výrobcu GW Instek]{loratester}}
+	\caption{Proces spracovania odosielaných dát v LoRa (Binárne hodnoty sú ukážkové, nezodpovedajú reálnej konverzií). \cite[Prevzaté z video prezentácie výrobcu GW Instek]{loratester}}
 	\label{fig:loraModulation}
 \end{figure}
 
@@ -199,10 +198,10 @@ Dĺžka preambuly, tzn. počet opakovaní prázdneho chirp signálu, je stanoven
 Na Obr. \ref{fig:loraModulation} môžme vidieť, že na preambulu boli použité iba 2 prázdne chirp signály -- teda dĺžka preambuly je 2.
 
 Prijímacie zariadenie číta prijaté symboly v určitom časovom intervale -- okne. Tento interval sa ale nemusí zhodovať s intervalom, ktorý bol použitý pri vysielaní daných symbolov.
-Je preto potreba synchronizovať prijímacie zariadenie aby hodnoty symbolov boli správne interpretované.
+Je preto potreba synchronizovať prijímacie zariadenie tak, aby hodnoty symbolov boli správne interpretované.
 
-Zariadenie po prijatí nového paketu očakáva, že na začiatku paketu bude preambula definovanej dĺžky. Ak z paketu prečíta počet symbolov rovnakej hodnoty, zhodný 
-s definovanou dĺžkou preambuly, predpokladá že sa jedná o preambulu a synchronizuje čítacie okno tak aby bolo zarovnané so symbolmi preambuly. Tzn. tak, aby symboly preambuly boli 
+Zariadenie po prijatí nového paketu očakáva, že na začiatku paketu bude preambula definovanej dĺžky. Ak z paketu prečíta počet symbolov rovnakej hodnoty zhodný 
+s definovanou dĺžkou preambuly, predpokladá že sa jedná o preambulu a synchronizuje čítacie okno tak, aby bolo zarovnané so symbolmi preambuly. Tzn. tak, aby symboly preambuly boli 
 prečítané ako symbol 0.
 
 Zjednodušené znázornenie procesu čítania symbolov a posun čítacieho okna môžme vidieť na Obr. \ref{fig:loraPreamble1}.
@@ -216,10 +215,10 @@ Zjednodušené znázornenie procesu čítania symbolov a posun čítacieho okna 
 
 \newpage
 \section{LoRa parametre}
-Pri používaní technológie LoRa je nutné správne zvoliť parametre na bezdrôtový prenos. Medzi nastaviteľné parametre patrí frekvencia, šírka pásma, rozprestierací factor a kódovací pomer.
-Použitá frekvencia je závislá od regiónu, v ktorom chceme technológiu LoRa využívať, viď Tabuľka \ref{tab:ismBands}. 
+Pri používaní technológie LoRa je nutné správne zvoliť parametre na bezdrôtový prenos. Medzi nastaviteľné parametre patrí frekvencia, šírka pásma, rozprestierací faktor a kódovací pomer.
+Použitá frekvencia je závislá od regiónu, v ktorom chceme technológiu LoRa využívať. Viď Tabuľka \ref{tab:ismBands}. 
 
-V Európe je možné mimo 866 MHz pásma používať na LoRa aj 433 MHz pásmo. Okrem toho existuje ešte globálne používaná frekvencia 2,4 GHz. Tu sme ale limitovaní 
+V Európe je možné mimo 868 MHz pásma používať na LoRa aj 433 MHz pásmo. Okrem toho existuje ešte globálne používaná frekvencia 2,4 GHz. Tu sme ale limitovaní 
 podporou daných frekvencií v nami použitom LoRa modeme. Bežné používané moduly, zväčša nemajú podporu pre 2,4 GHz frekvenčné pásmo.
 
 \begin{table}[h!]
@@ -244,13 +243,13 @@ podporou daných frekvencií v nami použitom LoRa modeme. Bežné používané 
 \newpage
 
 Ostatné LoRa parametre sú vyberané na základe toho ako ďaleko, ako spoľahlivo a ako rýchlo je potrebné dáta prenášať. Je nutné zvoliť vhodný kompromis medzi rýchlosťou prenosu 
-a dosahom prenosu. Pri výbere parametrov je ale taktiež potrebné dbať na to, aby nebol prekročený povolený kľučovací pomer. O tom si povieme viac v sekcii legislatíva.
+a dosahom prenosu. Pri výbere parametrov je ale taktiež potrebné dbať na to, aby nebol prekročený povolený kľúčovací pomer. O tom si povieme viac v sekcii legislatívy.
 
 Parameter bandwidth (BW) určuje šírku pásma, v ktorom sa bude chirp posúvať. Pri vyššej šírke pásma sa zvyšuje rýchlosť prenosu, avšak znižuje sa použiteľný dosah.
 Najbežnejšie používané šírky pásma sú 125 kHz, 250 kHz a 500 kHz.
 
-Rozprestierací faktor -- spreading factor (SF) určuje koľko bitov dát bude prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tym pádom 
-zvyšuje alebo znižuje rýchlosť prenosu na úkor zníženia alebo zvýšenia dosahu prenosu. Spreading factor je vo väčšine prípadov možné zvoliť z intervalu 6--12. 
+Rozprestierací faktor -- spreading factor (SF) určuje koľko bitov dát bude prenesených v každom vysielanom symbole. To určuje ako rýchlo sa chirp posúva po frekvenčnom pásme a tým pádom 
+zvyšuje alebo znižuje rýchlosť prenosu na úkor zníženia alebo zvýšenia dosahu prenosu. Spreading factor je vo väčšine prípadov možné zvoliť z intervalu 6 -- 12. 
 Avšak niektoré LoRa modemy umožňujú nastaviť aj nižšie hodnoty rozprestieracieho faktoru. 
 
 Používanie rozprestieracích faktorov prináša výhodu v podobe ortogonality správ vysielaných s rôznymi rozprestieracími faktormi. 
@@ -262,7 +261,7 @@ sa ku prenášaným dátam pridávajú korekčné bity. Tieto bity sú potom na 
 K nastaveniu korekcie chýb slúži parameter kódovací pomer -- coding rate (CR).
 
 V technológií LoRa máme na výber zo štyroch možností pre parameter coding rate: 4/5, 4/6, 4/7 a 4/8. 
-Tieto možnosti su niekedy označované aj ako čísla x = 1 až 4, kde kódovací pomer je 4/4+x.
+Tieto možnosti sú niekedy označované aj ako čísla x = 1 až 4, kde kódovací pomer je 4/4+x.
 Označenie vyjadruje pomer bitov, ktoré nesú informáciu, ku bitom, ktoré budú reálne použité na prenos informácie. 
 Napríklad pri kódovacom pomere 4/5 sa na každé 4 bity informácie pridáva 1 korekčný bit.
 Vyšší kódovací pomer zabezpečí spoľahlivejší prenos dát ak sa nachádzame v rušivom prostredí, avšak zníži rýchlosť prenosu dát, 
@@ -292,11 +291,11 @@ LoRaWAN definuje tri základne triedy zariadení, ktoré sa v sieti vyskytujú. 
 Sú nimi triedy A, B a C, kde do triedy A spadajú zariadenia väčšinou poháňané batériami, ktoré po odvysielaní svojich dát otvárajú dve prijímacie okna, 
 v ktorých čakajú na príjem dát z brány.
 Trieda B je rozšírením triedy A. Zariadenia v tejto triede môžu otvárať dodatočné prijímacie okna v naplánovaných časových intervaloch.
-Zariadenia z triedy C môžu prijímať neustále. Z tohto dôvodu majú vyššiu spotrebu energie a zvyčajne su pripojené k stálemu napájaniu.
+Zariadenia z triedy C môžu prijímať neustále. Z tohto dôvodu majú vyššiu spotrebu energie a zvyčajne sú pripojené k stálemu napájaniu.
 
-Zariadenia používané na realizáciu gateway bývajú zväčša výkonnejšie oproti koncovým zariadeniam. Okrem toho su schopné prijímať na viacerých frekvenciách a
-LoRa parametroch zároveň. Gateway môže byť pripojená ne nejakú cloudovú službu, cez ktorú je možne spravovať zariadenia v sieti. Medzi najznámejšie 
-služby patrí The Things Network (TTN) \cite{ttn}. Je však možné spojiť LoRaWAN aj s inými populárnymi cloudovými službami ako je napríklad Microsoft Azure \cite{azure} 
+Zariadenia používané na realizáciu gateway bývajú zväčša výkonnejšie oproti koncovým zariadeniam. Okrem toho sú schopné prijímať na viacerých frekvenciách a
+LoRa parametroch zároveň. Gateway môže byť pripojená na nejakú cloudovú službu, cez ktorú je možné spravovať zariadenia v sieti. Medzi najznámejšie 
+služby patrí The Things Network (TTN) \cite{ttn}. Je však možné spojiť LoRaWAN aj s inými populárnymi cloudovými službami, ako je napríklad Microsoft Azure \cite{azure} 
 alebo Google Cloud \cite{googleCloud}.
 
 \section{Legislatíva}
@@ -304,13 +303,13 @@ V Európe sa k frekvenčnému pásmu používaného pri technológií LoRa viaž
 Obmedzenia sa týkajú používania fyzického média. Regulácia určuje maximálnu povolenú dobu, v ktorú môže vysielač na daných frekvenciách vysielať 
 v rámci jednej hodiny a maximálny vysielací výkon, akým môže signal vysielať.
 
-Určuje sa takzvaný klučovací pomer, ktorý hovorí koľko percent času z nejakého celkového času môže vysielač vysielať.
-Ak by zariadenie vysielalo signál po dobu jednej jednotky času z celkových 10 jednotiek času, tak kľučovací pomer by bol 10 \%.
+Určuje sa takzvaný kľúčovací pomer, ktorý hovorí koľko percent času z nejakého celkového času môže vysielač vysielať.
+Ak by zariadenie vysielalo signál po dobu jednej jednotky času z celkových 10 jednotiek času, tak kľúčovací pomer by bol 10 \%.
 
 Český Telekomunikačný úrad stanovuje vo všeobecné oprávnění č. VO-R/10/07.2021-8 \cite{vor}, že 
-frekvenčné pásmo, do ktorého spadá technológia LoRa, patrí do skupiny g. Pre túto skupinu je maximálny povolený kľučovací pomer 1 \% a maximálny 
+frekvenčné pásmo, do ktorého spadá technológia LoRa, patrí do skupiny g. Pre túto skupinu je maximálny povolený kľúčovací pomer 1 \% a maximálny 
 vysielací výkon 25 mW (14 dBm). Znamená to teda, že zariadenia môžu každú hodinu vysielať maximálne po dobu 36 sekúnd.
-Pre pásmo 869,40--869,65 MHz je ale udelená výnimka, ktorá umožňuje vysielať s kľučovacím pomerom 10 \% a maximálnym vysielacím výkonom 500 mW (27 dBm).
+Pre pásmo 869,40 -- 869,65 MHz je ale udelená výnimka, ktorá umožňuje vysielať s kľúčovacím pomerom 10 \% a maximálnym vysielacím výkonom 500 mW (27 dBm).
 
 \chapter{Dostupné LoRa moduly }
 Pri práci s technológiou LoRa máme na výber z rôznych modulov od rôznych výrobcov.
@@ -319,7 +318,7 @@ Moduly pre koncové zariadenia obvykle dokážu prijímať a odosielať iba na j
 nízku spotrebu energie. Moduly pre gateway dokážu prijímať a odosielať na viacerých kanáloch súčasne.
 
 V tejto časti sa budeme zaoberať dostupnými modulmi pre koncové zariadenia.
-Keďže je technológia LoRa patentovaná výrobcom Semtech \cite{semtech}, tak všetky dostupné LoRa čipy su práve od tohto výrobcu a moduly od iných výrobcov 
+Keďže je technológia LoRa patentovaná výrobcom Semtech \cite{semtech}, tak všetky dostupné LoRa čipy sú práve od tohto výrobcu a moduly od iných výrobcov 
 sú založené na používaní týchto čipov. Kompletné porovnanie parametrov najpouživanejších modulov je možné vidieť v tabuľke \ref{tab:semtechModules}.
 
 \section{SX127x/SX126x}
@@ -489,7 +488,7 @@ za použitia lacných zariadení.
 
 Ďalším zaujímavým projektom je Armachat \cite{armachat}, ktorý ponúka možnosť komunikácie v prípade nedostupnosti ostatných sieti, napríklad po nejakej prírodnej alebo inej katastrofe.
 Súčasťou projektu Armachat sú plošné spoje, z ktorých si používateľ poskladá finálne zariadenie.
-Zariadenia Armachat su poháňané mikrokontrolérmi Raspberry Pi Pico, obsahujú LoRa moduly, displej, klávesnicu a ďalšie vymoženosti.
+Zariadenia Armachat sú poháňané mikrokontrolérmi Raspberry Pi Pico, obsahujú LoRa moduly, displej, klávesnicu a ďalšie vymoženosti.
 
 Originálny projekt avšak sám o sebe zatiaľ nepodporuje využívanie mesh topológie. Používa ale rovnakú štruktúru správ ako projekt Meshtastic a vďaka tomu je možné 
 v projekte Armachat využívať mesh sieť projektu Meshtastic.
@@ -521,7 +520,7 @@ Myšlienka tohto projektu spočíva v tom, že vytvára komunikačnú sieť na m
 
 Posielanie správ v sieti je založené na jednoduchom multi-hop flooding.
 Každý uzol znovu odvysiela paket, ktorý prijal ( pokiaľ nedošiel počet preskokov na 0 ), až kým sa paket nedostane do určenej destinácie naprieč mesh sieťou.
-Prenášane správy su šifrované za pomoci šifrovacieho algoritmu AES.
+Prenášane správy sú šifrované za pomoci šifrovacieho algoritmu AES.
 
 Zariadenia používane v projekte Meshtastic majú okrem LoRa modulu zabudovaný aj bluetooth modul, vďaka ktorému je možne sa k zariadeniu pripojiť cez mobilný telefón, ktorý slúži ako rozhranie pre 
 užívateľa. Cez aplikáciu v mobilnom telefóne môže používateľ vytvárať a prijímať správy. Správy sa cez bluetooth prenášajú z telefónu do zariadenia kde sa následne odošlú cez 
@@ -547,12 +546,12 @@ kým dáta nedosiahnu datasink.
 Takto tvorená sieť avšak vyžaduje existenciu nejakého hlavného uzlu (datasinku), ktorý je potrebný na riadenie siete prostredníctvom časovej synchronizácie.
 
 \section{Pymesh}
-Pymesh je súčasťou Pycom \cite{pycom} ekosystému. Tento ekosystém je určený na vývoj IoT systémov. Ponúka rôzne zariadenia, ktoré su určené na použitie s týmto 
+Pymesh je súčasťou Pycom \cite{pycom} ekosystému. Tento ekosystém je určený na vývoj IoT systémov. Ponúka rôzne zariadenia, ktoré sú určené na použitie s týmto 
 ekosystémom. Zariadenia obsahujú WiFi, bluetooth a LoRa, prípadne SigFox moduly. Zariadenia je možné rozšíriť o rôzne moduly so senzormi, ktoré rozširujú ich schopnosti.
 
-PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway su označované ako Border Routers a prepájajú LoRa sieť s 
+PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway sú označované ako Border Routers a prepájajú LoRa sieť s 
 internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncové 
-zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny \footnote[1]{Smerovacie informácie su zasielané iba na vyžiadanie} distance vector smerovanie (AODV). 
+zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny \footnote[1]{Smerovacie informácie sú zasielané iba na vyžiadanie} distance vector smerovanie (AODV). 
 Príklad Pymesh siete, obsahujúcej uzly rôznych roli, môžme vidieť na obrázku \ref{fig:pymeshTop}.
 
 Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
@@ -579,7 +578,7 @@ tabuliek uzlov. Následne môže uzol vyslať pôvodný paket do destinácie.
 Projekt Synchronous LoRa Mesh \cite{synchronouslorameshnetwork} vznikol z potreby získavania real-time dát z podzemných kanalizácií. Tieto dáta sú potrebné k monitorovaniu a predikcií kritických situácií akými 
 sú napríklad záplavy.
 
-LoRaWAN však nemá moc veľký dosah do podzemia. Z toho dôvodu by bolo potrebné v podzemných priestoroch implementovať LoRaWAN gateway-e, ktoré su ale energeticky náročne, drahé a vyžadujú 
+LoRaWAN však nemá moc veľký dosah do podzemia. Z toho dôvodu by bolo potrebné v podzemných priestoroch implementovať LoRaWAN gateway-e, ktoré sú ale energeticky náročne, drahé a vyžadujú 
 pevné pripojenie do elektrickej a prípadne aj internetovej siete, ktoré v kanalizáciách niesu dostupné. Okrem toho, by museli byť všetky ostatné uzly v podzemnej sieti v dosahu danej gateway a pri väčšej podzemnej sieti 
 by teda bolo potrebné implementovať viacero LoRaWAN gateway.
 
@@ -596,7 +595,7 @@ potrebuje SN prijímať a odosielať dáta. Komunikácia sa cez uzly šíri mult
 \end{figure}
 
 Protokol používa na riadenie komunikácie metódu TDMA. RN priradí každej SN časový slot, v ktorom SN môže vyslať alebo prijať dáta.
-Monitorovacie uzly su väčšinu času v režime spánku, zobudia sa len v ich určenom časovom slote a vďaka tomu majú tieto uzly nízku spotrebu energie.
+Monitorovacie uzly sú väčšinu času v režime spánku, zobudia sa len v ich určenom časovom slote a vďaka tomu majú tieto uzly nízku spotrebu energie.
 
 Novo pripojený uzol do siete musí čakať na periodický beacon, vysielaný RN uzlom. Z beaconu sa zistí, aky časový slot je priradený danému uzlu a až po priradení slotu, môže uzol začať komunikovať v sieti.
 
@@ -607,7 +606,7 @@ Niektoré zo spomenutých riešení využívajú smerovacie tabuľky na efektív
 chceme dosiahnuť vyššej mobility uzlov. V prípade, že by sme chceli spolu so smerovacími tabuľkami podporovať mobilitu uzlov, je potrebné zabezpečiť 
 dostatočné časté aktualizácie smerovacích tabuliek.
 
-Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré su uzly v úspornom režime. To môže byť 
+Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré sú uzly v úspornom režime. To môže byť 
 veľkou limitáciou pri niektorých aplikáciách, kde je potrebná komunikácia v reálnom čase  (napr. chat).
 
 V tejto práci sme navrhli protokol, ktorý nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá vysoká mobilita uzlov a dynamickosť siete. 
@@ -1344,10 +1343,10 @@ zobrazujú práve tieto názvy kontaktov.
 
 Z traceroute odpovedi môžme vidieť, že spojenie medzi uzlom 0x0005 a 0x0001 nie je priamo, ale prechádza cez uzol 0x0002. Taktiež môžme vidieť, 
 že zo zariadenia \emph{Armachat \#2} bola odoslaná textová správa do zariadenia 0x0005. Pri tejto správe si môžme všimnúť, že počet skokov 
-zobrazený v informáciach nad správou je 0, čož sedí s predošlými traceroute správami.
+zobrazený v informáciach nad správou je 0, čo sedí s predošlými traceroute správami.
 
 Druhá správa odoslaná zo zariadenia \emph{Armachat \#1} bola odoslaná na broadcast adresu. Môžme vidieť ze v informáciách nad správou je počet 
-preskokov 1, čož znova sedí s predošlými traceroute správami. Táto textová správa preskakovala cez uzol 0x0002 predtým ako bola doručená 
+preskokov 1, čo znova sedí s predošlými traceroute správami. Táto textová správa preskakovala cez uzol 0x0002 predtým ako bola doručená 
 uzlu 0x0005.
 
 
@@ -1479,7 +1478,7 @@ A to z toho dôvodu, že vyslaná správa z uzlu 0 by bola prijatá uzlami 1 a 2
 Na základe horšej hodnoty SNR uzol 1 správu odvysiela skôr a správa sa ďalej bude šíriť už len v pravej vetve siete.
 
 Na obrázku môžme vidieť rozmiestnenie uzlov a dosah ich signálu v simulátore Meshtasticator, patriaceho ku projektu Meshtastic. Taktiež môžme vidieť časový priebeh šírenia správy medzi uzlami. 
-V tomto časovom priebehu su modrou farbou označené vysielania správy a zelenou prijatia správy.
+V tomto časovom priebehu sú modrou farbou označené vysielania správy a zelenou prijatia správy.
 
 \begin{figure}[h!]
   \centering

@@ -117,8 +117,7 @@ môže byť ich prevádzka ešte predĺžená.
 
 Tieto siete sú teda vhodné pre aplikácie, kde je potrebná dlhodobá prevádzka bez nutných servisných zásahov.
 LPWAN siete majú veľké pokrytie. V niektorých prípadoch to môžu byť až desiatky kilometrov v otvorenom priestranstve. Zväčša využívajú na prenos 
-ultrakrátke ( sub-GHz ) frekvenčné pásma, ktoré nevyžadujú na používanie žiadnu rádiovú licenciu.
-
+ultrakrátke ( sub-GHz ) frekvenčné pásma, ktoré nevyžadujú na používanie žiadnu rádiovú licenciu. 
 Medzi tie najznámejšie technológie na realizáciu LPWAN sieti patria napríklad Sigfox \cite{sigfox}, LoRa \cite{lora}, NB-IoT (NarrowBand Internet of Things) a iné.
 
 \section {LoRa}
@@ -142,7 +141,7 @@ Graf frekvenčnej charakteristiky a postupné zvyšovanie frekvencie chirp sign�
 \begin{figure}
 	\centering
 	\includegraphics[width=0.7\textwidth]{Figures/spreading factors.png}
-	\caption{Chirp signál a porovnanie rozprestieracích faktorov. Prevzaté z \cite{spreadfactorimage}}
+	\caption[Porovnanie rozprestieracích faktorov]{Chirp signál a porovnanie rozprestieracích faktorov. Prevzaté z \cite{spreadfactorimage}}
 	\label{fig:spreadingfactors}
 \end{figure}
 
@@ -163,16 +162,15 @@ Jeden chirp je rozdelený na $2^{SF}$ častí alebo chips.
 
 Vysielaný symbol sa potom skladá z cyklicky posunutého chirp signálu, kde posun definuje hodnotu daného symbolu. 
 To znamená, že vysielaný chirp nebude začínať na spodnej hranici frekvenčného pásma, ale na určitej frekvencii korešpondujúcej so symbolom, 
-ktorý je modulovaný do daného chirp signálu. Viď Obr. \ref{fig:loraSymbols}.
+ktorý je modulovaný do daného chirp signálu. Viď Obr. \ref{fig:loraSymbols}. Celý proces vyslania správy cez LoRa sa teda skladá z nasledujúcich krokov:
 
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{Figures/loraSymbols.png}
-	\caption{Chirp signály, do ktorých boli modulované symboly. \cite[Prevzaté z video prezentácie výrobcu GW Instek]{loratester}}
+	\caption[Symboly modulované do Chirp signálov]{Chirp signály, do ktorých boli modulované symboly. (Prevzaté z video prezentácie výrobcu GW Instek \cite{loratester})}
 	\label{fig:loraSymbols}
 \end{figure}
 
-Celý proces vyslania správy cez LoRa sa teda skladá z nasledujúcich krokov:
 \begin{enumerate}
   \item Konverzia správy do binárneho kódu
   \item Pridanie korekčných bitov slúžiacich na opravu chýb
@@ -185,7 +183,7 @@ Ukážku môžme vidieť na Obr. \ref{fig:loraModulation}.
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{Figures/loraModulation2.png}
-	\caption{Proces spracovania odosielaných dát v LoRa (Binárne hodnoty sú ukážkové, nezodpovedajú reálnej konverzií). \cite[Prevzaté z video prezentácie výrobcu GW Instek]{loratester}}
+	\caption[Proces spracovania odosielaných dát v LoRa]{Proces spracovania odosielaných dát v LoRa (Binárne hodnoty sú ukážkové, nezodpovedajú reálnej konverzií. Obrázok bol prevzatý z video prezentácie výrobcu GW Instek \cite{loratester})}
 	\label{fig:loraModulation}
 \end{figure}
 
@@ -209,7 +207,7 @@ Zjednodušené znázornenie procesu čítania symbolov a posun čítacieho okna 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=1\textwidth]{Figures/preambulaSmall.png}
-	\caption{Čítanie symbolov preambuly prijatého paketu a synchronizácia čítacieho okna na základe posunu preambuly.}
+	\caption[Čítanie symbolov preambuly]{Čítanie symbolov preambuly prijatého paketu a synchronizácia čítacieho okna na základe posunu preambuly.}
 	\label{fig:loraPreamble1}
 \end{figure}
 
@@ -333,7 +331,7 @@ Vďaka použitej modulačnej technike je možné dosiahnuť vysokej citlivosti m
 Výrobca uvádza citlivosť cez -137 dBm pri modemoch SX1272/73 a -148 dBm pri modemoch SX1276/78/79.
 
 
-Modemy SX1272 a SX1273 ponúkajú menší link budget \footnotemark[1] 157 dB oproti 168 dB pri modemoch SX1276/77/78/79. 
+Modemy SX1272 a SX1273 ponúkajú menší link budget\footnotemark[1] 157 dB oproti 168 dB pri modemoch SX1276/77/78/79. 
 \footnotetext[1]{Súčet zisku a strát signálu medzi vysielačom a prijímačom v bezdrôtovom prenose.}
 \newpage
 Majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz oproti modemom SX1276/77/78/79, kde 
@@ -357,7 +355,7 @@ Ten je pri modemoch série SX126x výrobcom udávaný na 170 dBm, takže sú opt
 	\caption[Parametre Semtech SX modemov]{Parametre Semtech SX modemov}
   \begin{tabular}{c|c|c|c|c|c|c|c|c}
     \toprule
-    Modem & Frekvencia & SF & BW (kHz) & Citlivosť & Spotreba \footnotemark[1] & Rozhranie & Výkon\footnotemark[2] & Cena\footnotemark[3]\\
+    Modem & Frekvencia & SF & BW (kHz) & Citlivosť & Spotreba\footnotemark[1] & Rozhranie & Výkon\footnotemark[2] & Cena\footnotemark[3]\\
     \midrule
     SX1272 & 860--1020 MHz & 6--12 & 125--500 & -137 dBm & 11,2 mA & SPI & 20 dbm & 9€ \\
     SX1273 & 860--1020 MHz & 6--9 & 125--500 & -130 dBm & 11,2 mA & SPI & 20 dbm & 7€ \\
@@ -420,7 +418,7 @@ Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
   \subfloat[\centering TTGO LoRa32]{{\includegraphics[width=0.4\textwidth]{Figures/LILYGO-TTGO-LoRa32-V1.png} }}
   \qquad
   \subfloat[\centering TTGO T-beam]{{\includegraphics[width=0.35\textwidth]{Figures/ttgo-tbeam.jpg} }}
-  \caption{Mikrokontroléry TTGO. Prevzaté z \cite{lilygo}}
+  \caption[Mikrokontroléry TTGO]{Mikrokontroléry TTGO. Prevzaté z \cite{lilygo}}
   \label{fig:ttgo-moduly}
 \end{figure}
 
@@ -439,7 +437,7 @@ Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.5\textwidth]{Figures/armachat.jpg}
-	\caption{Zariadenie Armachat. Prevzaté z \cite{armachatObr}}
+	\caption[Zariadenie Armachat]{Zariadenie Armachat. Prevzaté z \cite{armachatObr}}
 	\label{fig:armachat}
 \end{figure}
 \newpage
@@ -500,7 +498,7 @@ v následujúcich sekciách.
 \section{LoRa mesher}
 LoRaMesher \cite{loramesher} \cite{9930341} je C++ knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieťach.
 
-Na smerovanie v sieti používa proaktívny \footnote[1]{Smerovacia tabuľka sa pravidelne aktualizuje}  distance vector routing protokol. Tento protokol vyberá cestu, kadiaľ bude správa v sieti preposlaná od odosielateľa k príjemcovi, na základe 
+Na smerovanie v sieti používa proaktívny\footnote[1]{Smerovacia tabuľka sa pravidelne aktualizuje}  distance vector routing protokol. Tento protokol vyberá cestu, kadiaľ bude správa v sieti preposlaná od odosielateľa k príjemcovi, na základe 
 najlepšej cesty. Najlepšiu cestu definuje ako cestu s najmenším počtom hopov -- preskokov medzi uzlami v mesh sieti.
 
 K realizácií distance vector smerovania je potrebné udržiavať smerovaciu tabuľku, ktorá obsahuje informácie o ID uzlov, cez ktoré susedné uzly sa dané uzly dajú dosiahnuť a 
@@ -551,7 +549,7 @@ ekosystémom. Zariadenia obsahujú WiFi, bluetooth a LoRa, prípadne SigFox modu
 
 PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway sú označované ako Border Routers a prepájajú LoRa sieť s 
 internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncové 
-zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny \footnote[1]{Smerovacie informácie sú zasielané iba na vyžiadanie} distance vector smerovanie (AODV). 
+zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny\footnote[1]{Smerovacie informácie sú zasielané iba na vyžiadanie} distance vector smerovanie (AODV). 
 Príklad Pymesh siete, obsahujúcej uzly rôznych roli, môžme vidieť na obrázku \ref{fig:pymeshTop}.
 
 Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
@@ -563,7 +561,7 @@ PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na in
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.75\textwidth]{Figures/pymesh_roles.png}
-	\caption{Ukážková schéma Pymesh siete. Prevzaté z \cite{pycom}}
+	\caption[Ukážková schéma Pymesh siete]{Ukážková schéma Pymesh siete. Prevzaté z \cite{pycom}}
 	\label{fig:pymeshTop}
 \end{figure}
 
@@ -590,7 +588,7 @@ potrebuje SN prijímať a odosielať dáta. Komunikácia sa cez uzly šíri mult
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/synchronouslorameshnetwork.png}
-	\caption{Schéma Synchronous LoRa Mesh. Prevzaté z \cite{synchronouslorameshnetwork}}
+	\caption[Schéma Synchronous LoRa Mesh]{Schéma Synchronous LoRa Mesh. Prevzaté z \cite{synchronouslorameshnetwork}}
 	\label{fig:synchronouslora}
 \end{figure}
 
@@ -1145,7 +1143,7 @@ ktoré je súčasťou JavaScriptu. Ukážku volania za použitia fetch API môž
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.9\textwidth]{Figures/fetchApi.png}
+  \includegraphics[width=0.5\textwidth]{Figures/fetchApi.png}
   \caption{Volanie cez fetch API}
   \label{fig:fetchApi}
 \end{figure}
@@ -1297,7 +1295,7 @@ každá správa sa opakovane posielala daný počet pokusov aj napriek tomu, že
 daný počet pokusov, sa správa zo zoznamu odstránila.
 
 Hlavný chod programu pozostával z cyklu v ktorom sa prechádzali správy zo zoznamu a funkcie, ktorá generovala senzorové dáta. Na zariadení TTGO T-Beam bol použitý integrovaný 
-GPS modul, z ktorého boli získavané GPS súradnice a z nich tvorený obsah senzorovej správy. Zariadenie TTGO LoRa32 malo integrovaný hall effect senzor, ktorý snímal 
+GPS modul, z ktorého boli získavané GPS súradnice a z nich tvorený obsah senzorovej správy. Zariadenie TTGO LoRa32 malo integrovanú Hallovu sondu, ktorá snímala 
 úroveň magnetického poľa. Na tomto zariadení boli generované senzorové správy, ktorých obsahom bola úroveň magnetického poľa plus čas ako dlho bol daný senzor v prevádzke.
 
 Funkcia na vygenerovanie novej senzorovej správy bola volaná v určitých intervaloch. Tento interval bolo možne nastaviť konfiguračnou premennou. Výsledkom bol tak 
@@ -1371,8 +1369,8 @@ základe posledne prijatej správy od danej adresy. Keďže pri senzorových spr
 senzorových kontaktoch sa aktualizovali iba hodnoty SNR. Na Obr \ref{fig:contactsLastSNR} vidíme kontakty 0x0001 a 0x0002 s aktualizovanými hodnotami SNR a počtom skokov.
 Táto dodatočná informácia môže byť užitočná na zistenie kvality spojenia medzi uzlami.
 
-Otestovali sme aj funkcionalitu senzorových správ. Tieto senzorové správy boli odosielané zo zariadenia TTGO LoRa32 s hodnotou hall effect senzoru, 
-zo zariadenia TTGO T-Beam s GPS polohou a zo zariadení Armachat s informáciami o dobe behu, teplote procesora atď. 
+Otestovali sme aj funkcionalitu senzorových správ. Tieto senzorové správy boli odosielané zo zariadenia TTGO LoRa32 s hodnotou získanou z Hallovej sondy. 
+Zo zariadenia TTGO T-Beam s GPS polohou a zo zariadení Armachat s informáciami o dobe behu, teplote procesora atď. 
 Na obrázkoch \ref{fig:testingSensors} môžme vidieť prijaté senzorové správy.
 \begin{figure}[h!]
   \centering
@@ -1515,14 +1513,14 @@ ale táto správa ostala. Takže používateľ bol schopný vidieť aj správy s
 
 Na zariadeniach Armachat bez WiFi modulu bolo možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu taktiež nebol problémom.
 
-Veľkou limitáciou našej implementácie bolo, že CircuitPython nemá podporu pre externé prerušenia \footnote[1]{https://github.com/adafruit/circuitpython/issues/4542}. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
+Veľkou limitáciou našej implementácie bolo, že CircuitPython nemá podporu pre externé prerušenia\footnote[1]{https://github.com/adafruit/circuitpython/issues/4542}. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
 nepracovala veľmi efektívne. Keď aktuálne LoRa modul prijímal nejaký paket, tak sa pozdržal cely zvyšok bežiaceho programu, až kým sa paket neprijal a neprečítal celý alebo kým nedošlo k vypršaniu 
 časového limitu. Toto nam spomaľovalo beh programu zakaždým keď bol v sieti vysielaný nejaký paket.
 
 Použitá knižnica na ovládanie LoRa modulu so sebou priniesla ešte dodatočnú limitáciu. Táto knižnica nesprávne pracovala s LoRa modulom a nebolo možné stabilne používať 
 LoRa prenos pokiaľ bol nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky znížila. Pri 
 našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z desiatich pokusov pri použití najvyššieho rozprestieracieho faktoru. 
-K tejto chybe existuje aj oficiálna chybová správa na GitHub stránke CircuitPython knižnice \footnote[2]{https://github.com/adafruit/Adafruit\_CircuitPython\_RFM9x/issues/70}.
+K tejto chybe existuje aj oficiálna chybová správa na GitHub stránke CircuitPython knižnice\footnote[2]{https://github.com/adafruit/Adafruit\_CircuitPython\_RFM9x/issues/70}.
 
 Chybu v knižnici sme sa bezvýsledne snažili opraviť. Jedným z dôvodov, ktoré ku chybe prispievali bol nesprávne nastavený časový limit pre posielanie paketu. Knižnica odpočítavala časový limit dvoch sekúnd 
 pri čítaní novo prijímaného paketu. Ak sa paket nestihol prečítať v tomto intervale tak sa čítanie prerušilo a prijatý paket sa zahodil. 
@@ -1531,9 +1529,9 @@ Avšak, keď sme si zobrali prípad paketu, ktorý mal veľkosť 100 bajtov a bo
 zvýšení časového limitu v knižnici sme znovu otestovali spoľahlivosť prenosu. Tentokrát sa nam podarilo doručiť 2 správy z 10 pokusov. To avšak stále nebolo dostatočné a 
 naznačovalo to, že problém bol ešte niekde inde. Ten sa nam už ale nepodarilo nájsť.
 
-Zariadenie Raspberry Pi pico s WiFi modulom, bolo pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií obsahovala isté nedostatky \footnote[3]{https://github.com/adafruit/circuitpython/issues?q=is\%3Aissue+wifi}.
+Zariadenie Raspberry Pi pico s WiFi modulom, bolo pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií obsahovala isté nedostatky\footnote[3]{https://github.com/adafruit/circuitpython/issues?q=is\%3Aissue+wifi}.
 Neumožňovala prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nebolo možné prepnúť modul do režimu station ak bol 
-už prepnutý do režimu AP. Jediný spôsob ako bolo možné WiFi modul úspešne prepnúť medzi režimami bolo tvrdé resetovanie zariadenia \footnote[4]{https://github.com/adafruit/circuitpython/issues/7620}.
+už prepnutý do režimu AP. Jediný spôsob ako bolo možné WiFi modul úspešne prepnúť medzi režimami bolo tvrdé resetovanie zariadenia\footnote[4]{https://github.com/adafruit/circuitpython/issues/7620}.
 
 Pôvodne sme mali v pláne implementovať štartovací proces zariadenia tak, že najskôr by sa zariadenie pokúsilo pripojiť k WiFi sieťam, ktoré malo uložené v zozname a ak sa mu nepodarilo 
 pripojiť ku žiadnej z týchto sieti, tak vytvorilo svoju vlastnú WiFi sieť, na ktorú sa mohol používateľ pripojiť. Kvôli chybnému správaniu WiFi knižnice však tento prístup nebolo možné 
@@ -1543,7 +1541,7 @@ k žiadnej zo sieti.
 K WiFi knižnici sa viazal ešte jeden problém a to taký, že pokiaľ sa snažil používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojilo na WiFi sieť, 
 zariadenie sa dostalo do zamrznutého stavu a prestalo reagovať na čokoľvek. Na obnovenie funkcionality bol potrebný tvrdý reštart zariadenia. 
 Tomuto problému sme sa snažili vyhýbať tak, že zariadenie zobrazovalo informáciu o spustenom web serveri až po určitom oneskorení a spoliehali sme na to, že používateľ 
-sa bude pripájať na webový server až po zobrazení tejto informácie. K tejto chybe existuje report v zozname chýb na GitHub stránke CircuitPythonu \footnote[5]{https://github.com/adafruit/circuitpython/issues/7790}.
+sa bude pripájať na webový server až po zobrazení tejto informácie. K tejto chybe existuje report v zozname chýb na GitHub stránke CircuitPythonu\footnote[5]{https://github.com/adafruit/circuitpython/issues/7790}.
 
 \chapter{Záver}
 V tejto práci sa nam podarilo vytvoriť funkčný komunikačný protokol pre bezdrôtovú komunikáciu medzi zariadeniami v LoRa mesh sieti.
@@ -1579,7 +1577,7 @@ by bolo možné následne použiť na zabezpečenie neprekročenia povoleného l
   \centering
   \begin{tabular}{|c|c|c|c|c|c|c|}
   \hline
-      Dĺžka správy & 1 & 10 & 50 & 100 & 150 & 200 \\ \hline
+      Dĺžka správy (počet znakov) & 1 & 10 & 50 & 100 & 150 & 200 \\ \hline
       Priemerná latencia (ms) & 14767 & 13069 & 13666 & 17915 & 19308 & 25207 \\ \hline
       \multirow{16}{*}{\rotatebox[origin=c]{ 90}{Namerané hodnoty latencie (ms)}} & 8056 & 8077 & 9192 & 9332 & 8663 & 9098 \\ \cline{2-7}
       ~ & 7838 & 8358 & 8526 & 16836 & 18186 & 25444 \\ \cline{2-7}

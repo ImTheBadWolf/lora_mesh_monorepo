@@ -3,11 +3,13 @@
 #include <MicroNMEA.h>
 #include "main.h"
 #include "boards.h"
+#include <axp20x.h>
 
 char nmeaBuffer[100];
 MicroNMEA nmea(nmeaBuffer, sizeof(nmeaBuffer));
 SFE_UBLOX_GPS myGPS;
 SX1262 radio = new Module(RADIO_CS_PIN, RADIO_DIO1_PIN, RADIO_RST_PIN, RADIO_BUSY_PIN);
+AXP20X_Class axp;
 
 MessageHandler messageHandler = MessageHandler();
 Array<QueueItem *, 500> messageQueue;
@@ -35,13 +37,17 @@ void createSensorMessage() {
   }
   else {
     // No fix
-    // Get random latitude and longitude in Slovakia
-    //Serial.print("Nofix");
-    //Serial.println(nmea.getNumSatellites());
+    // Get random latitude and longitude in Slovakia if RANDOM_GPS is defined
+    #ifndef RANDOM_GPS
+      return;
+    #endif
+
+    // Serial.print("Nofix");
+    // Serial.println(nmea.getNumSatellites());
     lat = random(48000000, 49000000) / 1000000.0;
     lon = random(17000000, 18000000) / 1000000.0;
   }
-  //Serial.println("Lat: " + String(lat) + ", Lon: " + String(lon));
+  // Serial.println("Lat: " + String(lat) + ", Lon: " + String(lon));
   // For each contact in CONTACTS[] create sensor message
   for (int i = 0; i < sizeof(CONTACTS) / sizeof(uint16_t); i++)
   {
@@ -54,6 +60,17 @@ void createSensorMessage() {
 
 void setup()
 {
+  Wire.begin(21, 22);
+  if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS))
+  {
+    Serial.println("AXP192 Begin PASS");
+  }
+  else
+  {
+    Serial.println("AXP192 Begin FAIL");
+  }
+  axp.setPowerOutPut(AXP192_LDO3, AXP202_ON); //Power ON GPS
+
   initBoard();
   delay(1500);
   Serial.print(F("[SX1262] Initializing ... "));

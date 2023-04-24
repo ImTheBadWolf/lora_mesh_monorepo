@@ -86,7 +86,9 @@
             randomId = Math.floor(Math.random() * 10000000);
             let lat = message.payload.split("GPS:")[1].split(", ")[0];
             let lon = message.payload.split("GPS:")[1].split(", ")[1];
-            maps.set(randomId, [lat, lon]);
+            if (!!Number(lat) && !!Number(lon)){
+              maps.set(randomId, [lat, lon]);
+            }
           }
 
           messagesElement.innerHTML = messagesElement.innerHTML + `

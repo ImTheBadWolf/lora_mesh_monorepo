@@ -37,15 +37,16 @@ void createSensorMessage() {
   }
   else {
     // No fix
-    // Get random latitude and longitude in Slovakia if RANDOM_GPS is defined
-    #ifndef RANDOM_GPS
-      return;
-    #endif
-
     // Serial.print("Nofix");
     // Serial.println(nmea.getNumSatellites());
-    lat = random(48000000, 49000000) / 1000000.0;
-    lon = random(17000000, 18000000) / 1000000.0;
+    // Get random latitude and longitude in Slovakia if RANDOM_GPS is defined
+    #ifdef RANDOM_GPS
+      lat = random(48000000, 49000000) / 1000000.0;
+      lon = random(17000000, 18000000) / 1000000.0;
+    #else
+      lat = 0;
+      lon = 0;
+    #endif
   }
   // Serial.println("Lat: " + String(lat) + ", Lon: " + String(lon));
   // For each contact in CONTACTS[] create sensor message

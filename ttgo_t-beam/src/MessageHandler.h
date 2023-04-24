@@ -17,7 +17,7 @@
 #define RESEND_TIMEOUT 8 //Seconds, how long to wait before resending
 #define DEFAULT_TTL 120 //Seconds
 static uint16_t CONTACTS[] = { 0x0005 }; //Node will be sending messages to these addresses
-#define RANDOM_GPS //Uncomment to use random GPS coordinates when GPS cannot aquire fix. Otherwise it wont send any message if it cannot aquire fix.
+#define RANDOM_GPS //Uncomment to use random GPS coordinates when GPS cannot aquire fix. Otherwise it will send zeros as coordinates
 #define BROADCAST_ADDRESS 0xFFFF
 //End of config variables
 ////////////////////////////////////////////////////////////////////////

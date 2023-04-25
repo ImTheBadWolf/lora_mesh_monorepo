@@ -312,11 +312,11 @@ Pre pásmo 869,40 -- 869,65 MHz je ale udelená výnimka, ktorá umožňuje vysi
 \chapter{Dostupné LoRa moduly }
 Pri práci s technológiou LoRa máme na výber z rôznych modulov od rôznych výrobcov.
 Moduly môžme rozdeliť podla použitia na moduly pre koncové zariadenia a moduly pre gateway.
-Moduly pre koncové zariadenia obvykle dokážu prijímať a odosielať iba na jednom kanále ( kombinácia LoRa parametrov --  BW, SF, CR a frekvencia ) súčasne a majú 
+Moduly pre koncové zariadenia obvykle dokážu prijímať a odosielať iba na jednom kanále (kombinácia LoRa parametrov --  BW, SF, CR a frekvencia) súčasne a majú 
 nízku spotrebu energie. Moduly pre gateway dokážu prijímať a odosielať na viacerých kanáloch súčasne.
 
 V tejto časti sa budeme zaoberať dostupnými modulmi pre koncové zariadenia.
-Keďže je technológia LoRa patentovaná výrobcom Semtech \cite{semtech}, tak všetky dostupné LoRa čipy sú práve od tohto výrobcu a moduly od iných výrobcov 
+Keďže je technológia LoRa patentovaná výrobcom Semtech \cite{semtech}, všetky dostupné LoRa čipy sú práve od tohto výrobcu a moduly od iných výrobcov 
 sú založené na používaní týchto čipov. Kompletné porovnanie parametrov najpouživanejších modulov je možné vidieť v tabuľke \ref{tab:semtechModules}.
 
 \section{SX127x/SX126x}
@@ -328,17 +328,15 @@ SX127x LoRa modemy používajú LoRa modulačnú techniku frequency hopping spre
 
 Maximálny vysielací výkon týchto modemov je 100 mW.
 Vďaka použitej modulačnej technike je možné dosiahnuť vysokej citlivosti modemov.
-Výrobca uvádza citlivosť cez -137 dBm pri modemoch SX1272/73 a -148 dBm pri modemoch SX1276/78/79.
+Výrobca uvádza citlivosť cez -137 dBm pri modemoch SX1272 a -148 dBm pri modemoch SX1276/78/79. 
 
-
-Modemy SX1272 a SX1273 ponúkajú menší link budget\footnotemark[1] 157 dB oproti 168 dB pri modemoch SX1276/77/78/79. 
-\footnotetext[1]{Súčet zisku a strát signálu medzi vysielačom a prijímačom v bezdrôtovom prenose.}
-\newpage
-Majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz oproti modemom SX1276/77/78/79, kde 
+Modemy série SX127x sú parametrami veľmi podobné a v zásade sa líšia hlavne v rozsahu použiteľných frekvencií.
+Modemy SX1272 a SX1273 ponúkajú menší link budget\footnotemark[1] 157 dB, ktorý je 168 dB 
+pri modemoch SX1276/77/78/79. 
+Okrem toho majú menší rozsah frekvenčných pásiem medzi 860 a 1020 MHz oproti modemom SX1276/77, kde 
 je možné vybrať frekvenčné pásma z rozsahu 137 až 1020 MHz.
 
-Okrem toho majú aj vyššiu spotrebu energie.
-
+\footnotetext[1]{Súčet zisku a strát signálu medzi vysielačom a prijímačom v bezdrôtovom prenose}
 \subsection{SX126x}
 
 Modemy zo série SX126x - SX1261/62/68 sú nasledovníkmi predošlých modemov SX127x. Majú väčší vysielací výkon vďaka integrovanému zosilňovaču a menšiu spotrebu energie. 
@@ -355,7 +353,7 @@ Ten je pri modemoch série SX126x výrobcom udávaný na 170 dBm, takže sú opt
 	\caption[Parametre Semtech SX modemov]{Parametre Semtech SX modemov}
   \begin{tabular}{c|c|c|c|c|c|c|c|c}
     \toprule
-    Modem & Frekvencia & SF & BW (kHz) & Citlivosť & Spotreba\footnotemark[1] & Rozhranie & Výkon\footnotemark[2] & Cena\footnotemark[3]\\
+    Modem & Frekvencia & SF & BW (kHz) & Citlivosť & Spotreba\footnotemark[2] & Rozhranie & Výkon\footnotemark[3] & Cena\footnotemark[4]\\
     \midrule
     SX1272 & 860--1020 MHz & 6--12 & 125--500 & -137 dBm & 11,2 mA & SPI & 20 dbm & 9€ \\
     SX1273 & 860--1020 MHz & 6--9 & 125--500 & -130 dBm & 11,2 mA & SPI & 20 dbm & 7€ \\
@@ -371,9 +369,9 @@ Ten je pri modemoch série SX126x výrobcom udávaný na 170 dBm, takže sú opt
   \end{tabular}
   \label{tab:semtechModules}
 \end{table}
-\footnotetext[1]{Spotreba počas prijímania (mA)}
-\footnotetext[2]{Maximálny vysielací výkon}
-\footnotetext[3]{Cena platná ku Q4 2022}
+\footnotetext[2]{Spotreba počas prijímania (mA)}
+\footnotetext[3]{Maximálny vysielací výkon}
+\footnotetext[4]{Cena platná ku Q4 2022}
 
 \section{RFM9xW}
 Moduly RFM95W/96W/98W od výrobcu HopeRF \cite{hoperf} implementujú SX LoRa modemy od výrobcu Semtech.
@@ -403,7 +401,7 @@ Okrem toho TTGO LoRa32 obsahuje aj 0,96 palcový čiernobiely displej pripojený
 Tento displej môže slúžiť ako zobrazovací panel pre aplikácie, ktoré potrebujú zobrazovať textové a grafické informácie.
 
 \subsection{TTGO T-Beam}
-TTGO T-Beam je mikrokontrolér taktiež založený na module ESP32 s integrovaným Wi-Fi, Bluetooth a LoRa modulom. 
+TTGO T-Beam je mikrokontrolér, ktorý je taktiež založený na module ESP32 s integrovaným Wi-Fi, Bluetooth a LoRa modulom. 
 V porovnaní s predošlým mikrokontrolérom je však tento vybavený aj GPS modulom, ktorý umožňuje určovanie polohy zariadenia.
 
 Mikrokontrolér má na zadnej strane držiak na batériu, z ktorej môže byť napájaný. Taktiež je vybavený nabíjacím modulom, 
@@ -444,14 +442,14 @@ Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 
 \subsection{Raspberry Pi 2B}
 Jednodoskový, štvor-jadrový počítač vytvorený organizáciou Raspberry Pi. 
-Toto zariadenie obsahuje eternetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
-Počítač sam o sebe neobsahuje žiaden modul a tak bol pre prácu s LoRa pridaný RFM96W modul, pripojený do vstupno-výstupných pinov počítača.
+Toto zariadenie obsahuje ethernetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
+Počítač sam o sebe neobsahuje žiaden LoRa modul a tak bol pre prácu s LoRa pridaný modul RFM96W, pripojený do vstupno-výstupných pinov počítača.
 
 Na pripojenie bola použitá SPI zbernica. Raspberry Pi ponúka dva SPI porty, v našom prípade bol použitý ten prvý na pinoch 11, 10, 9 a 8. 
 Výsledné zostavenie môžme vidieť na Obr \ref{fig:rpi2b}.
 
 Na rozdiel od predchádzajúcich mikrokontrolérov disponuje tento jednodoskový počítač oveľa väčším výkonom a pamäťou, 
-avšak ma oveľa vyššiu spotrebu energie. Z tohto dôvodu tento počítač plnil rolu nemobilného uzlu v sieti, ktorý bol pripojený cez ethernet do internetovej siete.
+avšak ma oveľa vyššiu spotrebu energie. Z tohto dôvodu tento počítač plnil rolu nemobilného uzlu v sieti, ktorý bol pripojený cez ethernet do lokálnej siete.
 
 Vďaka tomu, že CircuitPython je možne spojazdniť aj na Raspberry Pi, bolo možné čast implementácie zdielať medzi Raspberry Pi Pico a Raspberry Pi 2B.
 

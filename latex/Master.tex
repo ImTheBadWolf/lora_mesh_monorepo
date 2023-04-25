@@ -474,19 +474,16 @@ Použitie mesh topológie môže so sebou prinášať rôzne výhody oproti bež
 Vo výskume od Ochoa et al. \cite{8115793} porovnávali spotrebu energie medzi 
 topológiou typu mesh a hviezdicovou topológiou v sieti LoRa. A z týchto štúdií možno vyvodiť, že pre rozsiahlejšie siete je viac
 efektívnejšie, z hľadiska spotreby energie, použiť topológiu mesh. 
-
 Okrem toho je možné optimalizovať výber rádiových nastavení v súlade s hustotou siete tak, 
 aby sa v mesh sieťach ešte viac optimalizovala spotreba energie.
 
-
-Existujú rozvinuté projekty ako napríklad Meshtastic \cite{meshtastic}, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť na miestach bez inej dostupnej konektivity, 
-za použitia lacných zariadení.
-
+Existujú rozvinuté projekty, ako napríklad Meshtastic \cite{meshtastic}, ktorý sa snaží vytvoriť rozsiahlu decentralizovanú mesh sieť na miestach bez inej dostupnej konektivity, 
+za použitia lacných zariadení. 
 Ďalším zaujímavým projektom je Armachat \cite{armachat}, ktorý ponúka možnosť komunikácie v prípade nedostupnosti ostatných sieti, napríklad po nejakej prírodnej alebo inej katastrofe.
 Súčasťou projektu Armachat sú plošné spoje, z ktorých si používateľ poskladá finálne zariadenie.
 Zariadenia Armachat sú poháňané mikrokontrolérmi Raspberry Pi Pico, obsahujú LoRa moduly, displej, klávesnicu a ďalšie vymoženosti.
 
-Originálny projekt avšak sám o sebe zatiaľ nepodporuje využívanie mesh topológie. Používa ale rovnakú štruktúru správ ako projekt Meshtastic a vďaka tomu je možné 
+Originálny projekt Armachat avšak sám o sebe zatiaľ nepodporuje využívanie mesh topológie. Používa ale rovnakú štruktúru správ ako projekt Meshtastic a vďaka tomu je možné 
 v projekte Armachat využívať mesh sieť projektu Meshtastic.
 
 Teoretických návrhov ako realizovať smerovanie v mesh sieťach je mnoho, avšak v praxi sa najčastejšie stretávame s 
@@ -515,14 +512,14 @@ Meshtastic vytvára mesh sieť za použitia lacných mikrokontrolérov s LoRa mo
 Myšlienka tohto projektu spočíva v tom, že vytvára komunikačnú sieť na miestach kde neexistuje spoľahlivá infraštruktúra na bezdrôtovú komunikáciu (napr. v horách).
 
 Posielanie správ v sieti je založené na jednoduchom multi-hop flooding.
-Každý uzol znovu odvysiela paket, ktorý prijal ( pokiaľ nedošiel počet preskokov na 0 ), až kým sa paket nedostane do určenej destinácie naprieč mesh sieťou.
+Každý uzol znovu odvysiela paket, ktorý prijal (pokiaľ nedošiel počet preskokov na 0), až kým sa paket nedostane do určenej destinácie naprieč mesh sieťou.
 Prenášane správy sú šifrované za pomoci šifrovacieho algoritmu AES.
 
 Zariadenia používane v projekte Meshtastic majú okrem LoRa modulu zabudovaný aj bluetooth modul, vďaka ktorému je možne sa k zariadeniu pripojiť cez mobilný telefón, ktorý slúži ako rozhranie pre 
 užívateľa. Cez aplikáciu v mobilnom telefóne môže používateľ vytvárať a prijímať správy. Správy sa cez bluetooth prenášajú z telefónu do zariadenia kde sa následne odošlú cez 
 LoRa do siete.
 
-Meshtastic poskytuje možnosť pripojenia sa k oficiálnemu meshtastic MQTT brokerovi. Toto umožňuje prepojiť malé lokálne mesh siete do väčšej globálnej siete a 
+Meshtastic poskytuje možnosť pripojenia sa k oficiálnemu meshtastic MQTT brokerovi. Toto umožňuje prepojiť malé lokálne mesh siete do väčšej globálnej siete, a 
 tak rozšíriť dosah siete.
 
 \section{LoRaBlink}
@@ -532,11 +529,11 @@ vysielať svoje dáta. Správy sa sieťou šíria pomocou multi-hop flooding.
 Sieť sa skladá z jedného uzlu, ktorý plní rolu takzvaného datasinku (gateway alebo brána) a ostatných uzlov. Uzly siete posielajú dáta do datasinku alebo dáta z neho prijímajú.
 
 V určitých intervaloch datasink vyšle tzv. beacon signál. Tento signál slúži na časovú synchronizáciu medzi uzlami a značí začiatok novej epochy. 
-Každá epocha obsahuje N slotov, v ktorých môžu uzly vysielať dáta. Beacon správa obsahuje hop count, ktorá udáva vzdialenosť ku datasinku.
-Ked nejaký uzol príjme beacon signál, vyšle svoj vlastný beacon signál v ďalšom volnom slote, ktorý vyberá na základe vzdialenosti od datasinku (hop count).
+Každá epocha obsahuje N slotov, v ktorých môžu uzly vysielať dáta. Beacon správa obsahuje hop count, ktorý udáva vzdialenosť ku datasinku.
+Keď nejaký uzol príjme beacon signál, vyšle svoj vlastný beacon signál v ďalšom voľnom slote, ktorý vyberá na základe vzdialenosti od datasinku (hop count).
 
-Ked uzol potrebuje poslať nejaké dáta, tak vyberie najskorší volný slot a v nom vysiela svoje dáta. Ak tieto dáta príjme uzol, ktorý nie je datasink a 
-hop count daného uzlu ku sinku je menší ako hop count vysielacieho uzlu, tak dáta v ďalšom volnom slote znovu prepošle. Toto sa opakuje, až 
+Keď uzol potrebuje poslať nejaké dáta, tak vyberie najskorší voľný slot a v nom vysiela svoje dáta. Ak tieto dáta príjme uzol, ktorý nie je datasink a 
+hop count daného uzlu ku sinku je menší ako hop count vysielacieho uzlu, tak dáta v ďalšom voľnom slote znovu prepošle. Toto sa opakuje, až 
 kým dáta nedosiahnu datasink.
 
 Takto tvorená sieť avšak vyžaduje existenciu nejakého hlavného uzlu (datasinku), ktorý je potrebný na riadenie siete prostredníctvom časovej synchronizácie.
@@ -544,6 +541,7 @@ Takto tvorená sieť avšak vyžaduje existenciu nejakého hlavného uzlu (datas
 \section{Pymesh}
 Pymesh je súčasťou Pycom \cite{pycom} ekosystému. Tento ekosystém je určený na vývoj IoT systémov. Ponúka rôzne zariadenia, ktoré sú určené na použitie s týmto 
 ekosystémom. Zariadenia obsahujú WiFi, bluetooth a LoRa, prípadne SigFox moduly. Zariadenia je možné rozšíriť o rôzne moduly so senzormi, ktoré rozširujú ich schopnosti.
+PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na inom zariadení by vyžadovalo väčšie úpravy zdrojového kódu.
 
 PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway sú označované ako Border Routers a prepájajú LoRa sieť s 
 internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncové 
@@ -553,8 +551,6 @@ Príklad Pymesh siete, obsahujúcej uzly rôznych roli, môžme vidieť na obrá
 Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
 Aby sa zabránilo takýmto situáciám, je použitá metóda Listen Before Talk, pri ktorej sa pred vysielaním signálu overí, či nie je v sieti už niekto iný, kto by práve 
 vysielal. Pokiaľ áno, tak sa posielaná správa vyšle neskôr.
-
-PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na inom zariadení by vyžadovalo väčšie úpravy zdrojového kódu.
 
 \begin{figure}[h!]
 	\centering
@@ -579,7 +575,7 @@ pevné pripojenie do elektrickej a prípadne aj internetovej siete, ktoré v kan
 by teda bolo potrebné implementovať viacero LoRaWAN gateway.
 
 Tento projekt sa snaží vyriešiť tieto problémy. Prináša protokol, ktorý rozširuje LoRaWAN o tzv. repeater uzly (RN) viď Obr. \ref{fig:synchronouslora}. Tieto uzly sa vyskytujú na povrchu a preposielajú dáta z 
-podzemných monitorovacích uzlov (sensor node  - SN) do LoRaWAN siete. Monitorovacie uzly pod zemou tvoria mesh sieť a RN plní funkciu riadiaceho uzlu pre podzemnú mesh sieť. 
+podzemných monitorovacích uzlov (sensor node - SN) do LoRaWAN siete. Monitorovacie uzly pod zemou tvoria mesh sieť a RN plní funkciu riadiaceho uzlu pre podzemnú mesh sieť. 
 Komunikácia medzi RN a SN je synchronizovaná pomocou presného časovania, čo umožňuje koordináciu zmeny stavov SN z režimu spánku do normálneho režimu v čase, kedy 
 potrebuje SN prijímať a odosielať dáta. Komunikácia sa cez uzly šíri multi-hop prístupom, za použitia smerovacej tabuľky.
 
@@ -595,19 +591,17 @@ Monitorovacie uzly sú väčšinu času v režime spánku, zobudia sa len v ich 
 
 Novo pripojený uzol do siete musí čakať na periodický beacon, vysielaný RN uzlom. Z beaconu sa zistí, aky časový slot je priradený danému uzlu a až po priradení slotu, môže uzol začať komunikovať v sieti.
 
-
-
 \section{Porovnanie a návrh nášho rozšírenia}
 Niektoré zo spomenutých riešení využívajú smerovacie tabuľky na efektívnejší prenos dát v rámci siete. Tie môžu byť však limitáciou pokiaľ 
 chceme dosiahnuť vyššej mobility uzlov. V prípade, že by sme chceli spolu so smerovacími tabuľkami podporovať mobilitu uzlov, je potrebné zabezpečiť 
-dostatočné časté aktualizácie smerovacích tabuliek.
+dostatočne časté aktualizácie smerovacích tabuliek.
 
 Niektoré spomenuté riešenia limitujú komunikáciu medzi uzlami na vyhradené časové okná, mimo ktoré sú uzly v úspornom režime. To môže byť 
 veľkou limitáciou pri niektorých aplikáciách, kde je potrebná komunikácia v reálnom čase  (napr. chat).
 
 V tejto práci sme navrhli protokol, ktorý nevyužíval žiadne smerovacie tabuľky. Vďaka tomu bola dosiahnutá vysoká mobilita uzlov a dynamickosť siete. 
 Hlavným využitím nášho protokolu bola ad-hoc komunikácia, preto protokol nepoužíval 
-žiadnu časovú synchronizáciu a časové okná vyhradené na komunikáciu, uzly siete tak mohli prijímať a odosielať dáta kedykoľvek to bolo potrebné.
+žiadnu časovú synchronizáciu a časové okná vyhradené na komunikáciu. Uzly siete tak mohli prijímať a odosielať dáta kedykoľvek to bolo potrebné.
 To so sebou ale prinášalo nevýhodu v podobe vyššej spotreby energie.
 
 Funkcionalita navrhnutého protokolu, podobne ako niektoré zo spomínaných riešení, fungovala na základe multi hop flooding, 
@@ -615,12 +609,11 @@ kedy sa správa v sieti preposielala cez uzly siete až kým nedorazila do desti
 Správa sa odoslala a uzol, ktorý túto správu prijal ako posledný ju preposlal ďalej. Toto sa opakovalo na ostatných uzloch v sieti až kým sa správa nedostala do destinácie alebo kym správe nedošiel limit preskokov, prípade TTL.
 
 Navrhnutý protokol nebol závislý na žiadnych špeciálnych centrálnych uzloch typu gateway, prípadne nejakých riadiacich uzloch. Každý uzol v sieti mohol byť jednoduchým uzlom, ktorý prijímal a preposielal dáta ďalej.
-Vďaka tomu mohli byť uzly realizované prostredníctvom lacných a malých zariadení.
+Vďaka tomu mohli byť uzly realizované prostredníctvom lacných a malých zariadení. Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
 
 Protokol bolo možné používať na rôznych platformách. V tejto práci vznikla implementácia protokolu pre mikrokontroléry používajúce programovací jazyk C++ a 
-mikrokontroléry alebo jednodoskové počítače podporujúce CircuitPython.
+mikrokontroléry alebo jednodoskové počítače podporujúce CircuitPython. 
 
-Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
 
 
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
@@ -1228,9 +1221,9 @@ Po sfunkčnení celej aplikácie sme narazil na problém, v podobe nepostačujú
 väčšie množstvo správ, tak mu došla pamäť a beh programu sa ukončil.
 
 V zozname správ boli uložené všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny, a časom ako 
-uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a volná pamäť zariadenia sa postupne znižovala.
+uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a voľná pamäť zariadenia sa postupne znižovala.
 
-Vykonali sme experiment, pri ktorom sme merali veľkosť volnej pamäte pred a po vytvorení textovej správy. Dĺžka textovej správy bola postupne zvyšovaná. Výsledky merania 
+Vykonali sme experiment, pri ktorom sme merali veľkosť voľnej pamäte pred a po vytvorení textovej správy. Dĺžka textovej správy bola postupne zvyšovaná. Výsledky merania 
 môžme vidieť na obrázku \ref{fig:memoryUsage}.
 správ.
 \begin{figure}[h!]

@@ -1532,19 +1532,19 @@ Tomuto problému sme sa snažili vyhýbať tak, že zariadenie zobrazovalo infor
 sa bude pripájať na webový server až po zobrazení tejto informácie. K tejto chybe existuje report v zozname chýb na GitHub stránke CircuitPythonu\footnote[5]{https://github.com/adafruit/circuitpython/issues/7790}.
 
 \chapter{Záver}
-V tejto práci sa nam podarilo vytvoriť funkčný komunikačný protokol pre bezdrôtovú komunikáciu medzi zariadeniami v LoRa mesh sieti.
-Funkcionalita protokolu bola otestovaná na rôznych zariadeniach kde bolo potvrdené, že protokol funguje správne. 
+V tejto práci sa nám podarilo vytvoriť funkčný komunikačný protokol pre bezdrôtovú komunikáciu medzi zariadeniami v LoRa mesh sieti, založený na multi hop flooding prístupe.
+Protokol ponúkal ad-hoc komunikáciu medzi používateľmi v sieti, umožňoval veľkú škálovatelnosť siete a prípadne kolízie v sieti riešil prístupom listen before talk.
 
 K obsluhe protokolu vzniklo webové rozhranie, na ktoré sa používateľ pripájal a mohol cez neho prijímať a odosielať správy, konfigurovať 
-rôzne nastavenia, ktoré ovplyvňovali správanie protokolu, a spravovať zoznam kontaktov. Zoznam kontaktov slúžil na prekladanie 
-hexadecimálnych adries zariadení na používateľom definované názvy.
+rôzne nastavenia, ktoré ovplyvňovali správanie protokolu prípadne spravovať zoznam kontaktov. Toto rozhranie bolo prístupne prostredníctvom WiFi siete, 
+na ktorú sa zariadenie pripájalo, prípadne vytváralo svoju vlastnú WiFi sieť.
 
-Nami vytvorené riešenie je vhodné pre použitie v rôznych oblastiach, a ponúka oproti iným riešeniam isté výhody ako aj nevýhody.
+Nami vytvorené riešenie je vhodné pre použitie v rôznych oblastiach, a ponúka oproti iným riešeniam isté výhody, ako aj nevýhody.
 Ak porovnáme naše riešenie voči niektorým spomínaným protokolom, ako napríklad LoRaBlink alebo Synchronous LoRa Mesh, 
 tak náš protokol nie je závislý na žiadnych centrálnych uzloch, potrebných k riadeniu siete. Taktiež ponúka vyššiu dynamickosť siete oproti 
 niektorým riešeniam.
 
-Naše riešenie by sa dalo prirovnať k projektu Meshtastic, ale oproti tomuto projektu ponúka naš protokol rôzne typy správ, ktoré umožňujú 
+Naše riešenie by sa dalo prirovnať k projektu Meshtastic, ale oproti tomuto projektu ponúka náš protokol rôzne typy správ, ktoré umožňujú 
 rozlične spracovávať správy zo senzorov a správy od používateľov. Okrem toho v našom protokole riešime aj slabinu projektu Meshtastic, ktorú sme 
 popísali v kapitole testovania funkčnosti.
 

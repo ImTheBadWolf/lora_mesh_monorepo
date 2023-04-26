@@ -392,10 +392,9 @@ TTGO LoRa32 je multifunkčný mikrokontrolér postavený na module ESP32, ktorý
 moduly pre bezdrôtovú komunikáciu, vrátane Wi-Fi, Bluetooth a SX1276 LoRa modulu. 
 
 Tento mikrokontrolér je navrhnutý pre projektovanie internetu vecí (IoT), senzorov a ďalších podobných aplikácií, 
-ktoré vyžadujú spoľahlivú a energeticky úspornú bezdrôtovú komunikáciu.
-
+ktoré vyžadujú spoľahlivú a energeticky úspornú bezdrôtovú komunikáciu. 
 Jednou z výhod tohto mikrokontroléru je jeho úsporný režim spánku, ktorý umožňuje znížiť spotrebu až na 0,6 mA. 
-Tento režim je ideálny pre aplikácie, ktoré potrebujú byť v prevádzke čo najdlhšie, bez nutnosti pravidelného nabíjania batérie.
+Tento režim je ideálny pre aplikácie, ktoré potrebujú byť v prevádzke čo najdlhšie, bez nutnosti pravidelného nabíjania batérie. 
 
 Okrem toho TTGO LoRa32 obsahuje aj 0,96 palcový čiernobiely displej pripojený cez I2C rozhranie. 
 Tento displej môže slúžiť ako zobrazovací panel pre aplikácie, ktoré potrebujú zobrazovať textové a grafické informácie.
@@ -406,16 +405,14 @@ V porovnaní s predošlým mikrokontrolérom je však tento vybavený aj GPS mod
 
 Mikrokontrolér má na zadnej strane držiak na batériu, z ktorej môže byť napájaný. Taktiež je vybavený nabíjacím modulom, 
 ktorý umožňuje bezpečné nabíjanie a ochranu lítiových batérií. TTGO T-Beam je v režime spánku schopný spotreby iba 0,2 mA. 
-
-Okrem toho, TTGO T-Beam je tiež schopný pripojenia dodatočného displeja, ktorý môže byť použitý na zobrazovanie informácií. 
-Nami použivaný mikrokontrolér však tento displej nemal.
-
+Mikrokontrolér TTGO T-Beam je tiež schopný pripojenia dodatočného displeja, ktorý môže byť použitý na zobrazovanie informácií. 
+Nami použivaný mikrokontrolér však tento displej nemal. 
 Na Obr \ref{fig:ttgo-moduly} môžeme vidieť oba mikrokontroléry TTGO.
 \begin{figure}[h!]
   \centering
-  \subfloat[\centering TTGO LoRa32]{{\includegraphics[width=0.4\textwidth]{Figures/LILYGO-TTGO-LoRa32-V1.png} }}
+  \subfloat[\centering TTGO LoRa32]{{\includegraphics[width=0.45\textwidth]{Figures/LILYGO-TTGO-LoRa32-V1.png} }}
   \qquad
-  \subfloat[\centering TTGO T-beam]{{\includegraphics[width=0.35\textwidth]{Figures/ttgo-tbeam.jpg} }}
+  \subfloat[\centering TTGO T-beam]{{\includegraphics[width=0.4\textwidth]{Figures/ttgo-tbeam.jpg} }}
   \caption[Mikrokontroléry TTGO]{Mikrokontroléry TTGO. Prevzaté z \cite{lilygo}}
   \label{fig:ttgo-moduly}
 \end{figure}
@@ -425,11 +422,9 @@ Mikrokontrolér od známej organizácie Raspberry Pi \cite{rpiOrg}, založený n
 Existuje verzia s Wi-Fi modulom aj bez. Na programovanie sa využíva jazyk C alebo MicroPython, 
 prípadne derivát MicroPythonu -- CircuitPython. V tejto práci bol použitý práve CircuitPython.
 
-Avšak aby bolo možné využívať tieto mikrokontroléry s technológiou LoRa, bolo potrebné pridať k nim nejaký LoRa modul.
-
+Avšak aby bolo možné využívať tieto mikrokontroléry s technológiou LoRa, bolo potrebné pridať k nim nejaký LoRa modul. 
 Na implementáciu v tejto práci boli preto zvolené zariadenia Armachat, ktoré kombinujú mikrokontrolér Raspberry Pi Pico s LoRa modulom RFM96W.
-Okrem toho pridávajú dvoj palcový farebný displej a klávesnicu.
-
+Okrem toho pridávajú dvoj palcový farebný displej a klávesnicu. 
 Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 
 \begin{figure}[h!]
@@ -443,8 +438,7 @@ Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
 \subsection{Raspberry Pi 2B}
 Jednodoskový, štvor-jadrový počítač vytvorený organizáciou Raspberry Pi. 
 Toto zariadenie obsahuje ethernetový port, ktorý môže slúžiť na pevné pripojenie do internetovej siete.
-Počítač sam o sebe neobsahuje žiaden LoRa modul a tak bol pre prácu s LoRa pridaný modul RFM96W, pripojený do vstupno-výstupných pinov počítača.
-
+Počítač sam o sebe neobsahuje žiaden LoRa modul a tak bol pre prácu s LoRa pridaný modul RFM96W, pripojený do vstupno-výstupných pinov počítača. 
 Na pripojenie bola použitá SPI zbernica. Raspberry Pi ponúka dva SPI porty, v našom prípade bol použitý ten prvý na pinoch 11, 10, 9 a 8. 
 Výsledné zostavenie môžme vidieť na Obr \ref{fig:rpi2b}.
 
@@ -661,8 +655,7 @@ bola primárne určená pre mikrokontroléry TTGO. Z dôvodu výkonnosti a obmed
 údajmi zo senzorov. Mikrokontroléry TTGO tak v sieti fungovali iba ako jednoduché uzly, ktoré v určitých časových intervaloch odosielali dáta zo senzorov.
 
 \section{Typy a stavy správ}
-Predom sme si stanovili, že v našom protokole bude možné odosielať rôzne typy správ. Na základe typov správ, sa potom správy spracovávajú odlišne.
-
+Predom sme si stanovili, že v našom protokole bude možné odosielať rôzne typy správ. Na základe typov správ, sa potom správy spracovávajú odlišne. 
 Okrem typov správ, bolo nutné si definovať aj určité stavy, v ktorých sa správa môže nachádzať. Tieto stavy potom určovali, ako sa správa spracováva.
 \subsection{Typy správ}
 Rozhodli sme sa v našom protokole implementovať dokopy sedem typov správ. Každý typ správy má svoju úlohu a využitie.
@@ -731,7 +724,7 @@ Navrhnutú štruktúru hlavičky paketu môžme vidieť v tabuľke \ref{tab:pack
   \caption{Štruktúra hlavičky paketu a dĺžka jednotlivých polí v bajtoch.}
   \begin{tabular}{|c|c|c|c|c|c|c|}
     \toprule
-    2B \emph{uint} & 2B \emph{uint} & 4B \emph{uint} & 2B \emph{uint} & 1B \emph{uint} & 1B \emph{uint} & 0 -- 240B \\
+    2B \emph{int} & 2B \emph{int} & 4B \emph{int} & 2B \emph{int} & 1B \emph{int} & 1B \emph{int} & 0 -- 240B \\
     \midrule
     Destinácia & Odosielateľ & ID správy & Kontrolný súčet & Typ správy & Priorita & Dátový rámec \\
     \midrule
@@ -759,7 +752,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \caption{Štruktúra dátového rámcu pre textové správy.}
   \begin{tabular}{|c|c|c|}
     \toprule
-    1B \emph{uint} & 1B \emph{uint} & 0 -- 238B \emph{String} \\
+    1B \emph{int} & 1B \emph{int} & 0 -- 238B \emph{string} \\
     \midrule
     Počet skokov & Pôvodný počet skokov & Textové dáta \\
     \midrule
@@ -772,7 +765,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \subfloat[\centering Správa typu žiadosť o traceroute.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B \emph{uint} & 1B \emph{uint} \\
+      1B \emph{int} & 1B \emph{int} \\
       \midrule
       Počet skokov & Pôvodný počet skokov \\
       \midrule
@@ -782,7 +775,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \subfloat[\centering Správa typu odpoveď na traceroute.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B \emph{uint} & 0 -- 239B \emph{String}\\
+      1B \emph{int} & 0 -- 239B \emph{string}\\
       \midrule
       Počet skokov & Navštívené adresy \\
       \midrule
@@ -805,7 +798,7 @@ následne použiť na správne nastavenie maximálneho počtu skokov pre odoslan
   \subfloat[\centering Potvrdzovacie ACK správy.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      1B \emph{uint} & 4B \emph{uint} \\
+      1B \emph{int} & 4B \emph{int} \\
       \midrule
       Počet skokov & ID potvrdzovanej správy \\
       \midrule
@@ -815,7 +808,7 @@ následne použiť na správne nastavenie maximálneho počtu skokov pre odoslan
   \subfloat[\centering Správy pre senzorové dáta.]{{
     \begin{tabular}{|c|c|}
       \toprule
-      2B \emph{uint} & 0 -- 238B \emph{String} \\
+      2B \emph{int} & 0 -- 238B \emph{string} \\
       \midrule
       TTL & Senzorové dáta \\
       \midrule
@@ -893,7 +886,7 @@ Hodnota SNR vyjadruje pomer signálu k šumu. Čím je hodnota SNR vyššia, tý
 Vďaka tomu, bolo možné približne odhadnúť, ktorý uzol bol vzdialenejší. Uzly, ktoré boli vzdialenejšie, mali nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
 To viedlo k tomu, že vzdialenejšie uzly odvysielali správu skôr, ako uzly, ktoré boli bližšie. Ostatné uzly toto vysielanie prijali, a u seba označili danú správu ako zmazanú, 
 keďže už nebolo potrebné aby ju oni preposielali. Na určenie časového oneskorenia bol použitý následovný výpočet vyobrazený na Obr \ref{fig:getTimeout}. Výpočet transformuje hodnotu 
-SNR prijatého paketu na časové oneskorenie v intervale od 1 do 6 sekúnd, pričom ráta s minimálnou hodnotou SNR -20 dB a maximálnou hodnotou 20 dB. 
+SNR prijatého paketu na časové oneskorenie v intervale od 1 do 6 sekúnd, pričom ráta s rozsahom hodnôt SNR -20 -- 20 dB.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/getTimeout.png}
@@ -1097,11 +1090,9 @@ Rozhodli sme sa pridať aj možnosť ukladať si kontakty do adresára, ktorý u
 hexadecimálnych adries v správach, názov uloženého kontaktu. Tieto kontaktné adresáre boli rozdelené pre kontakty na iných používateľov a kontakty 
 ne senzorové uzly. Z toho dôvodu boli potrebné dve ďalšie stránky, kde by používateľ mohol spravovať svoje kontakty.
 
-Poslednou stránkou bola stránka na konfiguračné rozhranie. Táto stránka obsahovala všetky možnosti, ktoré mal používateľ možnosť nastavovať.
-
+Poslednou stránkou bola stránka na konfiguračné rozhranie. Táto stránka obsahovala všetky možnosti, ktoré mal používateľ možnosť nastavovať. 
 Výsledne návrhy môžeme vidieť na následujúcich obrázkoch. Stránky pre správu kontaktov (Obr. \ref{fig:figma2}) na používateľov a kontaktov na senzorové uzly budú vyzerať 
-rovnako.
-
+rovnako. 
 Na obrázku \ref{fig:figmaHome} zachytávajúcom návrh úvodnej stránky si môžme všimnúť, že niektoré adresy sú zobrazené ako mená z kontaktov.
 
 Pri tvorbe návrhu stránky na konfiguráciu nastavení (Obr. \ref{fig:figma2}), nebolo ešte známe, aké všetky nastavenia 
@@ -1216,25 +1207,16 @@ my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobile
 
 \newpage
 \section{Optimalizácia}
-Po sfunkčnení celej aplikácie sme narazil na problém, v podobe nepostačujúceho miesta na zariadeniach. Dochádzalo k tomu, že ak zariadenie prijalo 
+Po sfunkčnení celej aplikácie sme narazili na problém, v podobe nepostačujúceho miesta na zariadeniach. Dochádzalo k tomu, že ak zariadenie prijalo 
 väčšie množstvo správ, tak mu došla pamäť a beh programu sa ukončil.
 
 V zozname správ boli uložené všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny a časom, ako 
 uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a voľná pamäť zariadenia sa postupne znižovala.
 
-Vykonali sme experiment, pri ktorom sme merali veľkosť voľnej pamäte pred a po vytvorení textovej správy. Dĺžka textovej správy bola postupne zvyšovaná. Výsledky merania 
-môžme vidieť na obrázku \ref{fig:memoryUsage}.
-správ.
-\begin{figure}[h!]
-  \begin{center}
-    \includegraphics[width=1\textwidth]{Figures/memAnalyze.png}
-  \end{center}
-  \caption{Graf závislosti veľkosti pamäte na dĺžke správy}
-  \label{fig:memoryUsage}
-\end{figure}
-
-Z merania bolo zistené, že pri maximálnej povolenej dĺžke správy, ktorá je 238 znakov, bolo alokovaných približne 2390 bajtov pre každú novú správu. Samotný bežiaci program 
-zaberá zhruba, 30 kB a zvyšná voľná pamäť zariadenia tak nebola dostatočná na uloženie viac ako 12 správ (Rátame so správami maximálnej dĺžky). 
+Vykonali sme experiment, pri ktorom sme merali veľkosť voľnej pamäte pred a po vytvorení textovej správy. Dĺžka textovej správy bola postupne zvyšovaná. 
+Z merania bolo zistené, že pamäť (v bajtoch) potrebná pre uloženie jednej správy je približne rovná 753B + 7*počet znakov. 
+Pri maximálnej povolenej dĺžke správy, ktorá je 238 znakov, bolo teda alokovaných približne 2400 bajtov pre každú novú správu. Samotný bežiaci program 
+zaberá zhruba 30 kB a zvyšná voľná pamäť zariadenia tak nebola dostatočná na uloženie viac ako 12 správ (Rátame so správami maximálnej dĺžky). 
 Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahol určeného limitu, tak sa z neho odstránila najposlednejšia správa.
 Po tejto úprave už nedochádzalo k spomínanému problému.
 
@@ -1391,19 +1373,10 @@ k nemu správa nedoručila a po uplynutí časového intervalu bola označená s
 Bola otestovaná aj priepustnosť siete a postupnosť prijatých správ. Tento test bol realizovaný tak, že zo zariadenia \emph{Armachat \#1} bolo odoslaných celkovo 26 správ. Do každej ďalšej správy 
 bolo pridávané následujúce písmeno abecedy. Tieto správy boli odoslane tesne za sebou, a následne sme sledovali či sa podarilo doručiť všetky tieto správy uzlu 0x0005.
 
-Na obrázkoch \ref{fig:packetLoss} môžme vidieť prijaté správy. Z výpisu zoznamu správ (Obr. \ref{fig:packetLossSum}) sme sa dozvedeli, že sme prijali celkovo 23 správ. Taktiež si môžme všimnúť, že správy 
-môžu doraziť do destinácie v inom poradí v akom boli odoslané.
-
+Na obrázkoch \ref{fig:packetLoss} môžme vidieť prijaté správy. Vidíme, že sme prijali celkovo 23 správ. Taktiež si môžme všimnúť, že správy 
+môžu doraziť do destinácie v inom poradí v akom boli odoslané. 
 Na základe získaných údajov môžme povedať, že sa nám podarilo doručiť 23 správ z 26, z čoho vyplýva pravdepodobnosť doručenia správy približne 88,5\%.
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.9\textwidth]{Figures/packetLoss.png}
-  \caption{Čast výpisu správ z webového rozhrania a počet všetkých správ}
-  \label{fig:packetLossSum}
-\end{figure}
 
-
-\newpage
 \begin{figure}[h!]
   \centering
   \subfloat{{
@@ -1414,13 +1387,14 @@ Na základe získaných údajov môžme povedať, že sa nám podarilo doručiť
   \label{fig:packetLoss}
 \end{figure}
 
+\newpage
 Vytvorili sme testovací scenár na zmeranie času potrebného na doručenie správy - latencie. Z uzlu 0x0005 sme odosielali správy rôznej dĺžky. Pri každom odoslaní 
 bol uložený čas odoslania každej konkrétnej správy. Správy boli posielané uzlu 0x0001, ktorý po ich prijatí poslal nazad ACK správu. Keď táto ACK správa dorazila 
 k uzlu 0x0005 tak sa zaznamenal čas prijatia správy a na základe rozdielu medzi časom odoslania a časom prijatia sa vypočítal čas potrebný na doručenie správy.
 
 Meranie bolo vykonané pre správy rôznych dĺžok, a pri každej dĺžke správy bolo odoslaných 16 správ. Na základe týchto údajov sme vytvorili graf, ktorý je 
-zobrazený na obrázku \ref{fig:latencyGraph}. Z merania sme zistili, že čas doručenia správy sa zvyšuje s dĺžkou správy a, že pri správach dĺžky 200 znakov sa čas doručenia 
-pohybuje okolo 25 sekúnd. Kompletné namerané hodnoty je možné nájsť v prílohe \ref{fig:latencyTable1}.
+zobrazený na obrázku \ref{fig:latencyGraph}. Z merania sme zistili, že čas doručenia správy sa zvyšuje s dĺžkou správy a že pri správach dĺžky 200 znakov sa čas doručenia 
+pohybuje v priemere okolo 25 sekúnd. Kompletné namerané hodnoty je možné nájsť v prílohe \ref{fig:latencyTable1}.
 
 Tieto merania boli vykonávane s nastavenou hodnotou \emph{Resend timeout} 8 sekúnd. Následne sme znížili hodnotu tejto konfiguračnej premennej na 2 sekundy 
 a opakovali meranie pri správach dĺžky 200 znakov. Pri skrátení času medzi opakovanými odoslaniami správ na 2 sekundy sa čas doručenia správy znížil približne 
@@ -1432,6 +1406,7 @@ na 19 sekúnd.
   \label{fig:latencyGraph}
 \end{figure}
 
+\newpage
 Ďalším testovaním, ktoré sme realizovali bolo zistenie, aký vplyv má konfiguračná premenná \emph{Resend count} na stratovosť paketov v sieti. Toto meranie bolo vykonávane 
 v inom prostredí, ako predchádzajúce meranie stratovosti. Topológia siete bola ale rovnaká. Avšak v tomto prípade neobsahovala sieť senzorové uzly a sieť bola realizovaná v 
 interiéri budovy. Na obrázku \ref{fig:plResend} vidíme zobrazený graf závislosti stratovosti paketov od počtu opakovaných odoslaní správy. Z grafu môžme vidieť, že ak 
@@ -1440,12 +1415,11 @@ znižuje.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1\textwidth]{Figures/packetLossResendCount.png}
-  \caption{Graf závislosti TODO}
+  \includegraphics[width=0.8\textwidth]{Figures/packetLossResendCount.png}
+  \caption[Graf stratovosti paketov]{Graf stratovosti paketov v závislosti od počtu opakovaní odosielania správy}
   \label{fig:plResend}
 \end{figure}
 
-\newpage
 Taktiež sme otestovali funkcionalitu monitorovacieho módu. Po zapnutí monitorovacieho módu sme z jedného zariadenia vyslali LoRa pakety, 
 ktoré nespĺňali špecifikáciu nášho protokolu. Na zariadení 0x0005 sa následne zobrazili dva nespracované pakety v podobe hexadecimálnych hodnôt 
 jednotlivých bajtov. Tie je možné vidieť na obrázku \ref{fig:rawPacket}.
@@ -1559,7 +1533,7 @@ by bolo možné následne použiť na zabezpečenie neprekročenia povoleného l
 
 % Prilohy
 \appendix
-\chapter{}
+\chapter{Namerané hodnoty latencie a stavový diagram}
 
 \begin{table}[!ht]
   \centering
@@ -1595,5 +1569,16 @@ by bolo možné následne použiť na zabezpečenie neprekročenia povoleného l
   \caption{Zjednodušený stavový diagram}
   \label{fig:stateDiagram}
 \end{figure}
+
+\chapter{Zdrojové kódy}
+Priložené zdrojové kódy sú rozdelené do zložiek pre konkrétne zariadenia. Pre zariadenia Armachat bez WiFi modulu 
+sa nachádzajú zdrojové kódy v zložke \emph{armachat/armachat\_nw/}. V zložke \emph{armachat/armachat\_w/} sa nachádzajú zdrojové kódy pre 
+zariadenia Armachat, ktoré obsahujú WiFi modul. 
+Zdrojové kódy pre použité TTGO mikrokontroléry sa nachádzajú v zložkách \emph{ttgo/ttgo-tbeam/} a \emph{ttgo/ttgoLoRa32/}, a 
+pre zariadenie Raspberry Pi 2B v zložke \emph{raspberry pi/}. V tejto zložke sa okrem zdrojových kódov nachádza aj skript \emph{autostart.sh}, 
+slúžiaci na automatické spúšťanie programu pri štarte zariadenia. Tento skript je spúšťaný automaticky pri štarte zariadenia pomocou služby Cron.
+
+
+
 
 \end{document}

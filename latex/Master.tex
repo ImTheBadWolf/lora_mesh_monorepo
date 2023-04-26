@@ -606,7 +606,7 @@ To so sebou ale prinášalo nevýhodu v podobe vyššej spotreby energie.
 
 Funkcionalita navrhnutého protokolu, podobne ako niektoré zo spomínaných riešení, fungovala na základe multi hop flooding, 
 kedy sa správa v sieti preposielala cez uzly siete až kým nedorazila do destinácie.
-Správa sa odoslala a uzol, ktorý túto správu prijal ako posledný ju preposlal ďalej. Toto sa opakovalo na ostatných uzloch v sieti až kým sa správa nedostala do destinácie alebo kym správe nedošiel limit preskokov, prípade TTL.
+Správa sa odoslala a uzol, ktorý túto správu prijal ako posledný ju preposlal ďalej. Toto sa opakovalo na ostatných uzloch v sieti až kým sa správa nedostala do destinácie alebo kým správe nedošiel limit preskokov, prípade TTL.
 
 Navrhnutý protokol nebol závislý na žiadnych špeciálnych centrálnych uzloch typu gateway, prípadne nejakých riadiacich uzloch. Každý uzol v sieti mohol byť jednoduchým uzlom, ktorý prijímal a preposielal dáta ďalej.
 Vďaka tomu mohli byť uzly realizované prostredníctvom lacných a malých zariadení. Na šifrovanie obsahu správ bol použitý šifrovací algoritmus AES.
@@ -650,15 +650,15 @@ Jednou z nevýhod bolo, že ak sme poslali niekam správu, a destinácia práve 
 odoslať niekedy neskôr. To, že sa správu nepodarilo doručiť do destinácie, sme zisťovali vďaka potvrdzovacím ACK správam. 
 
 Ďalším z problémov mohlo byť potenciálne zahltenie siete správami. Keby každý uzol v sieti preposielal ďalej každú správu, ktorú prijal, tak by sme sa rýchlo dostali 
-do stavu kedy by množstvo uzlov preposielalo rovnaké správy a sieť by sa tym pádom zahltila.
-Riešenie tohto problému spočívalo v niekoľkých procesoch ako stavu zahltenia predchádzať. Tieto procesy si bližšie popíšeme v kapitole implementácie.
+do stavu kedy by množstvo uzlov preposielalo rovnaké správy a sieť by sa tým pádom zahltila.
+Riešenie tohto problému spočívalo v niekoľkých procesoch ako stavu zahltenia predchádzať. Tieto procesy si bližšie popíšeme v sekcií implementácie.
 
 V tejto práci vznikli dve verzie implementácie. Jedna verzia, implementovaná v CircuitPython, bola určená pre výkonnejšie zariadenia. Táto implementácia obsahovala aj webové rozhranie na 
 obsluhu, posielanie a prijímanie sprav. Webové rozhranie avšak šlo využiť len na zariadeniach, ktoré podporujú WiFi prípadne ethernet.
 
 Implementácia v C++ bola určená pre menej výkonne zariadenia. Táto implementácia bola len zjednodušená verzia kompletnej implementácie a 
 bola primárne určená pre mikrokontroléry TTGO. Z dôvodu výkonnosti a obmedzenej pamäti táto implementácia obsahovala iba základné funkcionality protokolu, potrebné na odosielanie správ s 
-údajmi so senzorov. Mikrokontroléry TTGO tak v sieti fungovali iba ako jednoduché uzly, ktoré v určitých časových intervaloch odosielali dáta zo senzorov.
+údajmi zo senzorov. Mikrokontroléry TTGO tak v sieti fungovali iba ako jednoduché uzly, ktoré v určitých časových intervaloch odosielali dáta zo senzorov.
 
 \section{Typy a stavy správ}
 Predom sme si stanovili, že v našom protokole bude možné odosielať rôzne typy správ. Na základe typov správ, sa potom správy spracovávajú odlišne.
@@ -679,8 +679,8 @@ reťazca, ktorý obsahoval dáta zo senzorov. Tento typ správ avšak oproti oby
 časový interval -- TTL, po ktorého uplynutí sa správa nebude ďalej šíriť sieťou. Obsah správy bol taktiež šifrovaný.
 
 Sprava žiadosť o traceroute (TRACEROUTE\_REQUEST) bola používaná len v krajných prípadoch, kedy nás zaujímalo akou cestou sa správa preposiela sieťou. 
-Ked nejaký uzol prijal správu typu žiadosť o traceroute, tak vytvoril novu správu typu odpoveď na traceroute (TRACEROUTE) a vložil do nej svoju adresu. 
-Adresátom tejto novej správy bol odosielateľ pôvodnej správy. Ked sa táto odpoveď na traceroute šírila sieťou, 
+Keď nejaký uzol prijal správu typu žiadosť o traceroute, tak vytvoril novu správu typu odpoveď na traceroute (TRACEROUTE) a vložil do nej svoju adresu. 
+Adresátom tejto novej správy bol odosielateľ pôvodnej správy. Keď sa táto odpoveď na traceroute šírila sieťou, 
 tak každý uzol, ktorý danú správu preposlal ďalej, pridal do nej svoju vlastnú adresu.
 Takto sa vytvoril reťazec, ktorý obsahoval adresy všetkých uzlov, cez ktoré bola správa preposlaná.
 Aby mohli ostatné uzly v sieti do správy postupne pridávať svoje adresy, tak obsah tejto správy nemohol byť šifrovaný.
@@ -698,13 +698,13 @@ Stav nová správa (NEW). Tento stav bol určený pre správu, ktorá bola práv
 prvé odoslanie. Po prvom odoslaní sa správa presunula do stavu odoslaná (SENT).
 
 Zo stavu odoslaná bolo možne správu presunúť do stavu neúspešná (FAILED), hotová (DONE), preposlaná (REBROADCASTED) alebo zmazaná (DELETED). 
-Ak aktuálny uzol prijal tu istú správu, odoslanú iným uzlom, znamená to, že dana správa sa šíri ďalej v sieti. Aktuálny uzol teda správu 
+Ak aktuálny uzol prijal tu istú správu, odoslanú iným uzlom, znamená to, že daná správa sa šíri ďalej v sieti. Aktuálny uzol teda správu 
 presunul do stavu preposlaná alebo do stavu zmazaná. 
 To či sa správa presunula do stavu zmazaná alebo preposlaná bolo závisle od toho, či bol aktuálny uzol zároveň aj autorom danej správy. V prípade, že bol autorom, 
 správa sa presunula do stavu preposlaná.
 
 Správy v stave preposlaná, pri ktorých nepotrebujeme sledovať, či správa dorazila do destinácie, sa následne presunuli do stavu hotová. Prechody medzi týmito stavmi 
-su znázornené v časti stavového diagramu na obrázku \ref{fig:stateFlowMin}. Kompletný stavový diagram prechodov medzi stavmi správ je vyobrazený na obrázku v prílohe \ref{fig:stateDiagram}.
+sú znázornené v časti stavového diagramu na obrázku \ref{fig:stateFlowMin}. Kompletný stavový diagram prechodov medzi stavmi správ je vyobrazený na obrázku v prílohe \ref{fig:stateDiagram}.
 
 \begin{figure}[h!]
 	\centering
@@ -748,7 +748,7 @@ patrila do nášho protokolu. Overovať integritu dát na základe kontrolného 
 Položka typ správy obsahovala číslo, ktoré definovalo typ danej správy. Číslo reprezentovalo jeden z typov spomínaných v predošlej sekcii.
 
 Správam bolo možné v hlavičke paketu určiť vyššiu prioritu. Na túto prioritu sa následne bral ohľad pri spracovávaní správ a správy s vyššou prioritou boli odbavené prioritne. 
-Rozhodli sme sa poskytovať iba dva stupne priority správ a to normálna priorita a vysoká priorita. 
+Rozhodli sme sa poskytovať iba dva stupne priority správ, a to normálna priorita a vysoká priorita. 
 
 Dátové rámce sa líšili na základe typu správy. V tabuľkách \ref{tab:textFrame}, \ref{tab:trFrames} a \ref{tab:frames} 
 sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
@@ -797,7 +797,7 @@ pri prenose sieťou. Každý uzol, predtým ako správu preposlal ďalej, zmenš
 adekvátny stav.
 
 V rámcoch tiež nájdeme položku pôvodný počet skokov. Do tejto položky bol tak isto pri vytvorení novej správy zapísaný maximálny počet skokov. Hodnota v tejto položke sa 
-však už ďalej nemenila. Slúžila k tomu, aby prijímateľ dokázal zistiť, koľko preskokov správe zabralo, kym správa dorazila až k nemu. Túto informáciu bolo možné 
+však už ďalej nemenila. Slúžila k tomu, aby prijímateľ dokázal zistiť, koľko preskokov správe zabralo, kým správa dorazila až k nemu. Túto informáciu bolo možné 
 následne použiť na správne nastavenie maximálneho počtu skokov pre odoslanie potvrdzovacej správy, prípadne správy typu odpoveď na traceroute.
 
 \begin{table}[h!]
@@ -830,7 +830,7 @@ spracovávaná a preposielaná v sieti. Táto hodnota sa pri vytvorení správy 
 si overil ako dlho už bola správa uložená u neho v pamäti a na základe toho odčítal hodnotu z TTL. Po odčítaní hodnoty z TTL, uzol správu ďalej preposlal.
 
 Pri odčítavaní TTL bol braný do úvahy iba čas, ktorý daná správa strávila na určitom uzle. Nebral sa do úvahy čas, ktorý správe zabralo preniesť sa rádiovými vlnami z jedného uzlu 
-na ďalší. A to z toho dôvodu, že sme neboli schopní presne určiť, aku vzdialenosť prekonala vysielaná správa rádiovými vlnami. Existujúce spôsoby merania vzdialenosti, 
+na ďalší. A to z toho dôvodu, že sme neboli schopní presne určiť, akú vzdialenosť prekonala vysielaná správa rádiovými vlnami. Existujúce spôsoby merania vzdialenosti, 
 ktorú správa prešla vzduchom, produkovali len hrubé odhady a boli veľmi závisle od aktuálnych atmosférických podmienok \cite{Simka2021thesis}. Preto sme sa rozhodli, že v našom riešení budeme 
 počítať iba s časom, ktorý správa strávila na určitom uzle. Mimo toho, keby sme počítali s maximálnou možnou vzdialenosťou medzi dvoma uzlami, ktorá sa pri LoRa 
 udáva okolo 15 kilometrov v otvorenom priestranstve, a rýchlosťou ktorou sa šíria rádiové vlny, ktorá je vo vákuu rovná rýchlosti svetla, tak by sme zistili, 
@@ -845,7 +845,7 @@ Uzol každú správu odosielal iba určitý počet krát a medzi každým odosla
 Toto viacnásobne odosielanie každej správy nám zabezpečilo vyššiu spoľahlivosť v doručení. Keby sa každá správa preposielala iba jeden krát, mohlo by sa stať, že na ten prvý raz 
 by tuto vyslanú správu nezachytil žiaden ďalší uzol a správa by sa tak nedoručila ďalej.
 
-Medzi tým ako boli správy spracovávané a preposielané, uzol zároveň počúval na novo príchodzie správy od iných uzlov. Ak náhodou uzol 
+Medzi tým, ako boli správy spracovávané a preposielané, uzol zároveň počúval na novo príchodzie správy od iných uzlov. Ak náhodou uzol 
 prijal správu, ktorá už bola prijatá a uložená u neho tak to považoval ako potvrdenie, že sa správa šírila ďalej v sieti. Uzol teda u seba danú správu zahodil a už ju 
 ďalej nepreposielal.
 
@@ -869,14 +869,14 @@ prípadne novo prijaté správy. Následne bol tento zoznam správ v hlavnom cyk
 
 Na to aby bolo možné správy do tohoto zoznamu ukladať, bolo potrebné vytvoriť istú dátovú štruktúru, do ktorej by sa ukladali jednotlivé správy.
 Správy v zozname so sebou držali rôzne informácie. Okrem tých základných informácií o správe akými boli napríklad jej identifikátor, odosielateľ a prijímateľ, obsah správy atď., 
-bolo potrebné držať spolu so správou aj dodatočné informácie, ktoré boli potrebné na jej následne spracovávanie. Do týchto dodatočných informácií patrili napríklad 
-čas, kedy bola správa naposledy spracovávaná aktuálnym uzlom. Táto informácia bola využitá pri kontrole či uz nadišiel čas správu znovu preposlať ale aj 
+bolo potrebné držať spolu so správou aj dodatočné informácie, ktoré boli potrebné na jej následne spracovávanie. Do týchto dodatočných informácií patril napríklad 
+čas, kedy bola správa naposledy spracovávaná aktuálnym uzlom. Táto informácia bola využitá pri kontrole či už nadišiel čas správu znovu preposlať ale aj 
 na to aby bolo možné zistiť koľko času treba odčítať z hodnoty TTL pri senzorových správach.
 
-Pri prechádzaní zoznamu správ sa pri každej správe skontroloval jej stav a to či časový limit už dosiahol požadovanej hodnoty. Opakované znovu odosielanie 
-správy, bolo vykonávané iba pri správach v stave nová a odoslaná. Spomínali sme, že je bolo možne určiť správe vyššiu prioritu. Tato vyššia priorita zabezpečila to, že sa pri správe, 
+Pri prechádzaní zoznamu správ sa pri každej správe skontroloval jej stav, a to či časový limit už dosiahol požadovanej hodnoty. Opakované znovu odosielanie 
+správy, bolo vykonávané iba pri správach v stave nová a odoslaná. Spomínali sme, že je možné určiť správe vyššiu prioritu. Tato vyššia priorita zabezpečila to, že sa pri správe, 
 ktorá má nastavenú vyššiu prioritu, vykonávalo opakované znovu odosielanie správy, aj keď jej časový limit ešte nebol dosiahnutý. Tým bolo dosiahnuté toho, že správa sa 
-skôr odoslala a do destinácie by mala v ideálnom prípade doraziť skôr ako správa s nižšou prioritou.
+skôr odoslala a do destinácie by mala v ideálnom prípade doraziť skôr, ako správa s nižšou prioritou.
 
 Spomínali sme tiež, že môže dôjsť k problému zahltenia siete, keby každý uzol v sieti preposielal všetky správy, ktoré príjme. Spôsob akým sme vzniku tohto problému zabránili 
 spočíval práve v tom, že keď uzol prijal správu, ktorú už mal u seba uloženú, tak u seba tuto správu označil ako zmazanú ( stav zmazaná ) a správa nebola ďalej preposielaná. 
@@ -886,12 +886,12 @@ správ nebola znovu ukladaná. K tejto situácii môže bežne dochádzať a neo
 preposielala medzi dvoma uzlami až kým by jej nedošiel limit skokov prípadne TTL.
 
 Aby bolo v mesh sieti dosiahnuté čo najlepšieho dosahu, bolo nutné nejak zabezpečiť, aby sa odosielané správy dostali k čo najvzdialenejším uzlom a aby tieto 
-najvzdialenejšie uzly boli tie ktoré propagujú prenášanú správu ďalej. To bolo zabezpečene tak, že každej novo prijatej správe bolo nastavené prvotné časové oneskorenie na základe 
+najvzdialenejšie uzly boli tie, ktoré propagujú prenášanú správu ďalej. To bolo zabezpečene tak, že každej novo prijatej správe bolo nastavené prvotné časové oneskorenie na základe 
 toho s akou hodnotou SNR bola daná správa prijatá. 
 
 Hodnota SNR vyjadruje pomer signálu k šumu. Čím je hodnota SNR vyššia, tým je signál silnejší oproti okolitému šumu.
-Vďaka tomu, bolo možné približne odhadnúť, ktorý uzol bol vzdialenejší. Uzly ktoré boli vzdialenejšie mali nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
-To poviedlo k tomu, že vzdialenejšie uzly odvysielali správu skôr, ako uzly ktoré boli bližšie. Ostatné uzly toto vysielanie prijali, a u seba označili danú správu ako zmazanú, 
+Vďaka tomu, bolo možné približne odhadnúť, ktorý uzol bol vzdialenejší. Uzly, ktoré boli vzdialenejšie, mali nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
+To viedlo k tomu, že vzdialenejšie uzly odvysielali správu skôr, ako uzly, ktoré boli bližšie. Ostatné uzly toto vysielanie prijali, a u seba označili danú správu ako zmazanú, 
 keďže už nebolo potrebné aby ju oni preposielali. Na určenie časového oneskorenia bol použitý následovný výpočet vyobrazený na Obr \ref{fig:getTimeout}. Výpočet transformuje hodnotu 
 SNR prijatého paketu na časové oneskorenie v intervale od 1 do 6 sekúnd, pričom ráta s minimálnou hodnotou SNR -20 dB a maximálnou hodnotou 20 dB. 
 \begin{figure}[h!]
@@ -904,8 +904,8 @@ SNR prijatého paketu na časové oneskorenie v intervale od 1 do 6 sekúnd, pri
 Na obrázku \ref{fig:getTimeout} môžme taktiež vidieť, že ak je v konfigurácii zapnutá možnosť náhodnej cesty (\emph{RANDOMIZE\_PATH}), tak sa hodnota časového oneskorenia nastavuje náhodne. 
 Jedná sa o experimentálne nastavenie a jeho funkčnosť si bližšie popíšeme v kapitole testovania funkčnosti.
 
-Ďalší z potrebných aspektov správneho fungovania nášho protokolu bolo zabezpečiť aby nedošlo k situácií kedy by dva alebo viac uzlov v sieti začalo vysielať signály v rovnakom čase.
-K tomu bol využitý takzvaný prístup listen before talk, kedy sa uzol predtým ako začal vysielať presvedčil, či náhodou práve nevysielal niekto iný v jeho dosahu. Ak áno tak tak sa vyslanie správy pozdržalo 
+Ďalší z potrebných aspektov správneho fungovania nášho protokolu bolo zabezpečenie aby nedošlo k situácií kedy by dva alebo viac uzlov v sieti začalo vysielať signály v rovnakom čase.
+K tomu bol využitý takzvaný prístup listen before talk, kedy sa uzol predtým ako začal vysielať presvedčil, či náhodou práve nevysielal niekto iný v jeho dosahu. Ak áno tak sa vyslanie správy pozdržalo 
 a skúsilo sa odoslať neskôr.
 
 Rozhodli sme sa implementáciu protokolu začať na zariadeniach Armachat. Keďže sme zatiaľ nemali vytvorené žiadne užívateľské rozhranie, tak veľké farebné displeje na zariadeniach Armachat 
@@ -925,39 +925,39 @@ TTL, metóda na zmenu stavu správy, metóda na aktualizovanie časového razít
 
 Po implementácii triedy \emph{MessageQueueItem} sme mohli začať implementovať samotný proces funkcionality nášho protokolu. Zoznam správ bol realizovaný ako dynamický slovník, 
 kde kľúčom bol identifikátor správy, a hodnota pod daným kľúčom bola inštanciou triedy \emph{MessageQueueItem}. To nám umožnilo rýchlo vyhľadávať správy na základe jej identifikátora. 
-Tento slovník sme pomenovali \emph{message queue} a tak ku nemu budeme referovať aj vo zvyšku tejto práce.
+Tento slovník sme pomenovali \emph{message queue}, a tak ku nemu budeme referovať aj vo zvyšku tejto práce.
 
 Hlavný proces protokolu pozostával z cyklu, v ktorom bolo najskôr skontrolované či náhodou nebol prijatý nový LoRa paket a následne boli prejdené všetky správy z \emph{message queue}. Ak to bolo 
 potrebné tak sa určité správy spracovali. K tomu vznikli dve hlavné funkcie. Funkcia \emph{receive()}, ktorá slúžila na skontrolovanie či nebol prijatý nový LoRa paket a funkcia \emph{tick()}, v ktorej boli prejdené všetky správy z \emph{message queue}.
 
 Funkcia \emph{receive()} prečítala novo prijatý paket z LoRa a následne overila, či daný paket spĺňa dĺžku aspoň 12 bajtov. Vychádza to z toho, že všetky správy nášho protokolu obsahujú predom definovanú 
-hlavičku paketu (viď. Tab. \ref{tab:packetHeader} ), ktorá mala veľkosť 12 bajtov. Ak bol paket kratší ako 12 bajtov, bolo možné s istotou povedať, že sa nejednalo o správu nášho protokolu a teda ho nebolo 
+hlavičku paketu (viď. Tab. \ref{tab:packetHeader}), ktorá mala veľkosť 12 bajtov. Ak bol paket kratší ako 12 bajtov, bolo možné s istotou povedať, že sa nejednalo o správu nášho protokolu, a teda ho nebolo 
 nutné ďalej spracovávať. Po kontrole dĺžky paketu, nasledovalo overenie kontrolného súčtu. Funkcia zobrala prvých 8 bajtov paketu a vypočítal sa z nich kontrolný súčet. 
 Ak sa vypočítaný kontrolný súčet zhodoval s kontrolným súčtom, ktorý bol v pakete, tak bolo možné správu považovať za 
 súčasť nášho protokolu. Na výpočet kontrolného súčtu bola použitá funkcia cyklicky redundantného súčtu typu CRC-16/CCITT-FALSE. Overovanie, či paket prisluhuje do nášho protokolu bolo pomerné dôležité, 
-pretože na rovnakých LoRa parametroch mohli byť vysielané aj pakety iných protokolov a tieto pakety by sa nam nepodarilo správne spracovať keďže by nespĺňali našu štruktúru paketu.
+pretože na rovnakých LoRa parametroch mohli byť vysielané aj pakety iných protokolov a tieto pakety by sa nám nepodarilo správne spracovať keďže by nespĺňali našu štruktúru paketu.
 
 Potom čo sa vo funkcii \emph{receive()} overilo, že paket spĺňa naše požiadavky, bola z neho vytvorená nova inštancia triedy Message. Bola k tomu využitá metóda triedy Message určená na vytvorenie správy z 
-poľa bajtov. Pri novo prijatej správe nás zaujímalo či je správa určená nám. Ak bola správa určená nám, bolo potrebné zistiť o aky typ správy sa jednalo. Pokiaľ bola prijatá správa typu ACK, tak bolo 
+poľa bajtov. Pri novo prijatej správe nás zaujímalo či je správa určená nám. Ak bola správa určená nám, bolo potrebné zistiť o aký typ správy sa jednalo. Pokiaľ bola prijatá správa typu ACK, tak bolo 
 nutné vyhľadať v \emph{message queue} korešpondujúcu správu a zmeniť jej stav na ACK. Pokiaľ sa nejednalo o ACK správu, nasledovala kontrola, či sa daná správa už nenachádzala v \emph{message queue} a ak nie tak tam bola pridaná.
 
 Bolo dôležité, aby uzol po prijatí správy, odoslal naspäť ACK správu. A to aj v prípade, že sa nejednalo o typ správy, ktorý vyžadoval potvrdenie o doručení. Dôvodom bolo to, že ak by 
 uzol neposlal naspäť ACK správu, tak by predošlý uzol pokračoval v opakovanom vysielaní správy, a tieto vysielania by zbytočne obsadzovali prenos v sieti. Uzol teda po prijatí vyslal ACK správu. 
 V prípade, že prijatá správa nevyžadovala potvrdenie o doručení, tak mohol uzol ACK správe nastaviť maximálny počet preskokov na 0. 
-Tým pádom sa správa neposunula ďalej v sieti ako k najbližšiemu uzlu. Ak sa ale jednalo o správu vyžadujúcu potvrdenie o doručení, tak sa maximálny počet preskokov nastavil na 
+Tým pádom sa správa neposunula ďalej v sieti, ako k najbližšiemu uzlu. Ak sa ale jednalo o správu vyžadujúcu potvrdenie o doručení, tak sa maximálny počet preskokov nastavil na 
 hodnotu, ktorá bola uložená v prijatej správe pod položkou pôvodný počet skokov. 
-Tym bolo zaručené, že správa bude mať dostatočný počet dostupných skokov aby sa dostala naspäť k uzlu, ktorý pôvodnú správu poslal.
+Tým bolo zaručené, že správa bude mať dostatočný počet dostupných skokov aby sa dostala naspäť k uzlu, ktorý pôvodnú správu poslal.
 
 V prípadnom scenári, že prijatá správa nebola určená nám, bolo skontrolované či sa rovnaká správa už nenachádzala v \emph{message queue} a ak nie tak tam bola pridaná za predpokladu, že mala ešte dostupný 
 nejaký počet skokov alebo TTL. Správe bolo zároveň nastavené prvotné časové pozdržanie na základe hodnoty SNR, s ktorou bola prijatá.
 
 V opačnom prípade, kedy sa sprava už nachádzala v \emph{message queue}, bolo nutné znova vykonať sériu overení a na základe nich zmeniť stav správy.
 Prvé z overení bolo, či daná správa bola vytvorená nami. To či bola vytvorená nami, sme zistili na základe toho, či sa adresa odosielateľa správy zhodovala s tou našou. 
-V tom prípade nastala situácia kedy našu správu preposlal nejaký iny uzol. Bolo možné teda správe zmeniť stav na hotovo, prípadne na stav preposlaná ak sa jednalo o správu s potrebným 
+V tom prípade nastala situácia kedy našu správu preposlal nejaký iný uzol. Bolo možné teda správe zmeniť stav na hotovo, prípadne na stav preposlaná ak sa jednalo o správu s potrebným 
 potvrdením o doručení.
 
 Ak sa ukázalo, že správa nebola vytvorená nami ale niekým iným, tak bola správa presunutá do stavu zmazaná. Do tohto stavu bola ale presunutá iba v prípade overenia, že hodnota počtu preskokov alebo TTL 
-z prijatej správy bola nižšia ako hodnota správy v \emph{message queue}. %TODO tu mozno vysvetlit preco sa to tak robi
+z prijatej správy bola nižšia, ako hodnota zo správy v \emph{message queue}.
 
 Po dokončení funkcie \emph{receive()}, nasledovala funkcia \emph{tick()}. V tejto funkcii bolo postupne prechádzane všetkými spravami z \emph{message queue}. Pri každej správe bol overený jej stav 
 a ak bola v stave preposlaná alebo zmazaná tak sa následne skontrolovalo, či jej už nevypršal časový limit. Pokiaľ limit vypršal, tak sa správa 
@@ -973,10 +973,10 @@ správa vytvorená nami. Ak správe ešte zostali nejaké pokusy o odoslanie, ta
 odoslaním zmenšila hodnota TTL.
 
 Po odoslaní bolo správe aktualizované aktuálne časové razítko, znížilo sa počítadlo dostupných pokusov o odoslanie a bol nastavený nový časový limit pre správu. Tento 
-limit bol závislý od konfiguračnej premennej, ktorá určovala, ako často sa ma správa znovu odosielať. Pokiaľ bola správa pred odoslaním v stave nová, tak jej stav bol aktualizovaný 
+limit bol závislý od konfiguračnej premennej \emph{RESEND\_TIMEOUT}, ktorá určovala, ako často sa ma správa znovu odosielať. Pokiaľ bola správa pred odoslaním v stave nová, tak jej stav bol aktualizovaný 
 na odoslaná.
 
-Pri pokuse o odoslanie mohlo dôjsť k situácií, kedy práve niekto iný vysielal signál a tak bolo nutné pozdržanie odoslania. To bolo realizované tak, že správe bolo nastavené 
+Pri pokuse o odoslanie mohlo dôjsť k situácií, kedy práve niekto iný vysielal signál, a tak bolo nutné pozdržanie odoslania. To bolo realizované tak, že správe bolo nastavené 
 časové pozdržanie na hodnotu konfiguračnej premennej a bolo aktualizované jej časové razítko. Výsledkom bolo, že táto správa sa pokúšala znovu odoslať až po uplynutí 
 časového intervalu.
 
@@ -995,7 +995,7 @@ Okrem obsahu správy, môžme vidieť hodnoty SNR a RSSI, s ktorými zariadenie 
 ktorá predstavovala pôvodný maximálny počet preskokov. Na základe rovnosti týchto dvoch hodnôt, môžme usúdiť, že správa prešla medzi dvoma zariadeniami bez toho aby prešla 
 cez nejaké iné tretie zariadenie. Na spodku displeja môžme vidieť identifikátor prijatej správy.
 
-Na ďalšom obrázku \ref{fig:armRec2} môžme vidieť, že rozdiel medzi hodnotami max hop a initial max hop bol 1. Indikuje to, že správa spravila preskok cez ďalšie zariadenie predtým ako 
+Na ďalšom obrázku \ref{fig:armRec2} môžme vidieť, že rozdiel medzi hodnotami max hop a initial max hop bol 1. Indikuje to, že správa spravila preskok cez ďalšie zariadenie predtým, ako 
 bola doručená na cieľové zariadenie. Tento test sme vykonali tak, že sme tri zariadenia rozmiestnili s určitou vzdialenosťou medzi nimi, tak aby sme docielili preskok cez jedno zariadenie. 
 Zariadenia mali nastavené adresy 0x0001, 0x0002 a 0xA1BC. Správa bola odoslaná zo zariadenia 0xA1BC na zariadenie 0x0002.
 
@@ -1053,7 +1053,7 @@ Cez API sme mohli komunikovať so zariadením z webového rozhrania. Toto API be
 spolu s naším protokolom. API bolo realizované prostredníctvom klasických HTTP požiadavkov.
 
 Najpodstatnejšími časťami API boli funkcie, ktoré nám umožnili prijímať alebo odosielať správy. K tomu vznikli dve 
-API prístupové body -- takzvané routy. \uv{/api/messages} a \uv{/api/send text message}.
+API prístupové body -- takzvané routy. \uv{/api/messages} a \uv{/api/send\_text\_message}.
 
 Prvá routa slúžila na získanie správ, ktoré boli prijaté na zariadení. Bola volaná prostredníctvom HTTP GET požiadavku a 
 vraciala zoznam obsahujúci entity jednotlivých správ. Každá správa bola reprezentovaná JSON objektom, ktorý obsahoval 
@@ -1074,8 +1074,8 @@ API po prijatí požiadavku na vytvorenie novej správy validovala vstupné úda
 opačnom prípade API vrátila chybovú hlášku. Z dôvodu limitácie LoRa paketov na maximálnu dĺžku 255 bajtov pre posielané dáta, bolo potrebné overiť či textová správa 
 nie je príliš dlhá a prípadne ju orezať na maximálnu povolenú dĺžku.
 
-Maximálna povolená dĺžka v tomto prípade nie je 255 bajtov ale len 238. Toto je výsledkom toho, 
-že použitá LoRa knižnica povoľuje maximálnu dĺžku paketu 252 bajtov a to kvôli kompatibilite s inými knižnicami.
+Maximálna povolená dĺžka v našom prípade ale nie je 255 bajtov ale len 238. Toto je výsledkom toho, 
+že použitá LoRa knižnica povoľuje maximálnu dĺžku paketu 252 bajtov, a to kvôli kompatibilite s inými knižnicami.
 Pri našom protokole je okrem toho v každom LoRa pakete potrebné nejaké miesto ešte rezervovať pre hlavičku paketu a informácie o počte skokov.
 Z toho nám ostáva maximálna dĺžka správy 238 bajtov.
 
@@ -1089,8 +1089,7 @@ konfiguračného rozhrania.
 
 \section{Návrh webového rozhrania}
 Pred samotnou implementáciou webového rozhrania bolo nutné vytvoriť nejaký návrh, 
-ako bude webové rozhranie vyzerať. Na vytvorenie návrhov webových stránok bol použitý dizajnérsky nástroj Figma \cite{figma}.
-
+ako bude webové rozhranie vyzerať. Na vytvorenie návrhov webových stránok bol použitý dizajnérsky nástroj Figma \cite{figma}. 
 Bolo potrebné navrhnúť dokopy štyri web stránky, kde prvou bola úvodná stránka na ktorej mohol používateľ vidieť prijaté a odoslané správy. 
 Taktiež tam bola možnosť odoslať novú správu.
 
@@ -1100,13 +1099,13 @@ ne senzorové uzly. Z toho dôvodu boli potrebné dve ďalšie stránky, kde by 
 
 Poslednou stránkou bola stránka na konfiguračné rozhranie. Táto stránka obsahovala všetky možnosti, ktoré mal používateľ možnosť nastavovať.
 
-Výsledne návrhy môžeme vidieť na následujúcich obrázkoch. Stránky pre správu kontaktov ( Obr. \ref{fig:figma2} ) na používateľov a kontaktov na senzorové uzly budú vyzerať 
+Výsledne návrhy môžeme vidieť na následujúcich obrázkoch. Stránky pre správu kontaktov (Obr. \ref{fig:figma2}) na používateľov a kontaktov na senzorové uzly budú vyzerať 
 rovnako.
 
 Na obrázku \ref{fig:figmaHome} zachytávajúcom návrh úvodnej stránky si môžme všimnúť, že niektoré adresy sú zobrazené ako mená z kontaktov.
 
-Pri tvorbe návrhu stránky na konfiguráciu nastavení ( Obr. \ref{fig:figma2} ), nebolo ešte známe, aké všetky nastavenia 
-bude môcť používateľ meniť a tak sú tam iba nastavenia adresy, šifrovacieho kľúča a LoRa parametrov.
+Pri tvorbe návrhu stránky na konfiguráciu nastavení (Obr. \ref{fig:figma2}), nebolo ešte známe, aké všetky nastavenia 
+bude môcť používateľ meniť, a tak sú tam iba nastavenia adresy, šifrovacieho kľúča a LoRa parametrov.
 
 \begin{figure}[h!]
   \centering
@@ -1115,7 +1114,7 @@ bude môcť používateľ meniť a tak sú tam iba nastavenia adresy, šifrovaci
   \label{fig:figmaHome}
 \end{figure}
 
-Keďže bola pridaná novú funkciu v podobe pridávania kontaktov, bolo potrebné vytvoriť novú API routu, ktorá vraciala 
+Keďže bola pridaná nová funkcionalita v podobe pridávania kontaktov, bolo potrebné vytvoriť novú API routu, ktorá vraciala 
 zoznam kontaktov. Okrem toho bola vytvorená ďalšia routa, slúžiaca na pridávanie nových alebo mazanie starých kontaktov. 
 Ako databáza kontaktov bol použitý JSON súbor, do ktorého sa kontakty ukladali priamo na zariadení do súborov /data/contacts.json a /data/sensors.json. 
 
@@ -1167,9 +1166,9 @@ neúspešných správach.
 Tlačítko, zobrazujúce sa pri neúspešných správach, pridalo možnosť neúspešnú správu skúsiť znovu odoslať. K tomu aby to fungovalo, 
 bolo potrebné pridať ďalšiu API routu. Táto routa prijímala ako parameter ID správy, ktorú sme chceli odoslať znovu a správa sa znova odoslala.
 
-Stránku nastavení sme voči návrhu rozšírili o ďalšie nastavenia a spolu s tym sme rozšírili aj popis jednotlivých nastavení a čo robia. 
-Pri niektorých nastaveniach bolo nutne reštartovať zariadenie, k týmto pribudol popis s informáciou o nutnom reštarte. 
-Nastavenia vlastnej adresy bolo obmedzené na jednorázové nastavenie. Týmto sme sa snažili zamedziť tomu, aby si používateľ kedykoľvek 
+Stránku nastavení sme voči návrhu rozšírili o ďalšie nastavenia a spolu s tým sme rozšírili aj popis jednotlivých nastavení a čo robia. 
+Pri niektorých nastaveniach bolo nutné reštartovať zariadenie, k týmto pribudol popis s informáciou o nutnom reštarte. 
+Nastavenie vlastnej adresy bolo obmedzené na jednorázové nastavenie. Týmto sme sa snažili zamedziť tomu, aby si používateľ kedykoľvek 
 upravoval svoju adresu a tým sa mohol vydávať za iného používateľa. Prvú časť stránky nastavení vidíme na obrázku \ref{fig:webConfig1}.
 \begin{figure}[h!]
   \centering
@@ -1195,7 +1194,7 @@ nepokúšalo pripájať na žiadnu WiFi sieť, ale vytvorilo svoju vlastnú. Ča
 
 V našej LoRa mesh sieti sa mohli vyskytovať senzorové uzly, ktoré obsahovali GPS modul. Z toho dôvodu sme pridali do webového rozhrania funkciu, 
 ktorá zobrazovala na mape aktuálnu polohu zariadenia. Správy, ktoré sme chceli zobraziť ako polohu na mape, museli dodržiavať určitý formát 
-a to taký, že správa musela obsahovať prefix \uv{GPS:} a následne nasledovali súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
+, a to taký, že správa musela obsahovať prefix \uv{GPS:} a následne nasledovali súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
 Ako takáto správa s mapou vyzerala, môžme vidieť na obrázku \ref{fig:mobileWeb}. Na integráciu mapy do webového rozhrania bola použitá knižnica Leaflet.js \cite{leaflet}.
 
 Pri implementácií bol kladený dôraz na to, aby bolo možné webové rozhranie plnohodnotne používať aj na mobilných zariadeniach s malými displejmi. Preto sme 
@@ -1203,7 +1202,7 @@ spravili webové rozhranie responzívne na veľkosť obrazovky. Okrem toho, že 
 menilo sa aj celkové usporiadanie prvkov na stránke tak, aby bolo používanie rozhrania prívetivejšie. 
 
 Aby boli odlíšené nami odoslané správy od správ, ktoré sme prijali od nejakého iného uzlu, bolo pridané farebné označenie jednotlivých správ. Správy, ktoré sme 
-prijali od iného používateľa boli zobrazené v sivej farbe. Správy ktoré sme prijali od senzorových uzlov, boli zobrazené v žltej farbe. A správy, ktoré sme odoslali 
+prijali od iného používateľa boli zobrazené v sivej farbe. Správy, ktoré sme prijali od senzorových uzlov, boli zobrazené v žltej farbe. A správy, ktoré sme odoslali 
 my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy boli zobrazené v zelenej farbe.
 
 \begin{figure}[h!]
@@ -1220,7 +1219,7 @@ my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobile
 Po sfunkčnení celej aplikácie sme narazil na problém, v podobe nepostačujúceho miesta na zariadeniach. Dochádzalo k tomu, že ak zariadenie prijalo 
 väčšie množstvo správ, tak mu došla pamäť a beh programu sa ukončil.
 
-V zozname správ boli uložené všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny, a časom ako 
+V zozname správ boli uložené všetky správy, ktoré boli určené danému uzlu, alebo ktoré sám uzol vytvoril a odoslal. Tento prístup bol však neefektívny a časom, ako 
 uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a voľná pamäť zariadenia sa postupne znižovala.
 
 Vykonali sme experiment, pri ktorom sme merali veľkosť voľnej pamäte pred a po vytvorení textovej správy. Dĺžka textovej správy bola postupne zvyšovaná. Výsledky merania 
@@ -1235,7 +1234,7 @@ správ.
 \end{figure}
 
 Z merania bolo zistené, že pri maximálnej povolenej dĺžke správy, ktorá je 238 znakov, bolo alokovaných približne 2390 bajtov pre každú novú správu. Samotný bežiaci program 
-zaberá zhruba 30 kB a tak nám neostáva miesto na viac ako 12 správ (Rátame so správami maximálnej dĺžky). 
+zaberá zhruba, 30 kB a zvyšná voľná pamäť zariadenia tak nebola dostatočná na uloženie viac ako 12 správ (Rátame so správami maximálnej dĺžky). 
 Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahol určeného limitu, tak sa z neho odstránila najposlednejšia správa.
 Po tejto úprave už nedochádzalo k spomínanému problému.
 
@@ -1246,19 +1245,19 @@ nadmerné množstvo pamäti a program spadol.
 
 API na získanie správ sme preto upravili tak, že používa takzvané stránkovanie. Toto stránkovanie funguje tak, že na API bol zoznam správ rozdelený na menšie časti -- stránky a 
 vraciala sa vždy iba jedna stránka. Pri volaní API bol pridaný parameter špecifikujúci, ktorú stránku má API vrátiť. Tento prístup mal za následok, že 
-webová stránka volala API na získanie správ nie raz, ale viac krát, až kym nezískala všetky stránky.
+webová stránka volala API na získanie správ nie raz, ale viac krát, až kým nezískala všetky stránky.
 
 Vďaka tejto optimalizácií už nedochádzalo k problému s pamäťou.
 
 \section{Implementácia pre Raspberry Pi 2B}
-Implementácia pre Raspberry Pi 2B bola z väčšej časti rovnaká ako tá, pre zariadenia Armachat. Bolo potrebné na Raspberry Pi nainštalovať podporu pre 
+Implementácia pre Raspberry Pi 2B bola z väčšej časti rovnaká, ako tá pre zariadenia Armachat. Bolo potrebné na Raspberry Pi nainštalovať podporu pre 
 CircuitPython, a následne sme mohli použiť rovnakú implementáciu ako pre Armachat.
 
 Nami použité Raspberry Pi avšak neobsahuje WiFi modul. Miesto toho ponúka ethernetový port. Preto sme museli upraviť implementáciu tak, 
 aby sa nepripájala na WiFi sieť, ale použila vstavané ethernetové pripojenie. A tým pádom bolo tiež potrebné, z webovej stránky nastavení, odstrániť možnosť 
 pridávania WiFi siete keďže už nebola potrebná.
 
-Vďaka tomu, že Raspberry Pi má väčšiu pamäť, sme mohli zvýšiť limit dĺžky zoznamu správ. Tento limit bol nastavený úpravou v zdrojovom kóde programu a to konkrétne v 
+Vďaka tomu, že Raspberry Pi má väčšiu pamäť, sme mohli zvýšiť limit dĺžky zoznamu správ. Tento limit bol nastavený úpravou v zdrojovom kóde programu, a to konkrétne v 
 súbore \emph{base\_utils.py} bola upravená hodnota premennej \emph{MESSAGE\_QUEUE\_SIZE}.
 
 CircuitPython verzia pre Raspberry Pi nemala podporu pre všetky knižnice, ktoré boli používané v implementácií pre Armachat zariadenia. Bolo nutné nájsť vhodné náhrady pre 
@@ -1274,7 +1273,7 @@ odosielanie senzorových správ. Senzorové uzly posielali správy iba jednosmer
 Kvôli tomu, že senzorové uzly nemali možnosť prijímať žiadne správy, neboli schopné ani preposielať ďalej cudzie správy. Dosah mesh siete teda nebolo možné 
 rozšíriť pomocou týchto uzlov.
 
-Rovnako ako pri predošlých verziách pre Armachat a Raspberry Pi, bolo možné konfigurovať určité nastavenia. Táto konfigurácia sa vykonávala upravovaním konfiguračných 
+Rovnako, ako pri predošlých verziách pre Armachat a Raspberry Pi, bolo možné konfigurovať určité nastavenia. Táto konfigurácia sa vykonávala upravovaním konfiguračných 
 premenných, predtým ako bol program preložený a nahraný do zariadenia. Súčasťou konfigurácie bol aj zoznam kontaktov, na ktoré senzorový uzol odosielal správy. 
 Táto konfigurácia sa nachádzala v súbore \emph{MessageHandler.h}.
 
@@ -1282,12 +1281,12 @@ Implementácia pozostávala z funkcií, ktoré postupne poskladali hlavičku pak
 a rovnako ako pri plnej verzii programu, sa zoznam správ cyklicky prechádzal a správy z neho sa odosielali, keď nadišiel ich čas.
 
 Každá správa bola taktiež odosielaná viackrát. Počet pokusov koľko krát sa mala správa odoslať bol daný konfiguračnou premennou. Keďže táto zjednodušená implementácia neriešila prijímanie správ, 
-každá správa sa opakovane posielala daný počet pokusov aj napriek tomu, že bola daná správa uz preposlaná ďalej nejakým iným uzlom. Po tom čo sa správa odoslala 
+každá správa sa opakovane posielala daný počet pokusov aj napriek tomu, že bola daná správa už preposlaná ďalej nejakým iným uzlom. Po tom čo sa správa odoslala 
 daný počet pokusov, sa správa zo zoznamu odstránila.
 
 Hlavný chod programu pozostával z cyklu v ktorom sa prechádzali správy zo zoznamu a funkcie, ktorá generovala senzorové dáta. Na zariadení TTGO T-Beam bol použitý integrovaný 
 GPS modul, z ktorého boli získavané GPS súradnice a z nich tvorený obsah senzorovej správy. Zariadenie TTGO LoRa32 malo integrovanú Hallovu sondu, ktorá snímala 
-úroveň magnetického poľa. Na tomto zariadení boli generované senzorové správy, ktorých obsahom bola úroveň magnetického poľa plus čas ako dlho bol daný senzor v prevádzke.
+úroveň magnetického poľa. Na tomto zariadení boli generované senzorové správy, ktorých obsahom bola úroveň magnetického poľa plus čas, ako dlho bol daný senzor v prevádzke.
 
 Funkcia na vygenerovanie novej senzorovej správy bola volaná v určitých intervaloch. Tento interval bolo možne nastaviť konfiguračnou premennou. Výsledkom bol tak 
 uzol v mesh sieti, ktorý periodicky vysielal hodnoty zo senzorov. Adresátmi týchto správ boli uzly, ktorých adresy malo zariadenie uložené v konfiguračnej premennej kontaktov. 
@@ -1300,8 +1299,7 @@ o rôzne monitorovacie senzorové zariadenia, ktorých obstarávacia cena je vď
 \section{Testovanie funkčnosti}
 Testovanie bolo vykonávané so zariadeniami TTGO T-Beam, TTGO LoRa32 a troma zariadeniami Armachat. Jedno z týchto Armachat zariadení 
 bolo pripojené na WiFi hotspot vytvorený našim mobilným telefónom. Toto Armachat zariadenie bolo ovládané cez mobilný telefón prostredníctvom webového rozhrania. 
-
-Testovanie prebiehalo v lese a tak nebolo možné použiť zariadenie Raspberry Pi 2b, keďže toto zariadenie vyžaduje pripojenie do ethernetu a silnejšie napájanie. 
+Testovanie prebiehalo v lese, a tak nebolo možné použiť zariadenie Raspberry Pi 2b, keďže toto zariadenie vyžaduje pripojenie do ethernetu a silnejšie napájanie. 
 Použité zariadenia boli napájane z externej powerbanky a v prípade zariadenia TTGO LoRa32 bol použitý aj solárny panel (Viď Obr. \ref{fig:ttgoSolar}).
 
 \begin{figure}[h!]
@@ -1327,7 +1325,7 @@ Webový server bežal na zariadení s adresou 0x0005. Ako prvé sme overili topo
 Následne sme z ostatných Armachat zariadení odoslali správu, ktorej adresátom bol uzol 0x0005 a broadcast.
 
 Na obrázku \ref{fig:testingTR} môžme vidieť prijaté odpovede na traceroute od uzlov 0x0001 a 0x0002. Tieto adresy boli uložené 
-v kontaktoch pod názvami \emph{Armachat \#1} a \emph{Armachat \#2} a preto môžme vidieť, že sa pri prijatých správach miesto hexadecimálnej adresy 
+v kontaktoch pod názvami \emph{Armachat \#1} a \emph{Armachat \#2}, a preto môžme vidieť, že sa pri prijatých správach miesto hexadecimálnej adresy 
 zobrazujú práve tieto názvy kontaktov.
 
 Z traceroute odpovedi môžme vidieť, že spojenie medzi uzlom 0x0005 a 0x0001 nie je priamo, ale prechádza cez uzol 0x0002. Taktiež môžme vidieť, 
@@ -1335,7 +1333,7 @@ Z traceroute odpovedi môžme vidieť, že spojenie medzi uzlom 0x0005 a 0x0001 
 zobrazený v informáciach nad správou je 0, čo sedí s predošlými traceroute správami.
 
 Druhá správa odoslaná zo zariadenia \emph{Armachat \#1} bola odoslaná na broadcast adresu. Môžme vidieť ze v informáciách nad správou je počet 
-preskokov 1, čo znova sedí s predošlými traceroute správami. Táto textová správa preskakovala cez uzol 0x0002 predtým ako bola doručená 
+preskokov 1, čo znova sedí s predošlými traceroute správami. Táto textová správa preskakovala cez uzol 0x0002 predtým, ako bola doručená 
 uzlu 0x0005.
 
 
@@ -1379,8 +1377,8 @@ odoslaná s vyžiadaným potvrdením o doručení. Toto vyžiadanie potvrdenia o
 Pri tejto správe môžme vidieť status modrej fajky, ktorý symbolizuje, že správa bola doručená zariadeniu \emph{Armachat \#1} a zariadenie 0x0005 
 prijalo naspäť potvrdenie o doručení. 
 
-Správa pre zariadenie \emph{Armachat \#2} bola odoslaná bez vyžiadania potvrdenia o doručení a tak sa pri tejto 
-správe nezobrazila žiadna status ikona. Správa pre neexistujúcu adresu 0x1234 bola odoslaná s vyžiadaným potvrdením o doručení ale keďže tento uzol v sieti neexistuje, tak sa 
+Správa pre zariadenie \emph{Armachat \#2} bola odoslaná bez vyžiadania potvrdenia o doručení, a tak sa pri tejto 
+správe nezobrazila žiadna status ikona. Správa pre neexistujúcu adresu 0x1234 bola odoslaná s vyžiadaným potvrdením o doručení, ale keďže tento uzol v sieti neexistuje, tak sa 
 k nemu správa nedoručila a po uplynutí časového intervalu bola označená statusom failed.
 
 \begin{figure}[h!]
@@ -1390,10 +1388,10 @@ k nemu správa nedoručila a po uplynutí časového intervalu bola označená s
   \label{fig:testingFull}
 \end{figure}
 
-Bola otestovaná aj priepustnosť siete. Tento test bol realizovaný tak, že zo zariadenia \emph{Armachat \#1} bolo odoslaných celkovo 26 správ. Do každej ďalšej správy 
+Bola otestovaná aj priepustnosť siete a postupnosť prijatých správ. Tento test bol realizovaný tak, že zo zariadenia \emph{Armachat \#1} bolo odoslaných celkovo 26 správ. Do každej ďalšej správy 
 bolo pridávané následujúce písmeno abecedy. Tieto správy boli odoslane tesne za sebou, a následne sme sledovali či sa podarilo doručiť všetky tieto správy uzlu 0x0005.
 
-Na obrázkoch \ref{fig:packetLoss} môžme vidieť prijaté správy. Z výpisu zoznamu správ ( Obr. \ref{fig:packetLossSum} ) sme sa dozvedeli, že sme prijali celkovo 23 správ. Taktiež si môžme všimnúť, že správy 
+Na obrázkoch \ref{fig:packetLoss} môžme vidieť prijaté správy. Z výpisu zoznamu správ (Obr. \ref{fig:packetLossSum}) sme sa dozvedeli, že sme prijali celkovo 23 správ. Taktiež si môžme všimnúť, že správy 
 môžu doraziť do destinácie v inom poradí v akom boli odoslané.
 
 Na základe získaných údajov môžme povedať, že sa nám podarilo doručiť 23 správ z 26, z čoho vyplýva pravdepodobnosť doručenia správy približne 88,5\%.
@@ -1421,7 +1419,7 @@ bol uložený čas odoslania každej konkrétnej správy. Správy boli posielan�
 k uzlu 0x0005 tak sa zaznamenal čas prijatia správy a na základe rozdielu medzi časom odoslania a časom prijatia sa vypočítal čas potrebný na doručenie správy.
 
 Meranie bolo vykonané pre správy rôznych dĺžok, a pri každej dĺžke správy bolo odoslaných 16 správ. Na základe týchto údajov sme vytvorili graf, ktorý je 
-zobrazený na obrázku \ref{fig:latencyGraph}. Z merania sme zistili, že čas doručenia správy sa zvyšuje s dĺžkou správy a že pri správach dĺžky 200 znakov sa čas doručenia 
+zobrazený na obrázku \ref{fig:latencyGraph}. Z merania sme zistili, že čas doručenia správy sa zvyšuje s dĺžkou správy a, že pri správach dĺžky 200 znakov sa čas doručenia 
 pohybuje okolo 25 sekúnd. Kompletné namerané hodnoty je možné nájsť v prílohe \ref{fig:latencyTable1}.
 
 Tieto merania boli vykonávane s nastavenou hodnotou \emph{Resend timeout} 8 sekúnd. Následne sme znížili hodnotu tejto konfiguračnej premennej na 2 sekundy 
@@ -1434,8 +1432,8 @@ na 19 sekúnd.
   \label{fig:latencyGraph}
 \end{figure}
 
-Ďalším testovaním, ktoré sme realizovali bolo zistenie aky vplyv má konfiguračná premenná \emph{Resend count} na stratovosť paketov v sieti. Toto meranie bolo vykonávane 
-v inom prostredí ako predchádzajúce meranie stratovosti. Topológia siete bola rovnaká, ale v tomto prípade neobsahovala sieť senzorové uzly a sieť bola realizovaná v 
+Ďalším testovaním, ktoré sme realizovali bolo zistenie, aký vplyv má konfiguračná premenná \emph{Resend count} na stratovosť paketov v sieti. Toto meranie bolo vykonávane 
+v inom prostredí, ako predchádzajúce meranie stratovosti. Topológia siete bola ale rovnaká. Avšak v tomto prípade neobsahovala sieť senzorové uzly a sieť bola realizovaná v 
 interiéri budovy. Na obrázku \ref{fig:plResend} vidíme zobrazený graf závislosti stratovosti paketov od počtu opakovaných odoslaní správy. Z grafu môžme vidieť, že ak 
 je správa opätovne odosielaná každým uzlom iba jeden krát, tak dochádza k vysokej stratovosti paketov. Zvýšením počtu opakovaní odosielania správy sa stratovosť 
 znižuje.
@@ -1443,7 +1441,7 @@ znižuje.
 \begin{figure}[h!]
   \centering
   \includegraphics[width=1\textwidth]{Figures/packetLossResendCount.png}
-  \caption{Graf závislosti času doručenia správy od dĺžky správy}
+  \caption{Graf závislosti TODO}
   \label{fig:plResend}
 \end{figure}
 
@@ -1463,7 +1461,7 @@ Spomínali sme isté nastavenie \emph{RANDOMIZE\_PATH}. Toto nastavenie vzniklo 
 projektu Meshtastic, ktorá sa prejavuje napríklad v situácií kedy by malo rozmiestnenie uzlov v sieti tvár písmena V.
 
 Na obrázku \ref{fig:mestasticV} môžme vidieť takúto situáciu znázornenú v simulátore. Ak by sme z uzla číslo 0 chceli posielať správu do uzla číslo 4, nikdy by sa nám to nepodarilo.
-A to z toho dôvodu, že vyslaná správa z uzlu 0 by bola prijatá uzlami 1 a 2, a keďže uzol 1 je od uzla 0 vzdialenejší ako uzol 2, bude mat horšiu hodnotu SNR.
+A to z toho dôvodu, že vyslaná správa z uzlu 0 by bola prijatá uzlami 1 a 2, a keďže uzol 1 je od uzla 0 vzdialenejší, ako uzol 2, bude mat horšiu hodnotu SNR.
 Na základe horšej hodnoty SNR uzol 1 správu odvysiela skôr a správa sa ďalej bude šíriť už len v pravej vetve siete.
 
 Na obrázku môžme vidieť rozmiestnenie uzlov a dosah ich signálu v simulátore Meshtasticator, patriaceho ku projektu Meshtastic. Taktiež môžme vidieť časový priebeh šírenia správy medzi uzlami. 
@@ -1477,7 +1475,7 @@ V tomto časovom priebehu sú modrou farbou označené vysielania správy a zele
 \end{figure}
 
 V našom riešení bolo pridané experimentálne nastavenie, ktoré po jeho zapnutí spôsobilo to, že poradie v ktorom sa správa odosielala z ďalších uzlov 
-nebolo závislé na hodnote SNR ale bolo určované náhodne. Toto riešenie nebolo však úplne optimálne a vzhľadom na to, že poradie bolo určované 
+nebolo závislé na hodnote SNR, ale bolo určované náhodne. Toto riešenie nebolo však úplne optimálne a vzhľadom na to, že poradie bolo určované 
 náhodne, mohla nastať situácia, že náhodne vybraná trasa sa zhodovala s trasou vybranou 
 na základe hodnôt SNR a správa sa teda taktiež nedostala do cieľa. V tomto prípade bolo potrebné správu odoslať znovu. 
 Tento problém by šlo optimálnejšie vyriešiť smerovacími tabuľkami, ktoré ale v našom protokole neboli použité.
@@ -1501,12 +1499,11 @@ na 10 správ.
 Tento limit 10 správ, však v realite neznamenal až taký problém. Pokiaľ mal používateľ otvorené webové rozhranie tak sa správy ukladali aj na strane webovej aplikácie 
 bežiacej v prehliadači používateľa. Ak došlo k dosiahnutiu maximálneho limitu správ tak sa z pamäte zariadenia odstránila najstaršia správa. V pamäti prehliadača na webovej aplikácii 
 ale táto správa ostala. Takže používateľ bol schopný vidieť aj správy staršie ako posledných 10 správ.
-
 Na zariadeniach Armachat bez WiFi modulu bolo možné vidieť len tu najnovšiu správu na displeji, takže limit 10 správ tu taktiež nebol problémom.
 
 Veľkou limitáciou našej implementácie bolo, že CircuitPython nemá podporu pre externé prerušenia\footnote[1]{https://github.com/adafruit/circuitpython/issues/4542}. Z toho dôvodu knižnica, ktorú sme použili na ovládanie zabudovaného LoRa modulu, 
 nepracovala veľmi efektívne. Keď aktuálne LoRa modul prijímal nejaký paket, tak sa pozdržal cely zvyšok bežiaceho programu, až kým sa paket neprijal a neprečítal celý alebo kým nedošlo k vypršaniu 
-časového limitu. Toto nam spomaľovalo beh programu zakaždým keď bol v sieti vysielaný nejaký paket.
+časového limitu. Toto nám spomaľovalo beh programu zakaždým keď bol v sieti vysielaný nejaký paket.
 
 Použitá knižnica na ovládanie LoRa modulu so sebou priniesla ešte dodatočnú limitáciu. Táto knižnica nesprávne pracovala s LoRa modulom a nebolo možné stabilne používať 
 LoRa prenos pokiaľ bol nastavený rozprestierací faktor vyšší ako 9. Pri nastavení vyššieho rozprestieracieho faktoru sa spoľahlivosť prenosu dramaticky znížila. Pri 
@@ -1514,22 +1511,22 @@ našom testovaní sa nám nepodarilo úspešne doručiť ani jednu správu z des
 K tejto chybe existuje aj oficiálna chybová správa na GitHub stránke CircuitPython knižnice\footnote[2]{https://github.com/adafruit/Adafruit\_CircuitPython\_RFM9x/issues/70}.
 
 Chybu v knižnici sme sa bezvýsledne snažili opraviť. Jedným z dôvodov, ktoré ku chybe prispievali bol nesprávne nastavený časový limit pre posielanie paketu. Knižnica odpočítavala časový limit dvoch sekúnd 
-pri čítaní novo prijímaného paketu. Ak sa paket nestihol prečítať v tomto intervale tak sa čítanie prerušilo a prijatý paket sa zahodil. 
+pri odosielaní nového paketu. Ak sa paket nestihol odoslať v tomto intervale tak sa odosielanie prerušilo a paket sa zahodil. 
 Avšak, keď sme si zobrali prípad paketu, ktorý mal veľkosť 100 bajtov a bol vysielaný s rozprestieracím faktorom 12, kódovacím pomerom 4/8, a šírkou pásma 125 kHz, zistili sme 
-že čas potrebný na vyslanie tohto paketu sa blížil k 6 sekundám. Časový limit bol teda nedostačujúci na vysielanie paketov s vyššími rozprestieracími faktormi. Po 
-zvýšení časového limitu v knižnici sme znovu otestovali spoľahlivosť prenosu. Tentokrát sa nam podarilo doručiť 2 správy z 10 pokusov. To avšak stále nebolo dostatočné a 
-naznačovalo to, že problém bol ešte niekde inde. Ten sa nam už ale nepodarilo nájsť.
+, že čas potrebný na vyslanie tohto paketu sa blížil k 6 sekundám. Časový limit bol teda nedostačujúci na vysielanie paketov s vyššími rozprestieracími faktormi. Po 
+zvýšení časového limitu v knižnici sme znovu otestovali spoľahlivosť prenosu. Tentokrát sa nám podarilo doručiť 2 správy z 10 pokusov. To avšak stále nebolo dostatočné a 
+naznačovalo to, že problém bol ešte niekde inde. Ten sa nám už ale nepodarilo nájsť.
 
 Zariadenie Raspberry Pi pico s WiFi modulom, bolo pomerné nové. CircuitPython knižnica pre podporu WiFi modulu je stále v beta verzií obsahovala isté nedostatky\footnote[3]{https://github.com/adafruit/circuitpython/issues?q=is\%3Aissue+wifi}.
 Neumožňovala prepnúť WiFi modul do režimu AP (Access Point) ak bol modul už predtým prepnutý do režimu station a rovnako nebolo možné prepnúť modul do režimu station ak bol 
-už prepnutý do režimu AP. Jediný spôsob ako bolo možné WiFi modul úspešne prepnúť medzi režimami bolo tvrdé resetovanie zariadenia\footnote[4]{https://github.com/adafruit/circuitpython/issues/7620}.
+už prepnutý do režimu AP. Jediný spôsob, ako bolo možné WiFi modul úspešne prepnúť medzi režimami bolo tvrdé resetovanie zariadenia\footnote[4]{https://github.com/adafruit/circuitpython/issues/7620}.
 
 Pôvodne sme mali v pláne implementovať štartovací proces zariadenia tak, že najskôr by sa zariadenie pokúsilo pripojiť k WiFi sieťam, ktoré malo uložené v zozname a ak sa mu nepodarilo 
 pripojiť ku žiadnej z týchto sieti, tak vytvorilo svoju vlastnú WiFi sieť, na ktorú sa mohol používateľ pripojiť. Kvôli chybnému správaniu WiFi knižnice však tento prístup nebolo možné 
 realizovať. V momente kedy sa snažil WiFi modul pripojiť na nejakú sieť zo zoznamu WiFi sieti, prepol sa do režimu station. Potom už nebolo možné modul prepnúť do režimu AP ak sa nepodarilo pripojiť 
 k žiadnej zo sieti.
 
-K WiFi knižnici sa viazal ešte jeden problém a to taký, že pokiaľ sa snažil používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojilo na WiFi sieť, 
+K WiFi knižnici sa viazal ešte jeden problém, a to taký, že pokiaľ sa snažil používateľ pripojiť na webový server bežiaci na Armachat zariadení ihneď potom, ako sa zariadenie pripojilo na WiFi sieť, 
 zariadenie sa dostalo do zamrznutého stavu a prestalo reagovať na čokoľvek. Na obnovenie funkcionality bol potrebný tvrdý reštart zariadenia. 
 Tomuto problému sme sa snažili vyhýbať tak, že zariadenie zobrazovalo informáciu o spustenom web serveri až po určitom oneskorení a spoliehali sme na to, že používateľ 
 sa bude pripájať na webový server až po zobrazení tejto informácie. K tejto chybe existuje report v zozname chýb na GitHub stránke CircuitPythonu\footnote[5]{https://github.com/adafruit/circuitpython/issues/7790}.

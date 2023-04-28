@@ -96,7 +96,7 @@ k ním môžu užívatelia pristupovať z internetu.
 
 Pri LoRaWAN je potrebné mať nejaký centrálny uzol a ak chceme nejaké zariadenie pripojiť do siete, musí mať dosah na daný centrálny uzol. 
 Takto sme limitovaní existenciou a dosahom týchto centrálnych uzlov, a hviezdicovou topológiou, čo nie je v niektorých prípadoch užitia vhodné. Neustále vznikajú nové 
-protokoly, ktoré by tieto problémy riešili, napríklad za použitia mesh topológii \cite{9385408}.
+protokoly, ktoré by tieto problémy riešili, napríklad za použitia mesh topológii~\cite{9385408}.
 
 V tejto práci sa venujeme návrhu a vytvoreniu protokolu, ktorý umožňuje komunikáciu medzi zariadeniami v sieti tvorenej pomocou technológie LoRa,
 bez nutnej existencie centrálnych uzlov. Nami vytvorený protokol vytváral sieťovú topológiu typu mesh, ktorá mala oproti hviezdicovej topológii, 
@@ -200,8 +200,7 @@ Je preto potreba synchronizovať prijímacie zariadenie tak, aby hodnoty symbolo
 
 Zariadenie po prijatí nového paketu očakáva, že na začiatku paketu bude preambula definovanej dĺžky. Ak z paketu prečíta počet symbolov rovnakej hodnoty zhodný 
 s definovanou dĺžkou preambuly, predpokladá že sa jedná o preambulu a synchronizuje čítacie okno tak, aby bolo zarovnané so symbolmi preambuly. Tzn. tak, aby symboly preambuly boli 
-prečítané ako symbol 0.
-
+prečítané ako symbol 0. 
 Zjednodušené znázornenie procesu čítania symbolov a posun čítacieho okna môžme vidieť na Obr. \ref{fig:loraPreamble1}.
 
 \begin{figure}[h!]
@@ -217,7 +216,7 @@ Pri používaní technológie LoRa je nutné správne zvoliť parametre na bezdr
 Použitá frekvencia je závislá od regiónu, v ktorom chceme technológiu LoRa využívať. Viď Tabuľka \ref{tab:ismBands}. 
 
 V Európe je možné mimo 868 MHz pásma používať na LoRa aj 433 MHz pásmo. Okrem toho existuje ešte globálne používaná frekvencia 2,4 GHz. Tu sme ale limitovaní 
-podporou daných frekvencií v nami použitom LoRa modeme. Bežné používané moduly, zväčša nemajú podporu pre 2,4 GHz frekvenčné pásmo.
+podporou daných frekvencií v nami použitom LoRa modeme. Bežné používané moduly, zväčša nemajú podporu pre 2,4~GHz frekvenčné pásmo.
 
 \begin{table}[h!]
 	\centering
@@ -268,7 +267,7 @@ pretože ku prenášaným dátam pridáva navyše dáta potrebné na korekciu ch
 Rýchlosť prenosu dát (Data rate -- DR) môžme vyjadriť vzťahom:
 \begin{figure}[h!]
   \centering
-  \[DR = SF * \frac{\frac{4}{4+CR}}{\frac{2^{SF}}{BW}} *1000 \]
+  \[DR = SF \times \frac{\frac{4}{4+CR}}{\frac{2^{SF}}{BW}} \times 1000 \]
   \begin{tabular}{c c}
     DR & rýchlosť prenosu dát v bitoch za sekundu\\
     BW & šírka pásma v kHz \\
@@ -376,8 +375,7 @@ Ten je pri modemoch série SX126x výrobcom udávaný na 170 dBm, takže sú opt
 \section{RFM9xW}
 Moduly RFM95W/96W/98W od výrobcu HopeRF \cite{hoperf} implementujú SX LoRa modemy od výrobcu Semtech.
 Jedná sa o jednoduchý modul, ktorý obsahuje všetku riadiacu elektroniku potrebnú pre riadenie Semtech LoRa modemu.
-Okrem riadiacej elektroniky obsahuje modul aj zosilňovač signálu (+14 dBm), ktorý zvyšuje dosah bezdrôtového prenosu.
-
+Okrem riadiacej elektroniky obsahuje modul aj zosilňovač signálu (+14 dBm), ktorý zvyšuje dosah bezdrôtového prenosu. 
 Existuje niekoľko verzií modulov RFM9xW, kde každá verzia používa iný semtech LoRa modem a zdieľa parametre daného modemu.
 
 \section{Moduly a zariadenia použité v tejto práci}
@@ -425,11 +423,11 @@ prípadne derivát MicroPythonu -- CircuitPython. V tejto práci bol použitý p
 Avšak aby bolo možné využívať tieto mikrokontroléry s technológiou LoRa, bolo potrebné pridať k nim nejaký LoRa modul. 
 Na implementáciu v tejto práci boli preto zvolené zariadenia Armachat, ktoré kombinujú mikrokontrolér Raspberry Pi Pico s LoRa modulom RFM96W.
 Okrem toho pridávajú dvoj palcový farebný displej a klávesnicu. 
-Ako toto zariadenie vyzerá môžme vidieť na Obr \ref{fig:armachat}.
+Ako toto zariadenie vyzerá môžme vidieť na Obr~\ref{fig:armachat}.
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.5\textwidth]{Figures/armachat.jpg}
+	\includegraphics[width=0.6\textwidth]{Figures/armachat.jpg}
 	\caption[Zariadenie Armachat]{Zariadenie Armachat. Prevzaté z \cite{armachatObr}}
 	\label{fig:armachat}
 \end{figure}
@@ -485,8 +483,7 @@ distance vector smerovaním alebo flooding prístupom. Najzaujímavejšie rieše
 v následujúcich sekciách.
 
 \section{LoRa mesher}
-LoRaMesher \cite{loramesher} \cite{9930341} je C++ knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieťach.
-
+LoRaMesher \cite{loramesher, 9930341} je C++ knižnica, ktorú je možné použiť na komunikáciu v LoRa mesh sieťach. 
 Na smerovanie v sieti používa proaktívny\footnote[1]{Smerovacia tabuľka sa pravidelne aktualizuje}  distance vector routing protokol. Tento protokol vyberá cestu, kadiaľ bude správa v sieti preposlaná od odosielateľa k príjemcovi, na základe 
 najlepšej cesty. Najlepšiu cestu definuje ako cestu s najmenším počtom hopov -- preskokov medzi uzlami v mesh sieti.
 
@@ -701,7 +698,7 @@ sú znázornené v časti stavového diagramu na obrázku \ref{fig:stateFlowMin}
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.6\textwidth]{Figures/state_flow_Min.png}
+	\includegraphics[width=0.7\textwidth]{Figures/state_flow_Min.png}
 	\caption{Časť stavového diagramu}
 	\label{fig:stateFlowMin}
 \end{figure}
@@ -760,6 +757,7 @@ sú uvedené štruktúry dátových rámcov pre jednotlivé typy správ.
   \label{tab:textFrame}
 \end{table}
 
+\newpage
 \begin{table}[h!]
   \centering
   \subfloat[\centering Správa typu žiadosť o traceroute.]{{
@@ -886,7 +884,7 @@ Hodnota SNR vyjadruje pomer signálu k šumu. Čím je hodnota SNR vyššia, tý
 Vďaka tomu, bolo možné približne odhadnúť, ktorý uzol bol vzdialenejší. Uzly, ktoré boli vzdialenejšie, mali nižšiu hodnotu SNR a teda aj nižšiu hodnotu časového oneskorenia.
 To viedlo k tomu, že vzdialenejšie uzly odvysielali správu skôr, ako uzly, ktoré boli bližšie. Ostatné uzly toto vysielanie prijali, a u seba označili danú správu ako zmazanú, 
 keďže už nebolo potrebné aby ju oni preposielali. Na určenie časového oneskorenia bol použitý následovný výpočet vyobrazený na Obr \ref{fig:getTimeout}. Výpočet transformuje hodnotu 
-SNR prijatého paketu na časové oneskorenie v intervale od 1 do 6 sekúnd, pričom ráta s rozsahom hodnôt SNR -20 -- 20 dB.
+SNR prijatého paketu na časové oneskorenie v intervale od 1 do 6 sekúnd, pričom ráta s rozsahom hodnôt SNR od -20 do 20 dB.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/getTimeout.png}
@@ -912,7 +910,7 @@ do metódy, ktorá z nich vytvorila správu.
 
 Po implementácií triedy \emph{Message}, sme teda boli schopní vytvoriť novu správu alebo prijať bajtové pole z LoRa, z ktorého sa následne poskladala správa. Na to aby sme 
 mohli správy ukladať do zoznamu správ bolo ale potrebné vytvoriť ešte akýsi kontajner, ktorý by v sebe uchovával správu plus dodatočne informácie potrebne k ďalšiemu spracovávaniu.
-K tomu vznikla trieda \emph{MessageQueueItem}. Tá v sebe držala inštanciu triedy \emph{Message}, počítadlo opakovaných odoslaní, časový odpočet, časové razítko, ktoré zachytávalo čas, kedy bola 
+K tomu vznikla trieda  \emph{MessageQueueItem}. Tá v sebe držala inštanciu triedy \emph{Message}, počítadlo opakovaných odoslaní, časový odpočet, časové razítko, ktoré zachytávalo čas, kedy bola 
 správa naposledy spracovávaná, aktuálny stav správy a ďalšie užitočné informácie. Okrem toho obsahovala táto trieda metódy, ktoré boli využívane pri spracovávaní správ. Sem patria metódy na zníženie maximálneho počtu preskokov alebo 
 TTL, metóda na zmenu stavu správy, metóda na aktualizovanie časového razítka, ktorá časové razítko nastavila na aktuálny čas a mnoho ďalších.
 
@@ -932,7 +930,7 @@ pretože na rovnakých LoRa parametroch mohli byť vysielané aj pakety iných p
 
 Potom čo sa vo funkcii \emph{receive()} overilo, že paket spĺňa naše požiadavky, bola z neho vytvorená nova inštancia triedy Message. Bola k tomu využitá metóda triedy Message určená na vytvorenie správy z 
 poľa bajtov. Pri novo prijatej správe nás zaujímalo či je správa určená nám. Ak bola správa určená nám, bolo potrebné zistiť o aký typ správy sa jednalo. Pokiaľ bola prijatá správa typu ACK, tak bolo 
-nutné vyhľadať v \emph{message queue} korešpondujúcu správu a zmeniť jej stav na ACK. Pokiaľ sa nejednalo o ACK správu, nasledovala kontrola, či sa daná správa už nenachádzala v \emph{message queue} a ak nie tak tam bola pridaná.
+nutné vyhľadať v \emph{message queue} korešpondujúcu správu a zmeniť jej stav na ACK. Pokiaľ sa nejednalo o ACK správu, nasledovala kontrola, či sa daná správa už nenachádzala v \emph{message~queue} a ak nie tak tam bola pridaná.
 
 Bolo dôležité, aby uzol po prijatí správy, odoslal naspäť ACK správu. A to aj v prípade, že sa nejednalo o typ správy, ktorý vyžadoval potvrdenie o doručení. Dôvodom bolo to, že ak by 
 uzol neposlal naspäť ACK správu, tak by predošlý uzol pokračoval v opakovanom vysielaní správy, a tieto vysielania by zbytočne obsadzovali prenos v sieti. Uzol teda po prijatí vyslal ACK správu. 
@@ -988,7 +986,7 @@ Okrem obsahu správy, môžme vidieť hodnoty SNR a RSSI, s ktorými zariadenie 
 ktorá predstavovala pôvodný maximálny počet preskokov. Na základe rovnosti týchto dvoch hodnôt, môžme usúdiť, že správa prešla medzi dvoma zariadeniami bez toho aby prešla 
 cez nejaké iné tretie zariadenie. Na spodku displeja môžme vidieť identifikátor prijatej správy.
 
-Na ďalšom obrázku \ref{fig:armRec2} môžme vidieť, že rozdiel medzi hodnotami max hop a initial max hop bol 1. Indikuje to, že správa spravila preskok cez ďalšie zariadenie predtým, ako 
+Na ďalšom obrázku \ref{fig:armRec2} môžme vidieť, že rozdiel medzi hodnotami max hop a initial max hop bol~1. Indikuje to, že správa spravila preskok cez ďalšie zariadenie predtým, ako 
 bola doručená na cieľové zariadenie. Tento test sme vykonali tak, že sme tri zariadenia rozmiestnili s určitou vzdialenosťou medzi nimi, tak aby sme docielili preskok cez jedno zariadenie. 
 Zariadenia mali nastavené adresy 0x0001, 0x0002 a 0xA1BC. Správa bola odoslaná zo zariadenia 0xA1BC na zariadenie 0x0002.
 
@@ -1046,9 +1044,8 @@ Cez API sme mohli komunikovať so zariadením z webového rozhrania. Toto API be
 spolu s naším protokolom. API bolo realizované prostredníctvom klasických HTTP požiadavkov.
 
 Najpodstatnejšími časťami API boli funkcie, ktoré nám umožnili prijímať alebo odosielať správy. K tomu vznikli dve 
-API prístupové body -- takzvané routy. \uv{/api/messages} a \uv{/api/send\_text\_message}.
-
-Prvá routa slúžila na získanie správ, ktoré boli prijaté na zariadení. Bola volaná prostredníctvom HTTP GET požiadavku a 
+API prístupové body -- takzvané routy \uv{/api/send\_text\_message} \\ a \uv{/api/messages}.
+Jedna routa slúžila na získanie správ, ktoré boli prijaté na zariadení. Bola volaná prostredníctvom HTTP GET požiadavku a 
 vraciala zoznam obsahujúci entity jednotlivých správ. Každá správa bola reprezentovaná JSON objektom, ktorý obsahoval 
 iba potrebné informácie o správe, k tomu aby bolo možné zobrazovať správy na webovej stránke. Štruktúru tohoto JSON 
 objektu môžme vidieť na ukážke \ref{fig:messageObj}.
@@ -1100,7 +1097,7 @@ bude môcť používateľ meniť, a tak sú tam iba nastavenia adresy, šifrovac
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.9\textwidth]{Figures/figmaHome.png}
+  \includegraphics[width=0.8\textwidth]{Figures/figmaHome.png}
   \caption{Návrh úvodnej stránky}
   \label{fig:figmaHome}
 \end{figure}
@@ -1111,13 +1108,14 @@ Ako databáza kontaktov bol použitý JSON súbor, do ktorého sa kontakty uklad
 
 \begin{figure}[h!]
   \centering
-  \subfloat[\centering Kontakty]{{\includegraphics[width=0.77\textwidth]{Figures/figmaContacts.png} }}
+  \subfloat[\centering Kontakty]{{\includegraphics[width=0.87\textwidth]{Figures/figmaContacts.png} }}
   \qquad
-  \subfloat[\centering Nastavenia]{{\includegraphics[width=0.76\textwidth]{Figures/figmaSettings.png} }}
+  \subfloat[\centering Nastavenia]{{\includegraphics[width=0.86\textwidth]{Figures/figmaSettings.png} }}
   \caption{Návrhy stránok kontaktov a nastavení}
   \label{fig:figma2}
 \end{figure}
 
+\newpage
 \section{Implementácia webového rozhrania}
 Na implementáciu webového rozhrania bola použitá kombinácia HTML, CSS a JavaScriptu. Na komunikáciu s API bolo použité fetch API, 
 ktoré je súčasťou JavaScriptu. Ukážku volania za použitia fetch API môžeme vidieť na obrázku \ref{fig:fetchApi}.
@@ -1128,7 +1126,6 @@ ktoré je súčasťou JavaScriptu. Ukážku volania za použitia fetch API môž
   \caption{Volanie cez fetch API}
   \label{fig:fetchApi}
 \end{figure}
-
 
 Webové stránky sme implementovali podľa pripravených návrhov. Avšak pri implementácii sme sa rozhodli, že 
 niektoré veci trochu pozmeníme a pridáme. Ukážku finálnej implementácie webového rozhrania bude možné vidieť v časti testovania.
@@ -1196,6 +1193,7 @@ Aby boli odlíšené nami odoslané správy od správ, ktoré sme prijali od nej
 prijali od iného používateľa boli zobrazené v sivej farbe. Správy, ktoré sme prijali od senzorových uzlov, boli zobrazené v žltej farbe. A správy, ktoré sme odoslali 
 my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy boli zobrazené v zelenej farbe.
 
+\newpage
 \begin{figure}[h!]
   \begin{center}
     \subfloat[\centering Hlavná stránka]{{\includegraphics[width=0.5\textwidth]{Figures/mobileWeb.png} }}
@@ -1214,7 +1212,7 @@ V zozname správ boli uložené všetky správy, ktoré boli určené danému uz
 uzol prijímal a odosielal nove správy, veľkosť zoznamu správ rástla a voľná pamäť zariadenia sa postupne znižovala.
 
 Vykonali sme experiment, pri ktorom sme merali veľkosť voľnej pamäte pred a po vytvorení textovej správy. Dĺžka textovej správy bola postupne zvyšovaná. 
-Z merania bolo zistené, že pamäť (v bajtoch) potrebná pre uloženie jednej správy je približne rovná 753B + 7*počet znakov. 
+Z merania bolo zistené, že pamäť (v bajtoch) potrebná pre uloženie jednej správy je približne rovná $753B + 7 \times po\check{c}et znakov$. 
 Pri maximálnej povolenej dĺžke správy, ktorá je 238 znakov, bolo teda alokovaných približne 2400 bajtov pre každú novú správu. Samotný bežiaci program 
 zaberá zhruba 30 kB a zvyšná voľná pamäť zariadenia tak nebola dostatočná na uloženie viac ako 12 správ (Rátame so správami maximálnej dĺžky). 
 Preto sme sa rozhodli, že dĺžku zoznamu správ budeme limitovať. Ak zoznam správ dosiahol určeného limitu, tak sa z neho odstránila najposlednejšia správa.
@@ -1257,7 +1255,7 @@ rozšíriť pomocou týchto uzlov.
 
 Rovnako, ako pri predošlých verziách pre Armachat a Raspberry Pi, bolo možné konfigurovať určité nastavenia. Táto konfigurácia sa vykonávala upravovaním konfiguračných 
 premenných, predtým ako bol program preložený a nahraný do zariadenia. Súčasťou konfigurácie bol aj zoznam kontaktov, na ktoré senzorový uzol odosielal správy. 
-Táto konfigurácia sa nachádzala v súbore \emph{MessageHandler.h}.
+Táto konfigurácia sa nachádzala v súbore \\\emph{MessageHandler.h}.
 
 Implementácia pozostávala z funkcií, ktoré postupne poskladali hlavičku paketu a k nej pridali obsah senzorovej správy. Tieto novo vytvorené správy sa uložili do zoznamu 
 a rovnako ako pri plnej verzii programu, sa zoznam správ cyklicky prechádzal a správy z neho sa odosielali, keď nadišiel ich čas.
@@ -1302,7 +1300,6 @@ preposielanie správy cez viacero uzlov. Približné rozmiestnenie a dosah zaria
   \label{fig:topology}
 \end{figure}
 
-\newpage
 Webový server bežal na zariadení s adresou 0x0005. Ako prvé sme overili topológiu siete pomocou traceroute paketov. 
 Následne sme z ostatných Armachat zariadení odoslali správu, ktorej adresátom bol uzol 0x0005 a broadcast.
 
@@ -1321,7 +1318,7 @@ uzlu 0x0005.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.7\textwidth]{Figures/testingTR.png}
+  \includegraphics[width=0.6\textwidth]{Figures/testingTR.png}
   \caption{Zariadenie 0x0005 prijalo traceroute a textové správy}
   \label{fig:testingTR}
 \end{figure}
@@ -1329,7 +1326,7 @@ uzlu 0x0005.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.6\textwidth]{Figures/contactsLastSNR.png}
+  \includegraphics[width=0.5\textwidth]{Figures/contactsLastSNR.png}
   \caption{Kontaktom boli aktualizované hodnoty SNR a počet skokov}
   \label{fig:contactsLastSNR}
 \end{figure}
@@ -1337,7 +1334,7 @@ uzlu 0x0005.
 Na stránku kontaktov bola pridaná funkcionalita, ktorá ku každému kontaktu aktualizuje posledné hodnoty SNR a počtu skokov. 
 Keď uzol prijal nejakú správu a adresu odosielateľa danej správy mal uloženú v kontaktoch, tak sa aktualizovala hodnota SNR a počet skokov na 
 základe posledne prijatej správy od danej adresy. Keďže pri senzorových správach nebolo používane rátanie skokov ale odpočet TTL, tak pri 
-senzorových kontaktoch sa aktualizovali iba hodnoty SNR. Na Obr \ref{fig:contactsLastSNR} vidíme kontakty 0x0001 a 0x0002 s aktualizovanými hodnotami SNR a počtom skokov.
+senzorových kontaktoch sa aktualizovali iba hodnoty SNR. Na Obr~\ref{fig:contactsLastSNR} vidíme kontakty 0x0001 a 0x0002 s aktualizovanými hodnotami SNR a počtom skokov.
 Táto dodatočná informácia môže byť užitočná na zistenie kvality spojenia medzi uzlami.
 
 Otestovali sme aj funkcionalitu senzorových správ. Tieto senzorové správy boli odosielané zo zariadenia TTGO LoRa32 s hodnotou získanou z Hallovej sondy. 
@@ -1370,6 +1367,7 @@ k nemu správa nedoručila a po uplynutí časového intervalu bola označená s
   \label{fig:testingFull}
 \end{figure}
 
+\newpage
 Bola otestovaná aj priepustnosť siete a postupnosť prijatých správ. Tento test bol realizovaný tak, že zo zariadenia \emph{Armachat \#1} bolo odoslaných celkovo 26 správ. Do každej ďalšej správy 
 bolo pridávané následujúce písmeno abecedy. Tieto správy boli odoslane tesne za sebou, a následne sme sledovali či sa podarilo doručiť všetky tieto správy uzlu 0x0005.
 

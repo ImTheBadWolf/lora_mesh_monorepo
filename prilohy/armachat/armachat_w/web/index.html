@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoRa protocol</title>
+    <link rel="stylesheet" href="web/style.css">
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <link href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" rel="stylesheet"/>
+    <script>
+      const MAX_MESSAGE_LENGTH = 238;
+      let WACK = false;
+      let SENSOR_MESSAGES = true;
+      let scrollToEnd = true;
+      let shouldUpdate = true;
+
+      let messagesMap = new Map();
+      let sentMessages = new Map();
+      let contactsMap = new Map();
+      let sensorsMap = new Map();
+      let maps = new Map();
+
+      function scrolledEnd() {
+        const messagesElement = document.getElementsByClassName("messages")[0];
+        return Math.abs(Math.ceil(messagesElement.scrollTop + messagesElement.clientHeight) - messagesElement.scrollHeight) < 20
+      }
+
+      function isFailed(messageState) {
+        return messageState === 'FAILED' || messageState === 'NAK'
+      }
+      function showStatusIcons(message) {
+        return !!(!!message.state && !isFailed(message.state) && message.msg_type === 'WACK_TEXT')
+      }
+      function addressTranslation(address, messageType){
+        if (messageType === 'SENSOR') {
+          return sensorsMap.get(address) || address;
+        }
+        return contactsMap.get(address) || address;
+      }
+      function sanitize(text, keepRightArrow = false) {
+        if (keepRightArrow) {
+          text = text.replace(/[\<]/g, " ")
+        }
+        else {
+          text = text.replace(/[\<\>]/g, " ")
+        }
+        text = text.replace(/\n/g, "<br>")
+        return text
+      }
+      function translateTraceroute(message) {
+        let addresses = message.split("=>");
+        let translated = '';
+        addresses.forEach((address)=>{
+          contact = contactsMap.get(address) || sensorsMap.get(address) || address;
+          message = message.replace(address, contact);
+        })
+        return "Traceroute:<br>" + sanitize(message, true);
+      }
+
+      function updateMessageList() {
+        const sendButton = document.getElementById('sendBtn');
+        const traceRouteButton = document.getElementById('tracerouteBtn');
+        sendButton.disabled = false;
+        traceRouteButton.disabled = false;
+
+        if (!shouldUpdate) {
+          return;
+        }
+        let maps = new Map();
+        scrollToEnd = scrollToEnd || scrolledEnd();
+
+        let messagesElement = document.getElementsByClassName("messages")[0];
+        messagesElement.innerHTML = '';
+
+        messagesMap = new Map([...messagesMap.entries()].sort((a, b) => a[1].order - b[1].order));
+
+        messagesMap.forEach((message)=>{
+          if (message.msg_type === 'SENSOR' && !SENSOR_MESSAGES) {
+            return;
+          }
+
+          let gpsMessage = false;
+          let randomId;
+          if (message.payload.includes("GPS")){
+            gpsMessage = true;
+            randomId = Math.floor(Math.random() * 10000000);
+            let lat = message.payload.split("GPS:")[1].split(", ")[0];
+            let lon = message.payload.split("GPS:")[1].split(", ")[1];
+            if (!!Number(lat) && !!Number(lon)){
+              maps.set(randomId, [lat, lon]);
+            }
+          }
+
+          messagesElement.innerHTML = messagesElement.innerHTML + `
+            <div class="message ${message.msg_type === 'SENSOR' ? 'sns-message' : ''} ${message.state ? 'my-message':''}">
+              ${(message.state && message.msg_type === "WACK_TEXT" && isFailed(message.state)) ? `<button class="fail-msg" onclick="resendMessage(${message.id})">
+                <img class="fail-icon" src="web/icons/refresh-arrow.png" >
+                <span>Message failed</span>
+              </button>` : ''}
+              <span class="message__header ${message.state ? 'my-header':''}">
+                ${message.from ? (`${addressTranslation(message.from, message.msg_type)} ⟶ ${addressTranslation(message.to, message.msg_type)} |`):'' } ${message.lora_info.snr ? (`SNR:${message.lora_info.snr} RSSI:${message.lora_info.rssi}`) : ''} ${message.lora_info.lora_config} ${isNaN(message.hop_count) ? '':`Hops: ${message.hop_count}`}
+              </span>
+              <div ${gpsMessage ? "id="+randomId : ''} class="message__content ${message.msg_type === 'SENSOR' ? 'sns-content':''} ${message.msg_type === 'TRACEROUTE' ? 'trc-content':''} ${message.state ? 'my-content':''} ${message.state && message.msg_type === "WACK_TEXT" && isFailed(message.state) ? 'failed':''}">
+                ${message.msg_type === 'TRACEROUTE' ? translateTraceroute(message.payload):sanitize(message.payload)}
+              </div>
+              ${showStatusIcons(message) ? (message.state === 'ACK' ? '<img class="icon" src="web/icons/check.png">' :'<img class="icon" src="web/icons/check_empty.png">') : ''}
+            </div>
+           `
+        })
+
+        maps.forEach((position, mapId) => {
+          let element = document.getElementById(mapId);
+          element.style = 'height:140px;';
+          let map = L.map(element, {
+            scrollWheelZoom: false,
+            center: [position[0], position[1]],
+            zoom: 12,
+            layers: [
+              L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png')
+            ]
+          });
+          var target = L.latLng(position[0], position[1]);
+            map.setView(target, 12);
+            L.marker(target).addTo(map);
+        })
+
+        if (scrollToEnd) {
+          messagesElement.scroll({ top: messagesElement.scrollHeight, behavior: 'smooth' });
+          scrollToEnd = false;
+        }
+        document.getElementById("infoNotif").innerText = ""
+        shouldUpdate = false;
+      }
+
+      function fillContactsSelect(){
+        let contactsSelect = document.getElementById('contactsSelect');
+        contactsMap.forEach((name, address)=>{
+          if (name === 'YOU') {
+            return;
+          }
+          contactsSelect.innerHTML += `<option value="${address}">${name}</option>`
+        })
+      }
+
+      async function pullAddressBook() {
+        const response = await fetch('/api/contacts')
+        const { contacts } = await response.json()
+        if (contacts){
+          contacts.forEach((contact)=>{
+            if (!contactsMap.has(contact.address)) {
+              contactsMap.set(contact.address, contact.name)
+            }
+          })
+        }
+
+        const responseS = await fetch('/api/sensors')
+        const { sensors } = await responseS.json()
+        if (sensors){
+          sensors.forEach((sensor)=>{
+            if (!sensorsMap.has(sensor.address)) {
+              sensorsMap.set(sensor.address, sensor.name)
+            }
+          })
+        }
+      }
+
+      async function pullNewMessages() {
+        const response = await fetch('/api/messages')
+        const { pages, messages } = await response.json()
+
+        if (messages?.length) {
+          messages.forEach((message)=>{
+            if (!messagesMap.has(message.id)) {
+              messagesMap.set(message.id, message)
+              shouldUpdate = true;
+            }
+            else {
+              //Update message state
+              const oldMessage = messagesMap.get(message.id);
+              if (oldMessage.state !== message.state) {
+                messagesMap.set(message.id, {...oldMessage, state:message.state})
+                shouldUpdate = true;
+              }
+            }
+          })
+        }
+        for (let i = 1; i < pages; i++) {
+          const responseP = await fetch(`/api/messages?page=${i}`);
+          const { messages } = await responseP.json();
+
+          if (messages?.length) {
+            messages.forEach((message)=>{
+              if (!messagesMap.has(message.id)) {
+                messagesMap.set(message.id, message)
+                shouldUpdate = true;
+              }
+              else {
+                //Update message state
+                const oldMessage = messagesMap.get(message.id);
+                if (oldMessage.state !== message.state) {
+                  messagesMap.set(message.id, {...oldMessage, state:message.state})
+                  shouldUpdate = true;
+                }
+              }
+            })
+          }
+        }
+        updateMessageList();
+      }
+
+      function handleToggleChange(e) {
+        SENSOR_MESSAGES = e.target.checked;
+        const snsMessages = document.querySelectorAll('.sns-message');
+        snsMessages.forEach((message) => {
+          if (e.target.checked) {
+            message.style.display = 'flex';
+          } else {
+            message.style.display = 'none';
+          }
+        })
+      }
+      function handleSelectChange(e) {
+          const addressInput = document.getElementById('addressInput');
+          if (e.target.value === 'custom') {
+            addressInput.disabled = false;
+            addressInput.value = ""
+          } else {
+            addressInput.disabled = true;
+            addressInput.value = e.target.value;
+          }
+      }
+      function toggleWACK(e) {
+        WACK = e.target.checked
+      }
+
+      function sendMessage() {
+        const addressInput = document.getElementById('addressInput');
+        const messageInput = document.getElementById('textArea');
+        const maxHopInput = document.getElementById('maxHopInput');
+        const prioritySelect = document.getElementById('prioritySelect');
+        const sendButton = document.getElementById('sendBtn');
+        const traceRouteButton = document.getElementById('tracerouteBtn');
+
+        if (!addressInput.value.match(/^0x[0-9a-fA-F]{4}$/)) {
+          alert('Invalid address. Address must by in a 0xNNNN format. (e.g. 0x1234)');
+          return;
+        }
+
+        if(!maxHopInput.value.match(/^[0-9]+$/) || maxHopInput.value < 1 || maxHopInput.value > 255) {
+          alert('Invalid max hop value. Value must be between 1 and 255');
+          return;
+        }
+
+        if (messageInput.value.length > MAX_MESSAGE_LENGTH || messageInput.value.length === 0) {
+          alert('Message too long or empty');
+          return;
+        }
+
+        const message = {
+          'destination': addressInput.value,
+          'message': messageInput.value,
+          'max_hop': maxHopInput.value,
+          'priority': prioritySelect.value,
+          'wack': WACK
+        }
+
+        sendButton.disabled = true;
+        traceRouteButton.disabled = true;
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(message)
+        };
+        fetch('/api/send_text_message', requestOptions)
+        document.getElementById("infoNotif").innerText = "Message sent"
+
+        messageInput.value = '';
+        textAreaPress();
+        scrollToEnd = true;
+      }
+      function traceRoute() {
+        const addressInput = document.getElementById('addressInput');
+        const maxHopInput = document.getElementById('maxHopInput');
+        const prioritySelect = document.getElementById('prioritySelect');
+        const sendButton = document.getElementById('sendBtn');
+        const traceRouteButton = document.getElementById('tracerouteBtn');
+
+        if (!addressInput.value.match(/^0x[0-9a-fA-F]{4}$/)) {
+          alert('Invalid address. Address must by in a 0xNNNN format. (e.g. 0x1234)');
+          return;
+        }
+
+        if (addressInput.value === '0xFFFF') {
+          alert('Traceroute request cant be sent to broadcast address');
+          return;
+        }
+
+        if(!maxHopInput.value.match(/^[0-9]+$/) || maxHopInput.value < 1 || maxHopInput.value > 255) {
+          alert('Invalid max hop value');
+          return;
+        }
+
+        const message = {
+          'destination': addressInput.value,
+          'max_hop': maxHopInput.value,
+          'priority': prioritySelect.value,
+        }
+
+        sendButton.disabled = true;
+        traceRouteButton.disabled = true;
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(message)
+        };
+        fetch('/api/traceroute', requestOptions)
+        document.getElementById("infoNotif").innerText = "Traceroute request sent"
+        scrollToEnd = true;
+      }
+      function resendMessage(messageId){
+        const message = sentMessages.get(messageId);
+        const sendButton = document.getElementById('sendBtn');
+        const traceRouteButton = document.getElementById('tracerouteBtn');
+        sendButton.disabled = true;
+        traceRouteButton.disabled = true;
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({'message_id': messageId})
+        };
+        fetch('/api/resend_message', requestOptions)
+        document.getElementById("infoNotif").innerText = "Message resent"
+        textAreaPress()
+        scrollToEnd = true;
+      }
+
+      function textAreaPress() {
+        textAreaVal = document.getElementById("textArea").value
+        document.getElementById("remainingChars").innerText = `${MAX_MESSAGE_LENGTH-textAreaVal.length}/${MAX_MESSAGE_LENGTH}`
+      }
+
+      document.addEventListener("DOMContentLoaded", async function(event) {
+        await pullAddressBook();
+        await pullNewMessages();
+        fillContactsSelect();
+        setInterval(pullNewMessages, 800);
+      });
+    </script>
+  </head>
+  <body>
+    <div class="menu">
+      <ul>
+        <li><a href="#" class="underlined">HOME</a></li>
+        <li><a href="/sensors">SENSORS</a></li>
+        <li><a href="/contacts">CONTACTS</a></li>
+        <li><a href="/config">CONFIG</a></li>
+      </ul>
+    </div>
+    <div class="content">
+      <div class="toggle">
+        <p class="info-label">Show sensor messages</p>
+        <label class="switch">
+          <input type="checkbox" onchange="handleToggleChange(event)" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div class="messages">
+      </div>
+      <div class="new_msg">
+        <div class="toggle">
+          <p class="info-label">Send message&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Receive ACK:</p>
+          <label class="switch">
+            <input type="checkbox" onchange="toggleWACK(event)">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <textarea oninput="textAreaPress()" id="textArea" maxlength="238"></textarea>
+        <span id="remainingChars">238/238</span>
+        <div class="confirm">
+          <div>
+            <span class="info-label">Max Hop:</span>
+            <input id="maxHopInput" type="number" min="1" max="255" value="3">
+            <span class="info-label">Priority:</span>
+            <select id="prioritySelect">
+              <option value="0">Normal</option>
+              <option value="1">High</option>
+            </select>
+          </div>
+          <div>
+            <span class="info-label">Destination:</span>
+            <select id="contactsSelect" onchange="handleSelectChange(event)">
+              <option value="custom">Custom</option>
+            </select>
+            <input id="addressInput" type="text" maxlength="6">
+            <button id="sendBtn" class="btn" onclick="sendMessage()">SEND</button>
+          </div>
+        </div>
+        <button id="tracerouteBtn" class="btn" onclick="traceRoute()">TRACEROUTE</button>
+        <span id="infoNotif"></span>
+      </div>
+    </div>
+  </body>
+</html>

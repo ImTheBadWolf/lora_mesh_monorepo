@@ -117,7 +117,7 @@ môže byť ich prevádzka ešte predĺžená.
 
 Tieto siete sú teda vhodné pre aplikácie, kde je potrebná dlhodobá prevádzka bez nutných servisných zásahov.
 LPWAN siete majú veľké pokrytie. V niektorých prípadoch to môžu byť až desiatky kilometrov v otvorenom priestranstve. Zväčša využívajú na prenos 
-ultrakrátke ( sub-GHz ) frekvenčné pásma, ktoré nevyžadujú na používanie žiadnu rádiovú licenciu. 
+ultrakrátke (sub-GHz) frekvenčné pásma, ktoré nevyžadujú na používanie žiadnu rádiovú licenciu. 
 Medzi tie najznámejšie technológie na realizáciu LPWAN sieti patria napríklad Sigfox \cite{sigfox}, LoRa \cite{lora}, NB-IoT (NarrowBand Internet of Things) a iné.
 
 \section {LoRa}
@@ -189,7 +189,7 @@ Ukážku môžme vidieť na Obr. \ref{fig:loraModulation}.
 
 \section{LoRa paket}
 Štruktúra LoRa paketu môže byť závislá od daného použitia. Bežné sa ale stretávame s LoRa paketom, zloženým z preambuly, dát a kontrolného súčtu. Pričom maximálna 
-povolená dĺžka dát je 255 bajtov.
+povolená dĺžka dát je 256 bajtov.
 
 Preambula slúži na synchronizáciu prijímacieho zariadenia. Je tvorená niekoľkými opakovaniami prázdneho chirp signálu, ktorý predstavuje symbol s hodnotou 0. 
 Dĺžka preambuly, tzn. počet opakovaní prázdneho chirp signálu, je stanovená konfiguráciou zariadenia. Bežne sa stretávame s dĺžkou preambuly 8.
@@ -536,7 +536,7 @@ PyMesh je primárne určený na použitie s Pycom zariadeniami a použitie na in
 
 PyMesh sieť sa skladá z uzlov, ktoré môžu vystupovať v rôznych roliach. Sú nimi Border Router, Leader, Router a Child. Uzly typu gateway sú označované ako Border Routers a prepájajú LoRa sieť s 
 internetom. Uzly typu router slúžia len na preposielanie paketov ďalej. Leader alebo koordinátorske uzly sú zodpovedné za vytváranie a správu siete a Child uzly sú koncové 
-zariadenia. Na smerovanie paketov v sieti je využívaný reaktívny\footnote[1]{Smerovacie informácie sú zasielané iba na vyžiadanie} distance vector smerovanie (AODV). 
+zariadenia. Na smerovanie paketov v sieti je využívané reaktívne\footnote[1]{Smerovacie informácie sú zasielané iba na vyžiadanie} distance vector smerovanie (AODV). 
 Príklad Pymesh siete, obsahujúcej uzly rôznych roli, môžme vidieť na obrázku \ref{fig:pymeshTop}.
 
 Uzly v sieti môžu komunikovať ad-hoc. V sieti môže dojsť k situácií kedy bude chcieť viacero uzlov vysielať v rovnakom čase a došlo by tak ku kolízií.
@@ -1019,7 +1019,7 @@ textový reťazec \uv{Ahoj}. V prvých 12 bajtoch, vidíme hlavičku paketu. V �
   \small
   \setlength\tabcolsep{2pt}
 	\centering
-  \caption{Ukážka bajtov odoslaného paketu}
+  \caption{Ukážka bajtov prijatého paketu}
   \begin{tabular}{ c c | c c | c c c c |c c |c | c || c | c | c c c c }
     \multicolumn{12}{c ||}{Hlavička} & \multicolumn{6}{c}{Dátový rámec} \\
     \midrule
@@ -1061,10 +1061,11 @@ Druhá routa slúžila na odosielanie správ prostredníctvom HTTP POST požiada
 V JSON objekte musia byť uvedené všetky potrebné informácie o správe, ktoré sú potrebné na jej správne odoslanie. 
 Boli nimi destinácia, maximálny počet skokov, priorita, obsah správy a príznak, či chceme potvrdenie o doručení. 
 API po prijatí požiadavku na vytvorenie novej správy validovala vstupné údaje a ak boli všetky údaje v poriadku, tak bola vytvorená nová správa. V 
-opačnom prípade API vrátila chybovú hlášku. Z dôvodu limitácie LoRa paketov na maximálnu dĺžku 255 bajtov pre posielané dáta, bolo potrebné overiť či textová správa 
-nie je príliš dlhá a prípadne ju orezať na maximálnu povolenú dĺžku.
+opačnom prípade API vrátila chybovú hlášku. 
 
-Maximálna povolená dĺžka v našom prípade ale nie je 255 bajtov ale len 238. Toto je výsledkom toho, 
+Z dôvodu limitácie LoRa paketov na maximálnu dĺžku 256 bajtov pre posielané dáta, bolo potrebné overiť či textová správa 
+nie je príliš dlhá a prípadne ju orezať na maximálnu povolenú dĺžku.
+Maximálna povolená dĺžka v našom prípade ale nie je 256 bajtov ale len 238. Toto je výsledkom toho, 
 že použitá LoRa knižnica povoľuje maximálnu dĺžku paketu 252 bajtov, a to kvôli kompatibilite s inými knižnicami.
 Pri našom protokole je okrem toho v každom LoRa pakete potrebné nejaké miesto ešte rezervovať pre hlavičku paketu a informácie o počte skokov.
 Z toho nám ostáva maximálna dĺžka správy 238 bajtov.
@@ -1158,14 +1159,7 @@ Stránku nastavení sme voči návrhu rozšírili o ďalšie nastavenia a spolu 
 Pri niektorých nastaveniach bolo nutné reštartovať zariadenie, k týmto pribudol popis s informáciou o nutnom reštarte. 
 Nastavenie vlastnej adresy bolo obmedzené na jednorázové nastavenie. Týmto sme sa snažili zamedziť tomu, aby si používateľ kedykoľvek 
 upravoval svoju adresu a tým sa mohol vydávať za iného používateľa. Prvú časť stránky nastavení vidíme na obrázku \ref{fig:webConfig1}.
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=1\textwidth]{Figures/webConfig1.png}
-  \caption{Stránka nastavení - časť 1}
-  \label{fig:webConfig1}
-\end{figure}
 
-\newpage
 Všetky nastaviteľné položky boli validované predtým, ako sa novo upravené nastavenia odoslali na server. Táto validácia bola potom redundantne 
 vykonávaná aj na strane serveru.
 
@@ -1173,16 +1167,9 @@ Na stránku nastavení sme pridali možnosť pridávať alebo odstraňovať WiFi
 po úspešnom pripojení sa spustil webový server. Pribudla aj možnosť definovať si vlastnú sieť typu access point. Pri použití tejto možnosti sa zariadenie pri spúštaní 
 nepokúšalo pripájať na žiadnu WiFi sieť, ale vytvorilo svoju vlastnú. Časť stránky nastavení určená pre správu WiFi sieti vidíme na obrázku \ref{fig:webConfig2}.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=1\textwidth]{Figures/webConfig2.png}
-  \caption{Stránka nastavení - časť 2}
-  \label{fig:webConfig2}
-\end{figure}
-
 V našej LoRa mesh sieti sa mohli vyskytovať senzorové uzly, ktoré obsahovali GPS modul. Z toho dôvodu sme pridali do webového rozhrania funkciu, 
-ktorá zobrazovala na mape aktuálnu polohu zariadenia. Správy, ktoré sme chceli zobraziť ako polohu na mape, museli dodržiavať určitý formát 
-, a to taký, že správa musela obsahovať prefix \uv{GPS:} a následne nasledovali súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
+ktorá zobrazovala na mape aktuálnu polohu zariadenia. Správy, ktoré sme chceli zobraziť ako polohu na mape, museli dodržiavať určitý formát, 
+a to taký, že správa musela obsahovať prefix \uv{GPS:} a následne nasledovali súradnice zemepisnej šírky a zemepisnej dĺžky oddelene čiarkou.
 Ako takáto správa s mapou vyzerala, môžme vidieť na obrázku \ref{fig:mobileWeb}. Na integráciu mapy do webového rozhrania bola použitá knižnica Leaflet.js \cite{leaflet}.
 
 Pri implementácií bol kladený dôraz na to, aby bolo možné webové rozhranie plnohodnotne používať aj na mobilných zariadeniach s malými displejmi. Preto sme 
@@ -1191,7 +1178,31 @@ menilo sa aj celkové usporiadanie prvkov na stránke tak, aby bolo používanie
 
 Aby boli odlíšené nami odoslané správy od správ, ktoré sme prijali od nejakého iného uzlu, bolo pridané farebné označenie jednotlivých správ. Správy, ktoré sme 
 prijali od iného používateľa boli zobrazené v sivej farbe. Správy, ktoré sme prijali od senzorových uzlov, boli zobrazené v žltej farbe. A správy, ktoré sme odoslali 
-my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy boli zobrazené v zelenej farbe.
+my, boli modré. Toto farebné označenie je vidieť na obrázku \ref{fig:mobileWeb}. Spomínali sme aj možnosť posielania traceroute správ. Tieto správy boli zobrazené v zelenej farbe (Viď. \ref{fig:trMsg}).
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.6\textwidth]{Figures/tracerouteMSG.png}
+  \caption{Traceroute správa}
+  \label{fig:trMsg}
+\end{figure}
+
+
+\newpage
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/webConfig1.png}
+  \caption{Stránka nastavení - čast 1}
+  \label{fig:webConfig1}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{Figures/webConfig2.png}
+  \caption{Stránka nastavení - čast 2}
+  \label{fig:webConfig2}
+\end{figure}
+
+
 
 \newpage
 \begin{figure}[h!]
@@ -1225,8 +1236,7 @@ nadmerné množstvo pamäti a program spadol.
 
 API na získanie správ sme preto upravili tak, že používa takzvané stránkovanie. Toto stránkovanie funguje tak, že na API bol zoznam správ rozdelený na menšie časti -- stránky a 
 vraciala sa vždy iba jedna stránka. Pri volaní API bol pridaný parameter špecifikujúci, ktorú stránku má API vrátiť. Tento prístup mal za následok, že 
-webová stránka volala API na získanie správ nie raz, ale viac krát, až kým nezískala všetky stránky.
-
+webová stránka volala API na získanie správ nie raz, ale viac krát, až kým nezískala všetky stránky. 
 Vďaka tejto optimalizácií už nedochádzalo k problému s pamäťou.
 
 \section{Implementácia pre Raspberry Pi 2B}
@@ -1369,7 +1379,7 @@ k nemu správa nedoručila a po uplynutí časového intervalu bola označená s
 
 \newpage
 Bola otestovaná aj priepustnosť siete a postupnosť prijatých správ. Tento test bol realizovaný tak, že zo zariadenia \emph{Armachat \#1} bolo odoslaných celkovo 26 správ. Do každej ďalšej správy 
-bolo pridávané následujúce písmeno abecedy. Tieto správy boli odoslane tesne za sebou, a následne sme sledovali či sa podarilo doručiť všetky tieto správy uzlu 0x0005.
+bolo pridávané následujúce písmeno abecedy. Tieto správy boli odoslané tesne za sebou, a následne sme sledovali či sa podarilo doručiť všetky tieto správy uzlu 0x0005.
 
 Na obrázkoch \ref{fig:packetLoss} môžme vidieť prijaté správy. Vidíme, že sme prijali celkovo 23 správ. Taktiež si môžme všimnúť, že správy 
 môžu doraziť do destinácie v inom poradí v akom boli odoslané. 
